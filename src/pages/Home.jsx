@@ -43,6 +43,15 @@ const itemVariants = {
   hidden:  { opacity: 0, y: 12 },
   visible: { opacity: 1, y: 0, transition: { duration: 0.25, ease: 'easeOut' } },
 }
+// Grid de ejercicios — stagger más rápido para 47 celdas pequeñas
+const cellContainerVariants = {
+  hidden: {},
+  visible: { transition: { staggerChildren: 0.025 } },
+}
+const cellVariants = {
+  hidden:  { opacity: 0, scale: 0.7 },
+  visible: { opacity: 1, scale: 1, transition: { duration: 0.15, ease: 'easeOut' } },
+}
 
 // ─── Componentes internos ─────────────────────────────────────────────────────
 function RoomCard({ room, dominados }) {
@@ -273,17 +282,18 @@ export default function Home() {
               </div>
               <motion.div
                 className="grid grid-cols-6 sm:grid-cols-8 md:grid-cols-10 lg:grid-cols-12 gap-1"
-                variants={containerVariants}
+                variants={cellContainerVariants}
                 initial="hidden"
                 whileInView="visible"
-                viewport={{ once: true }}
+                viewport={{ once: true, margin: '-40px' }}
               >
                 {(exercisesByLevel[room.nivel] ?? []).map(ex => (
-                  <ExerciseCell
-                    key={ex.id}
-                    exercise={ex}
-                    estado={ejercicios[ex.id]?.estado ?? 'no_iniciado'}
-                  />
+                  <motion.div key={ex.id} variants={cellVariants}>
+                    <ExerciseCell
+                      exercise={ex}
+                      estado={ejercicios[ex.id]?.estado ?? 'no_iniciado'}
+                    />
+                  </motion.div>
                 ))}
               </motion.div>
             </div>

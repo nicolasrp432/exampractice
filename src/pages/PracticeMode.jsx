@@ -67,9 +67,17 @@ function TestRow({ test, index }) {
       >
         <motion.span
           key={test.status}
-          initial={{ scale: 0.5, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-          transition={{ type: 'spring', stiffness: 400, damping: 20 }}
+          initial={{ scale: 0.5, opacity: 0, x: 0 }}
+          animate={
+            isFailed ? { scale: 1, opacity: 1, x: [0, -5, 5, -5, 5, 0] }
+            : isPassed ? { scale: [0.5, 1.25, 1], opacity: 1, x: 0 }
+            : { scale: 1, opacity: 1, x: 0 }
+          }
+          transition={
+            isFailed  ? { opacity: { duration: 0.1 }, scale: { duration: 0.1 }, x: { duration: 0.4, ease: 'easeInOut' } }
+            : isPassed ? { duration: 0.35, ease: [0.34, 1.56, 0.64, 1] }
+            : { type: 'spring', stiffness: 400, damping: 20 }
+          }
         >
           {isPassed ? <CheckCircle2 size={18} className="text-green-500" /> :
            isFailed ? <XCircle     size={18} className="text-red-500"   /> :

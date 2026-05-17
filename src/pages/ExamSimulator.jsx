@@ -116,7 +116,16 @@ function ExamActive({ session, onSubmit, onSkip, onFinish, showHints }) {
             <Link to="/" className="btn-secondary">
               <ArrowLeft size={16} /> Inicio
             </Link>
-            <div className="rounded-full border border-zinc-200 bg-zinc-50 px-3 py-1 text-sm font-mono text-zinc-700">
+            <div
+              className={clsx(
+                'rounded-full border px-3 py-1 text-sm font-mono transition-colors duration-500',
+                session.timeLeftSeconds < 300
+                  ? 'border-red-300 bg-red-50 text-red-700 animate-pulse'
+                  : session.timeLeftSeconds < 600
+                  ? 'border-orange-200 bg-orange-50 text-orange-700'
+                  : 'border-zinc-200 bg-zinc-50 text-zinc-700'
+              )}
+            >
               {formatTime(session.timeLeftSeconds)}
             </div>
           </div>
