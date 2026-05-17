@@ -1,5 +1,6 @@
+import { useState, useEffect } from 'react'
 import { useLocation, useNavigate, Link } from 'react-router-dom'
-import { Flame, ChevronRight, Shuffle } from 'lucide-react'
+import { Flame, ChevronRight, Shuffle, Download } from 'lucide-react'
 import clsx from 'clsx'
 import { useProgressStore } from '@/store/progressStore'
 
@@ -61,6 +62,26 @@ export default function Header() {
   const ejercicios = useProgressStore(s => s.ejercicios)
   const racha = useProgressStore(s => s.racha)
 
+  const [installPrompt, setInstallPrompt] = useState(null)
+
+  useEffect(() => {
+    const onPrompt    = (e) => { e.preventDefault(); setInstallPrompt(e) }
+    const onInstalled = () => setInstallPrompt(null)
+    window.addEventListener('beforeinstallprompt', onPrompt)
+    window.addEventListener('appinstalled', onInstalled)
+    return () => {
+      window.removeEventListener('beforeinstallprompt', onPrompt)
+      window.removeEventListener('appinstalled', onInstalled)
+    }
+  }, [])
+
+  const handleInstall = async () => {
+    if (!installPrompt) return
+    installPrompt.prompt()
+    const { outcome } = await installPrompt.userChoice
+    if (outcome === 'accepted') setInstallPrompt(null)
+  }
+
   const dominados = Object.values(ejercicios).filter(p => p.estado === 'dominado').length
   const pct = Math.round((dominados / TOTAL_EXERCISES) * 100)
   const crumbs = buildBreadcrumbs(pathname)
@@ -113,6 +134,20 @@ export default function Header() {
           </div>
         )}
       </div>
+
+      {/* Install PWA — solo visible antes de instalar */}
+      {installPrompt && (
+        <button
+          onClick={handleInstall}
+          className="shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-lg
+                     border border-zinc-200 text-zinc-500 text-xs font-medium
+                     hover:bg-zinc-50 hover:text-zinc-700 transition-colors duration-150"
+          title="Instalar como aplicación"
+        >
+          <Download size={13} />
+          <span className="hidden sm:inline">Instalar app</span>
+        </button>
+      )}
 
       {/* Examen aleatorio */}
       <button

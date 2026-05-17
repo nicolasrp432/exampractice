@@ -1,16 +1,40 @@
 import { Outlet, useLocation } from 'react-router-dom'
-import { motion } from 'framer-motion'
+import { motion, AnimatePresence } from 'framer-motion'
 import Sidebar from './Sidebar'
 import Header from './Header'
+import { useOnlineStatus } from '@/hooks/useOnlineStatus'
 
 export default function Layout() {
   const location = useLocation()
+  const isOnline  = useOnlineStatus()
+
   return (
     <div className="flex h-screen bg-[#FAFAFA] overflow-hidden">
       <Sidebar />
 
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
         <Header />
+
+        {/* ── Offline banner ── */}
+        <AnimatePresence>
+          {!isOnline && (
+            <motion.div
+              key="offline-banner"
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: 'auto', opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              transition={{ duration: 0.2, ease: 'easeInOut' }}
+              className="shrink-0 overflow-hidden"
+            >
+              <div className="flex items-center justify-center gap-2 px-4 py-2
+                              bg-amber-50 border-b border-amber-200
+                              text-xs font-medium text-amber-700">
+                <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse shrink-0" />
+                Modo offline — todo el contenido disponible
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         <main className="flex-1 overflow-y-auto">
           <motion.div

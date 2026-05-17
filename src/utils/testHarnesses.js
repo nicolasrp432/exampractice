@@ -62,6 +62,17 @@ int main(int argc, char **argv)
 
   // ── Level 2 ─────────────────────────────────────────────────────────────────
 
+  ft_atoi: {
+    header: '',
+    main: `#include <stdio.h>
+int main(int argc, char **argv)
+{
+\tif (argc < 2) { printf("0\\n"); return (0); }
+\tprintf("%d\\n", ft_atoi(argv[1]));
+\treturn (0);
+}`,
+  },
+
   ft_strcmp: {
     header: '',
     main: `#include <stdio.h>
