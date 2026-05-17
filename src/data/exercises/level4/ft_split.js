@@ -1,0 +1,233 @@
+export default {
+  id: 'ft_split',
+  nombre: 'ft_split',
+  nivel: 4,
+  dificultad: 'difícil',
+  tipoEntrega: 'funcion',
+  archivosEsperados: ['ft_split.c'],
+  funcionesPermitidas: ['malloc'],
+
+  subject: `Assignment name  : ft_split
+Expected files   : ft_split.c
+Allowed functions: malloc
+--------------------------------------------------------------------------------
+
+Write a function that splits a string into an array of strings, using the
+character c as the delimiter.
+
+char\t**ft_split(char *str, char c);
+
+The array must end with a NULL pointer.
+
+There should be no empty strings in the result.
+
+If str is NULL, return NULL.
+
+Example:
+ft_split("hello world foo", ' ')  → {"hello", "world", "foo", NULL}
+ft_split("hello::world", ':')     → {"hello", "world", NULL}
+ft_split("  spaces  ", ' ')       → {"spaces", NULL}`,
+
+  descripcion: 'Función que divide un string por un delimitador y devuelve un array de strings (terminado en NULL). Requiere malloc para el array de punteros y para cada substring. Sin strings vacíos en el resultado.',
+
+  palacio: {
+    habitacion: 'garaje',
+    mueble: 'sierra',
+    personaje: 'La Sierra Divisora',
+    emoji: '🪚',
+    historia: `En el garaje hay una Sierra que corta strings en trozos.
+Le das un string y un carácter separador, y la Sierra lo divide en palabras.
+El proceso tiene DOS pasadas:
+PASADA 1: contar cuántas palabras hay (para malloc del array).
+PASADA 2: para cada palabra, malloc de su longitud y copiar.
+La Sierra ignora los separadores múltiples — sin strings vacíos.`,
+    anclas: [
+      "Pasada 1: count_words(str,c) → contar palabras",
+      "malloc((words+1) * sizeof(char*)) → +1 para NULL final",
+      "Pasada 2: saltar separadores, calcular longitud de palabra, malloc+copiar",
+      "poner resultado[words] = NULL al final",
+      "si str==NULL → return NULL",
+    ],
+  },
+
+  herramientas: ['strings'],
+
+  formulaClave: {
+    descripcion: 'Dos pasadas: contar palabras → malloc array → extraer cada palabra',
+    formula: 'words=count(str,c); res=malloc((words+1)*ptr_size); for each word: skip_sep; get_len; malloc+copy; res[i]=word;',
+    ejemplo: {
+      entrada: '"hello world foo", sep=" "',
+      calculo: 'words=3; malloc(4 ptrs); "hello"→malloc(6)+"hello\\0"; "world"→6; "foo"→4; res[3]=NULL',
+      resultado: '{"hello","world","foo",NULL}',
+    },
+  },
+
+  versiones: [
+    {
+      id: 'clasica',
+      nombre: 'Con count_words y extracción en bucle',
+      descripcion: 'Dos funciones auxiliares: count_words y extract_word. La más legible.',
+      recomendada: true,
+      codigo: `#include <stdlib.h>
+
+static int\tcount_words(char *str, char c)
+{
+\tint\tcount;
+\tint\tin_word;
+
+\tcount = 0;
+\tin_word = 0;
+\twhile (*str)
+\t{
+\t\tif (*str == c)
+\t\t\tin_word = 0;
+\t\telse if (!in_word)
+\t\t{
+\t\t\tcount++;
+\t\t\tin_word = 1;
+\t\t}
+\t\tstr++;
+\t}
+\treturn (count);
+}
+
+static char\t*extract_word(char *str, char c, int *i)
+{
+\tchar\t*word;
+\tint\t\tlen;
+\tint\t\tj;
+
+\twhile (str[*i] == c)
+\t\t(*i)++;
+\tlen = 0;
+\twhile (str[*i + len] && str[*i + len] != c)
+\t\tlen++;
+\tword = (char *)malloc(len + 1);
+\tif (!word)
+\t\treturn (NULL);
+\tj = 0;
+\twhile (j < len)
+\t{
+\t\tword[j] = str[*i + j];
+\t\tj++;
+\t}
+\tword[j] = '\\0';
+\t*i += len;
+\treturn (word);
+}
+
+char\t**ft_split(char *str, char c)
+{
+\tchar\t**result;
+\tint\t\twords;
+\tint\t\ti;
+\tint\t\tj;
+
+\tif (!str)
+\t\treturn (NULL);
+\twords = count_words(str, c);
+\tresult = (char **)malloc((words + 1) * sizeof(char *));
+\tif (!result)
+\t\treturn (NULL);
+\ti = 0;
+\tj = 0;
+\twhile (j < words)
+\t{
+\t\tresult[j] = extract_word(str, c, &i);
+\t\tif (!result[j])
+\t\t{
+\t\t\twhile (j > 0)
+\t\t\t\tfree(result[--j]);
+\t\t\tfree(result);
+\t\t\treturn (NULL);
+\t\t}
+\t\tj++;
+\t}
+\tresult[j] = NULL;
+\treturn (result);
+}`,
+    },
+  ],
+
+  tests: [
+    { id: 'test_spaces', descripcion: '"hello world foo" por " " → 3 palabras', entrada: ['hello world foo', ' '], salida: 'hello\nworld\nfoo\n', tipo: 'normal' },
+    { id: 'test_colon', descripcion: '"hello::world" por ":" → 2 palabras', entrada: ['hello::world', ':'], salida: 'hello\nworld\n', tipo: 'normal' },
+    { id: 'test_leading_sep', descripcion: '"  spaces  " por " " → 1 palabra', entrada: ['  spaces  ', ' '], salida: 'spaces\n', tipo: 'normal' },
+    { id: 'test_single', descripcion: '"hello" sin sep → 1 palabra', entrada: ['hello', ' '], salida: 'hello\n', tipo: 'normal' },
+    { id: 'test_no_sep', descripcion: 'sep no aparece → string completo', entrada: ['hello', ':'], salida: 'hello\n', tipo: 'normal' },
+  ],
+
+  gdbSteps: [
+    {
+      paso: 1,
+      titulo: 'ft_split("hello world", " "): contar y extraer',
+      codigo: `count_words("hello world", ' '):
+  'h'..'o': in_word=1, count=1
+  ' ': in_word=0
+  'w'..'d': in_word=1, count=2
+  → words=2
+
+malloc(3 * sizeof(char*)) → result[3]
+
+extract_word: skip ' ', len=5 ("hello"), malloc(6), copy "hello\\0"
+  i=5
+extract_word: skip ' ', i=6, len=5 ("world"), malloc(6), copy "world\\0"
+result[2] = NULL`,
+      variables: [
+        { nombre: 'result[0]', valor: '"hello"', cambio: true, nota: '' },
+        { nombre: 'result[1]', valor: '"world"', cambio: true, nota: '' },
+        { nombre: 'result[2]', valor: 'NULL', cambio: true, nota: '✓' },
+      ],
+    },
+  ],
+
+  trampas: [
+    {
+      severidad: 'mortal',
+      titulo: 'Olvidar el NULL al final del array',
+      descripcion: 'El enunciado especifica que el array termina en NULL. Sin él, el código que usa el resultado no sabe dónde termina el array.',
+      codigoMal: `// ❌ Sin NULL final
+result = malloc(words * sizeof(char*));
+// ... llenar result[0..words-1]
+// result[words] no asignado → comportamiento undefined`,
+      codigoBien: `// ✅ malloc words+1, asignar NULL al final
+result = malloc((words + 1) * sizeof(char*));
+// ...
+result[words] = NULL;`,
+    },
+    {
+      severidad: 'mortal',
+      titulo: 'No saltar separadores múltiples → strings vacíos',
+      descripcion: 'ft_split("a::b", ":") debe devolver {"a","b",NULL}, no {"a","","b",NULL}. Hay que saltar todos los separadores consecutivos.',
+      codigoMal: `// ❌ Solo salta un separador → crea strings vacíos
+while (str[i] != c) { ... }
+i++;  // solo avanza uno`,
+      codigoBien: `// ✅ Saltar todos los separadores consecutivos
+while (str[i] == c)
+    i++;`,
+    },
+    {
+      severidad: 'warning',
+      titulo: 'No liberar en caso de malloc fallo (memory leak)',
+      descripcion: 'Si malloc falla a la mitad, liberar todo lo ya asignado antes de retornar NULL.',
+      codigoMal: `// ❌ Si falla malloc de word[j], result y word[0..j-1] quedan sin liberar
+if (!result[j]) return NULL;`,
+      codigoBien: `// ✅ Liberar todo en caso de fallo
+if (!result[j]) {
+    while (j > 0) free(result[--j]);
+    free(result);
+    return NULL;
+}`,
+    },
+  ],
+
+  bajoCelCapot: `ft_split es una función de biblioteca fundamental en C — equivalente a split() en Python/JS.
+La clave es que NO hay strings vacíos: separadores consecutivos o al inicio/fin se ignoran.
+La función hace dos pasadas: contar → allocar → llenar.
+El array de punteros más NULL final es el contrato estándar en C para arrays de strings.
+Alternativa: una sola pasada si se puede malloc el máximo posible y luego realloc — pero dos pasadas es más limpio.`,
+
+  estrategia: 'MEMORIZAR',
+  razonEstrategia: 'Memorizar la estructura: count_words + malloc(n+1) + extract_word(con skip sep) + result[n]=NULL. Es el patrón más complejo del examen y aparece en proyectos reales.',
+  relacionados: ['ft_strdup', 'ft_range', 'epur_str'],
+}

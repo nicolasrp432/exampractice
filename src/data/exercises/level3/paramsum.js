@@ -1,0 +1,191 @@
+export default {
+  id: 'paramsum',
+  nombre: 'paramsum',
+  nivel: 3,
+  dificultad: 'fácil',
+  tipoEntrega: 'programa',
+  archivosEsperados: ['paramsum.c'],
+  funcionesPermitidas: ['write'],
+
+  subject: `Assignment name  : paramsum
+Expected files   : paramsum.c
+Allowed functions: write
+--------------------------------------------------------------------------------
+
+Write a program that displays the number of arguments passed to it, followed
+by a newline.
+
+With no argument, the program just displays 0.
+
+Example:
+$> ./paramsum | cat -e
+0$
+$> ./paramsum a b c | cat -e
+3$
+$> ./paramsum "hello world" foo bar | cat -e
+3$`,
+
+  descripcion: 'Programa que imprime el número de argumentos recibidos (sin contar el nombre del programa). Básicamente imprime argc-1.',
+
+  palacio: {
+    habitacion: 'dormitorio',
+    mueble: 'mesita',
+    personaje: 'El Contador de Argumentos',
+    emoji: '🔢',
+    historia: `En la mesita del dormitorio hay un Contador digital que siempre sabe cuántas cosas le das.
+Le pasas argumentos y él cuenta: ¿cuántos son? Pero OJO: argv[0] (el nombre del programa) NO cuenta.
+argc cuenta el programa también, así que el resultado es argc-1.
+Sin argumentos: argc=1, imprime 0.
+Con tres argumentos: argc=4, imprime 3.`,
+    anclas: [
+      "argc incluye el nombre del programa (argv[0])",
+      "imprimir argc - 1  ← el número de argumentos reales",
+      "sin args: argc=1 → imprimir 0",
+      "put_nbr para imprimir el número",
+      "seguido de '\\n'",
+    ],
+  },
+
+  herramientas: ['strings'],
+
+  formulaClave: {
+    descripcion: 'argc - 1 es el número de parámetros del programa',
+    formula: 'put_nbr(argc - 1); write(1, "\\n", 1);',
+    ejemplo: {
+      entrada: './paramsum a b c',
+      calculo: 'argc=4 → argc-1=3',
+      resultado: '3',
+    },
+  },
+
+  versiones: [
+    {
+      id: 'clasica',
+      nombre: 'Clásica con put_nbr recursivo',
+      descripcion: 'Imprime argc-1 con una función auxiliar put_nbr. La más limpia.',
+      recomendada: true,
+      codigo: `#include <unistd.h>
+
+static void\tput_nbr(int n)
+{
+\tchar\tc;
+
+\tif (n >= 10)
+\t\tput_nbr(n / 10);
+\tc = '0' + n % 10;
+\twrite(1, &c, 1);
+}
+
+int\tmain(int argc, char **argv)
+{
+\t(void)argv;
+\tput_nbr(argc - 1);
+\twrite(1, "\\n", 1);
+\treturn (0);
+}`,
+    },
+    {
+      id: 'inline',
+      nombre: 'Inline con string temporal',
+      descripcion: 'Construye el número como string en un buffer. Sin recursión.',
+      recomendada: false,
+      codigo: `#include <unistd.h>
+
+int\tmain(int argc, char **argv)
+{
+\tchar\tbuf[12];
+\tint\tlen;
+\tint\tn;
+
+\t(void)argv;
+\tn = argc - 1;
+\tlen = 0;
+\tif (n == 0)
+\t\tbuf[len++] = '0';
+\twhile (n > 0)
+\t{
+\t\tbuf[len++] = '0' + n % 10;
+\t\tn /= 10;
+\t}
+\twhile (len > 0)
+\t\twrite(1, &buf[--len], 1);
+\twrite(1, "\\n", 1);
+\treturn (0);
+}`,
+    },
+  ],
+
+  tests: [
+    { id: 'test_cero', descripcion: 'Sin argumentos → 0', entrada: [], salida: '0\n', tipo: 'edge' },
+    { id: 'test_uno', descripcion: 'Un argumento → 1', entrada: ['a'], salida: '1\n', tipo: 'normal' },
+    { id: 'test_tres', descripcion: 'Tres argumentos → 3', entrada: ['a', 'b', 'c'], salida: '3\n', tipo: 'normal' },
+    { id: 'test_dos', descripcion: 'Dos argumentos → 2', entrada: ['hello', 'world'], salida: '2\n', tipo: 'normal' },
+    { id: 'test_cinco', descripcion: 'Cinco argumentos → 5', entrada: ['1', '2', '3', '4', '5'], salida: '5\n', tipo: 'normal' },
+  ],
+
+  gdbSteps: [
+    {
+      paso: 1,
+      titulo: './paramsum a b c → argc=4',
+      codigo: `argc = 4
+argv[0] = "./paramsum"
+argv[1] = "a"
+argv[2] = "b"
+argv[3] = "c"
+argc - 1 = 3`,
+      variables: [
+        { nombre: 'argc', valor: '4', cambio: false, nota: '← incluye el nombre del programa' },
+        { nombre: 'argc - 1', valor: '3', cambio: true, nota: '← lo que hay que imprimir' },
+      ],
+    },
+    {
+      paso: 2,
+      titulo: 'put_nbr(3)',
+      codigo: `put_nbr(3):
+  3 < 10 → no recursión
+  c = '0' + 3 = '3'
+  write(1, "3", 1)
+write(1, "\\n", 1)
+// Salida: "3\\n"`,
+      variables: [
+        { nombre: 'salida', valor: '"3\\n"', cambio: true, nota: '✓' },
+      ],
+    },
+  ],
+
+  trampas: [
+    {
+      severidad: 'mortal',
+      titulo: 'Imprimir argc en vez de argc-1',
+      descripcion: 'argc incluye el nombre del programa (argv[0]). La pregunta pide el número de argumentos pasados, no el total de argc.',
+      codigoMal: `// ❌ argc incluye ./paramsum
+put_nbr(argc);  // "3 args" → imprime 4`,
+      codigoBien: `// ✅
+put_nbr(argc - 1);  // "3 args" → imprime 3`,
+    },
+    {
+      severidad: 'warning',
+      titulo: 'No manejar el caso n=0 en put_nbr',
+      descripcion: 'Si argc-1=0, put_nbr(0) debe imprimir "0". Con un put_nbr que solo itera mientras n>0, no imprimiría nada para n=0.',
+      codigoMal: `// ❌ No imprime nada para n=0
+void put_nbr(int n) {
+    while (n > 0) { write('0'+n%10); n/=10; }
+}`,
+      codigoBien: `// ✅ Manejar 0 explícitamente o con recursión
+void put_nbr(int n) {
+    if (n >= 10) put_nbr(n / 10);
+    char c = '0' + n % 10; write(1, &c, 1);
+}
+// put_nbr(0): 0 < 10 → no recursión; c='0'+0='0' → write('0') ✓`,
+    },
+  ],
+
+  bajoCelCapot: `argc (argument count) siempre incluye argv[0] (el nombre del programa).
+argc=1 significa que no se pasaron argumentos: solo el nombre del programa.
+"./paramsum a b c" → argc=4, argv={["./paramsum", "a", "b", "c"]}.
+El cast (void)argv evita el warning del compilador "unused parameter".`,
+
+  estrategia: 'MEMORIZAR',
+  razonEstrategia: 'La confusión argc vs argc-1 es la única trampa. Una vez clara, el ejercicio es el más simple del nivel 3.',
+  relacionados: ['tab_mult', 'add_prime_sum'],
+}

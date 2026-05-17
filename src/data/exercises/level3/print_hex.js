@@ -1,0 +1,210 @@
+export default {
+  id: 'print_hex',
+  nombre: 'print_hex',
+  nivel: 3,
+  dificultad: 'medio',
+  tipoEntrega: 'programa',
+  archivosEsperados: ['print_hex.c'],
+  funcionesPermitidas: ['write'],
+
+  subject: `Assignment name  : print_hex
+Expected files   : print_hex.c
+Allowed functions: write
+--------------------------------------------------------------------------------
+
+Write a program that takes a positive (or zero) int as argument and displays
+it in base 16 (lowercase), followed by a newline.
+
+If the number of arguments is not 1, just display a newline.
+
+Example:
+$> ./print_hex 10 | cat -e
+a$
+$> ./print_hex 255 | cat -e
+ff$
+$> ./print_hex 0 | cat -e
+0$`,
+
+  descripcion: 'Programa que convierte un entero positivo a base hexadecimal (minúsculas) e imprime el resultado. Usa una tabla de dígitos hex y recursión similar a put_nbr.',
+
+  palacio: {
+    habitacion: 'dormitorio',
+    mueble: 'paleta',
+    personaje: 'La Paleta de Colores Hex',
+    emoji: '🎨',
+    historia: `En el dormitorio hay una Paleta de artista con 16 colores (0-9, a-f).
+Le das un número decimal y ella lo convierte a base 16.
+El proceso: divide por 16 recursivamente, igual que put_nbr pero en base 16.
+Cada resto (0-15) mapea a un carácter: 0-9 → '0'-'9', 10-15 → 'a'-'f'.
+La tabla "0123456789abcdef" es la clave: hex[n%16] da el dígito correcto.`,
+    anclas: [
+      "tabla = '0123456789abcdef'  ← 16 dígitos",
+      "si n >= 16: llamar print_hex_rec(n/16) primero  ← recursión",
+      "write(tabla[n%16])  ← el dígito actual",
+      "solo dígitos en MINÚSCULA (a-f, no A-F)",
+      "argc != 2 → solo '\\n'",
+    ],
+  },
+
+  herramientas: ['bits', 'ascii'],
+
+  formulaClave: {
+    descripcion: 'Recursión base 16: dividir por 16, resto mapea a dígito hex',
+    formula: 'print_hex(n): if n>=16: print_hex(n/16); write(hex[n%16]);',
+    ejemplo: {
+      entrada: 'n=255',
+      calculo: 'print_hex(255): 255>=16→print_hex(15); hex[255%16]=hex[15]="f"; print_hex(15): 15<16→hex[15]="f"',
+      resultado: '"ff"',
+    },
+  },
+
+  versiones: [
+    {
+      id: 'recursiva',
+      nombre: 'Con función recursiva print_hex_rec',
+      descripcion: 'La más limpia. Usa una tabla de caracteres y recursión.',
+      recomendada: true,
+      codigo: `#include <unistd.h>
+
+static void\tprint_hex_rec(unsigned int n)
+{
+\tchar\thex[] = "0123456789abcdef";
+
+\tif (n >= 16)
+\t\tprint_hex_rec(n / 16);
+\twrite(1, &hex[n % 16], 1);
+}
+
+int\tmain(int argc, char **argv)
+{
+\tunsigned int\tn;
+\tint\t\t\ti;
+
+\tif (argc != 2)
+\t{
+\t\twrite(1, "\\n", 1);
+\t\treturn (0);
+\t}
+\tn = 0;
+\ti = 0;
+\twhile (argv[1][i] >= '0' && argv[1][i] <= '9')
+\t\tn = n * 10 + (argv[1][i++] - '0');
+\tprint_hex_rec(n);
+\twrite(1, "\\n", 1);
+\treturn (0);
+}`,
+    },
+    {
+      id: 'iterativa',
+      nombre: 'Iterativa con buffer',
+      descripcion: 'Construye el número hex en un buffer inverso y luego lo imprime.',
+      recomendada: false,
+      codigo: `#include <unistd.h>
+
+int\tmain(int argc, char **argv)
+{
+\tchar\thex[] = "0123456789abcdef";
+\tchar\tbuf[20];
+\tunsigned int\tn;
+\tint\t\t\ti;
+\tint\t\t\tlen;
+
+\tif (argc != 2)
+\t{
+\t\twrite(1, "\\n", 1);
+\t\treturn (0);
+\t}
+\tn = 0;
+\ti = 0;
+\twhile (argv[1][i] >= '0' && argv[1][i] <= '9')
+\t\tn = n * 10 + (argv[1][i++] - '0');
+\tif (n == 0)
+\t{
+\t\twrite(1, "0\\n", 2);
+\t\treturn (0);
+\t}
+\tlen = 0;
+\twhile (n > 0)
+\t{\n\t\tbuf[len++] = hex[n % 16];
+\t\tn /= 16;
+\t}
+\twhile (len > 0)
+\t\twrite(1, &buf[--len], 1);
+\twrite(1, "\\n", 1);
+\treturn (0);
+}`,
+    },
+  ],
+
+  tests: [
+    { id: 'test_10', descripcion: '10 → "a"', entrada: ['10'], salida: 'a\n', tipo: 'normal' },
+    { id: 'test_255', descripcion: '255 → "ff"', entrada: ['255'], salida: 'ff\n', tipo: 'normal' },
+    { id: 'test_0', descripcion: '0 → "0"', entrada: ['0'], salida: '0\n', tipo: 'edge' },
+    { id: 'test_16', descripcion: '16 → "10" (hex)', entrada: ['16'], salida: '10\n', tipo: 'normal' },
+    { id: 'test_42', descripcion: '42 → "2a"', entrada: ['42'], salida: '2a\n', tipo: 'normal' },
+    { id: 'test_256', descripcion: '256 → "100"', entrada: ['256'], salida: '100\n', tipo: 'normal' },
+  ],
+
+  gdbSteps: [
+    {
+      paso: 1,
+      titulo: 'print_hex_rec(255)',
+      codigo: `print_hex_rec(255):
+  255 >= 16 → llama print_hex_rec(255/16=15)
+    print_hex_rec(15):
+      15 < 16 → no recursión
+      hex[15%16] = hex[15] = 'f' → write('f')
+  hex[255%16] = hex[15] = 'f' → write('f')
+Salida: "ff"`,
+      variables: [
+        { nombre: 'salida', valor: '"ff"', cambio: true, nota: '✓' },
+      ],
+    },
+    {
+      paso: 2,
+      titulo: 'print_hex_rec(42)',
+      codigo: `print_hex_rec(42):
+  42 >= 16 → llama print_hex_rec(42/16=2)
+    print_hex_rec(2):
+      2 < 16 → no recursión
+      hex[2%16] = hex[2] = '2' → write('2')
+  hex[42%16] = hex[10] = 'a' → write('a')
+Salida: "2a"`,
+      variables: [
+        { nombre: 'salida', valor: '"2a"', cambio: true, nota: '42 en hex = 2*16+10 = 0x2a ✓' },
+      ],
+    },
+  ],
+
+  trampas: [
+    {
+      severidad: 'mortal',
+      titulo: 'Usar mayúsculas (A-F) en vez de minúsculas (a-f)',
+      descripcion: 'El subject especifica base 16 en MINÚSCULA. "0123456789abcdef", no "0123456789ABCDEF".',
+      codigoMal: `// ❌ Mayúsculas
+char hex[] = "0123456789ABCDEF";  // imprimiría "FF" en vez de "ff"`,
+      codigoBien: `// ✅ Minúsculas
+char hex[] = "0123456789abcdef";`,
+    },
+    {
+      severidad: 'mortal',
+      titulo: 'Olvidar el caso n=0 en la versión iterativa',
+      descripcion: 'En la versión iterativa con while(n>0), si n=0 el while no entra y no se imprime nada. La versión recursiva maneja bien el 0 (hex[0%16]=\'0\').',
+      codigoMal: `// ❌ n=0 → no imprime nada
+while (n > 0) { buf[len++] = hex[n%16]; n /= 16; }
+// si n=0: len=0, while de impresión no entra → output vacío`,
+      codigoBien: `// ✅ Caso especial para 0
+if (n == 0) { write(1, "0\\n", 2); return 0; }
+// o usar la versión recursiva que lo maneja automáticamente`,
+    },
+  ],
+
+  bajoCelCapot: `Base 16: dígitos 0-9 y a-f. 10→a, 11→b, 12→c, 13→d, 14→e, 15→f.
+255 = 15*16 + 15 = 0xff. 42 = 2*16 + 10 = 0x2a.
+La tabla "0123456789abcdef" indexada por n%16 mapea automáticamente.
+La recursión print_hex(n/16); write(hex[n%16]) imprime MSB primero.`,
+
+  estrategia: 'MEMORIZAR',
+  razonEstrategia: 'La tabla "0123456789abcdef" + recursión base 16 es el patrón reutilizable para cualquier conversión de base con digits mixtos.',
+  relacionados: ['ft_atoi_base', 'reverse_bits', 'print_bits'],
+}

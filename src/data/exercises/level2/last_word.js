@@ -1,0 +1,244 @@
+export default {
+  id: 'last_word',
+  nombre: 'last_word',
+  nivel: 2,
+  dificultad: 'medio',
+  tipoEntrega: 'programa',
+  archivosEsperados: ['last_word.c'],
+  funcionesPermitidas: ['write'],
+
+  subject: `Assignment name  : last_word
+Expected files   : last_word.c
+Allowed functions: write
+--------------------------------------------------------------------------------
+
+Write a program that takes a string and displays its last word followed by
+a newline.
+
+A word is a sequence of non-space characters.
+
+If the number of arguments is not 1, or there are no words, just display a
+newline.
+
+Example:
+$> ./last_word "FOR THE KNIFE" | cat -e
+KNIFE$
+$> ./last_word "   hello   " | cat -e
+hello$
+$> ./last_word | cat -e
+$
+$>`,
+
+  descripcion: 'Programa que imprime la última palabra de un string. Algoritmo: retroceder desde el final saltando espacios, luego encontrar el inicio de la última palabra y escribirla.',
+
+  palacio: {
+    habitacion: 'salon',
+    mueble: 'sofa',
+    personaje: 'El Detective de la Última Palabra',
+    emoji: '🕵️',
+    historia: `En el salón hay un Sofá donde el Detective siempre se sienta al final.
+Le das una frase y el Detective empieza leyendo desde el FINAL:
+PASO 1: Retrocede hasta que no sea espacio (salta espacios finales).
+PASO 2: Marca donde termina la palabra (end).
+PASO 3: Retrocede hasta que sea espacio o llegue al inicio (start).
+PASO 4: Escribe str[start..end].
+Si no hay palabras (todo espacios o string vacío), imprime solo '\\n'.`,
+    anclas: [
+      "end = len-1; while end>=0 && str[end]==' ': end--",
+      "if end<0: sin palabra → solo '\\n'",
+      "start = end; while start>0 && str[start-1]!=' ': start--",
+      "write str[start..end] char a char",
+      "separador: solo espacio (no tab, no newline)",
+    ],
+  },
+
+  herramientas: ['strings'],
+
+  formulaClave: {
+    descripcion: 'Desde el final: saltar espacios, luego buscar el inicio de la última palabra',
+    formula: 'end=len-1; while(str[end]==" ")end--; start=end; while(start>0&&str[start-1]!=" ")start--; write(str+start, end-start+1)',
+    ejemplo: {
+      entrada: '"   hello   "',
+      calculo: 'end=8→saltar 3 spaces→end=4("o"); start=4→retroceder hasta espacio→start=0; write "hello"',
+      resultado: '"hello"',
+    },
+  },
+
+  versiones: [
+    {
+      id: 'clasica',
+      nombre: 'Con dos índices end y start',
+      descripcion: 'La más explícita. Primero end (salta espacios finales), luego start (encuentra inicio de palabra).',
+      recomendada: true,
+      codigo: `#include <unistd.h>
+
+int\tmain(int argc, char **argv)
+{
+\tint\tend;
+\tint\tstart;
+
+\tif (argc == 2)
+\t{
+\t\tend = 0;
+\t\twhile (argv[1][end])
+\t\t\tend++;
+\t\tend--;
+\t\twhile (end >= 0 && argv[1][end] == ' ')
+\t\t\tend--;
+\t\tif (end >= 0)
+\t\t{
+\t\t\tstart = end;
+\t\t\twhile (start > 0 && argv[1][start - 1] != ' ')
+\t\t\t\tstart--;
+\t\t\twhile (start <= end)
+\t\t\t{
+\t\t\t\twrite(1, &argv[1][start], 1);
+\t\t\t\tstart++;
+\t\t\t}
+\t\t}
+\t}
+\twrite(1, "\\n", 1);
+\treturn (0);
+}`,
+    },
+    {
+      id: 'punteros',
+      nombre: 'Con punteros directos',
+      descripcion: 'Usa punteros para retroceder. Más compacto.',
+      recomendada: false,
+      codigo: `#include <unistd.h>
+
+int\tmain(int argc, char **argv)
+{
+\tchar\t*end;
+\tchar\t*start;
+
+\tif (argc == 2)
+\t{
+\t\tend = argv[1];
+\t\twhile (*end)
+\t\t\tend++;
+\t\tend--;
+\t\twhile (end >= argv[1] && *end == ' ')
+\t\t\tend--;
+\t\tif (end >= argv[1])
+\t\t{
+\t\t\tstart = end;
+\t\t\twhile (start > argv[1] && *(start - 1) != ' ')
+\t\t\t\tstart--;
+\t\t\twhile (start <= end)
+\t\t\t\twrite(1, start++, 1);
+\t\t}
+\t}
+\twrite(1, "\\n", 1);
+\treturn (0);
+}`,
+    },
+  ],
+
+  tests: [
+    { id: 'test_clasico', descripcion: '"FOR THE KNIFE" → "KNIFE"', entrada: ['FOR THE KNIFE'], salida: 'KNIFE\n', tipo: 'normal' },
+    { id: 'test_trailing_spaces', descripcion: '"hello   " → "hello" (espacios finales)', entrada: ['hello   '], salida: 'hello\n', tipo: 'normal' },
+    { id: 'test_leading_spaces', descripcion: '"   hello" → "hello"', entrada: ['   hello'], salida: 'hello\n', tipo: 'normal' },
+    { id: 'test_una_palabra', descripcion: '"hello" → "hello"', entrada: ['hello'], salida: 'hello\n', tipo: 'normal' },
+    { id: 'test_solo_espacios', descripcion: '"   " → "" (solo espacios → sin palabra)', entrada: ['   '], salida: '\n', tipo: 'edge' },
+    { id: 'test_vacio', descripcion: '"" → "" (string vacío)', entrada: [''], salida: '\n', tipo: 'edge' },
+  ],
+
+  gdbSteps: [
+    {
+      paso: 1,
+      titulo: 's="   hello   ": calcular len y retroceder desde el final',
+      codigo: `s = "   hello   "
+len = 11
+end = 10  (índice del último char)
+s[10]=' ', s[9]=' ', s[8]=' ' → espacios finales
+end-- × 3 → end = 7  (s[7]='o')`,
+      variables: [
+        { nombre: 'end inicial', valor: '10', cambio: false, nota: '' },
+        { nombre: 'end tras saltar', valor: '7 ("o")', cambio: true, nota: '← fin real de "hello"' },
+      ],
+    },
+    {
+      paso: 2,
+      titulo: 'end=7: buscar inicio de la palabra',
+      codigo: `start = 7
+start>0 && s[start-1]!=' ':
+  s[6]='l' ≠ ' ' → start-- → 6
+  s[5]='l' ≠ ' ' → start-- → 5
+  s[4]='e' ≠ ' ' → start-- → 4
+  s[3]='h' ≠ ' ' → start-- → 3
+  s[2]=' ' == ' ' → PARA
+start = 3`,
+      variables: [
+        { nombre: 'start', valor: '3 ("h" de "hello")', cambio: true, nota: '' },
+      ],
+    },
+    {
+      paso: 3,
+      titulo: 'Escribir str[3..7] = "hello"',
+      codigo: `write s[3]='h', s[4]='e', s[5]='l', s[6]='l', s[7]='o'
+→ "hello"`,
+      variables: [
+        { nombre: 'salida', valor: '"hello"', cambio: true, nota: '✓' },
+      ],
+    },
+    {
+      paso: 4,
+      titulo: 'write("\\n")',
+      codigo: `write(1, "\\n", 1)
+// Salida final: "hello\\n"`,
+      variables: [
+        { nombre: 'salida final', valor: '"hello\\n"', cambio: true, nota: '✓' },
+      ],
+    },
+  ],
+
+  trampas: [
+    {
+      severidad: 'mortal',
+      titulo: 'No saltar espacios finales → last "word" incluye espacios',
+      descripcion: 'Si el string termina en espacios y no los saltamos, end apunta a un espacio, no al final de la última palabra.',
+      codigoMal: `// ❌ No salta espacios finales
+end = len - 1;
+// "hello   ": end=7 (' ') → busca desde espacio → incorrecto`,
+      codigoBien: `// ✅ Saltar espacios del final primero
+end = len - 1;
+while (end >= 0 && str[end] == ' ')
+    end--;
+// "hello   ": end=4 ('o') → correcto`,
+    },
+    {
+      severidad: 'mortal',
+      titulo: 'Condición start > 0 en vez de start >= 0',
+      descripcion: 'Si la última palabra está al inicio del string (sin espacios delante), start debe llegar a 0. Si la condición es start > 0, se para en 1 y pierde el primer char.',
+      codigoMal: `// ❌ Se para en start=1, pierde str[0]
+while (start > 0 && str[start] != ' ')
+    start--;
+// "hello": start nunca llega a 0`,
+      codigoBien: `// ✅ Comprobar str[start-1] para poder llegar a start=0
+while (start > 0 && str[start - 1] != ' ')
+    start--;`,
+    },
+    {
+      severidad: 'warning',
+      titulo: 'Solo espacio como separador, NO tab ni newline',
+      descripcion: 'El subject dice "non-space characters" — espacio ASCII 32. El separador es SOLO el espacio, no el tab. Diferente de first_word que incluye tabs.',
+      codigoMal: `// ❌ Tratar tab como separador (no es correcto para last_word)
+while (end >= 0 && (str[end] == ' ' || str[end] == '\\t'))
+    end--;`,
+      codigoBien: `// ✅ Solo espacio
+while (end >= 0 && str[end] == ' ')
+    end--;`,
+    },
+  ],
+
+  bajoCelCapot: `El algoritmo es: ir al final, retroceder spaces, marcar end, retroceder no-spaces para encontrar start.
+La longitud de la última palabra es end - start + 1.
+Casos especiales: string vacío (end empieza en -1), todo espacios (end<0 tras el primer while).
+last_word vs first_word: first_word avanza desde el inicio; last_word retrocede desde el final.`,
+
+  estrategia: 'MEMORIZAR',
+  razonEstrategia: 'El patrón "ir al final, saltar separadores, encontrar inicio" es reutilizable en cualquier parser de tokens desde la derecha.',
+  relacionados: ['first_word', 'ft_strcspn', 'ft_strrev'],
+}

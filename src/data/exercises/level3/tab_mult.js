@@ -1,0 +1,285 @@
+export default {
+  id: 'tab_mult',
+  nombre: 'tab_mult',
+  nivel: 3,
+  dificultad: 'fácil',
+  tipoEntrega: 'programa',
+  archivosEsperados: ['tab_mult.c'],
+  funcionesPermitidas: ['write'],
+
+  subject: `Assignment name  : tab_mult
+Expected files   : tab_mult.c
+Allowed functions: write
+--------------------------------------------------------------------------------
+
+Write a program that displays a number's multiplication table.
+
+The program must display the multiplication table of the number given as
+argument (from 1 to 9), each operation on its own line.
+
+If the number of arguments is not 1, or if the argument is not a number
+between 1 and 9, the program displays a newline.
+
+Format: "i x n = result\\n" for i from 1 to 9.
+
+Example:
+$> ./tab_mult 9
+1 x 9 = 9
+2 x 9 = 18
+3 x 9 = 27
+4 x 9 = 36
+5 x 9 = 45
+6 x 9 = 54
+7 x 9 = 63
+8 x 9 = 72
+9 x 9 = 81`,
+
+  descripcion: 'Programa que muestra la tabla de multiplicar del número dado (1-9). Formato exacto: "i x n = resultado\\n" para i de 1 a 9. Requiere put_nbr para imprimir los números.',
+
+  palacio: {
+    habitacion: 'dormitorio',
+    mueble: 'poster',
+    personaje: 'El Póster de la Tabla',
+    emoji: '📋',
+    historia: `En el dormitorio hay un Póster de tablas de multiplicar en la pared.
+Le dices un número del 1 al 9 y el Póster despliega su tabla completa.
+El formato es EXACTO: "i x n = resultado" — con espacios alrededor de x y =.
+El Póster solo acepta números entre 1 y 9. Si le das otra cosa: solo imprime '\\n'.
+Usa put_nbr para imprimir los números sin printf.`,
+    anclas: [
+      "for i=1 to 9: write 'i x n = resultado\\n'",
+      "formato EXACTO: '1 x N = R\\n' — espacios incluidos",
+      "n debe estar entre 1 y 9 (inclusive)",
+      "put_nbr para imprimir enteros sin printf",
+      "argc != 2 → solo '\\n'",
+    ],
+  },
+
+  herramientas: ['strings', 'ascii'],
+
+  formulaClave: {
+    descripcion: 'Bucle de 1 a 9 imprimiendo "i x n = i*n"',
+    formula: 'for i=1 to 9: put_nbr(i); write(" x "); put_nbr(n); write(" = "); put_nbr(i*n); write("\\n");',
+    ejemplo: {
+      entrada: 'n=9, i=2',
+      calculo: '"2 x 9 = 18\\n"',
+      resultado: '"2 x 9 = 18"',
+    },
+  },
+
+  versiones: [
+    {
+      id: 'clasica',
+      nombre: 'Con put_nbr y strings literales',
+      descripcion: 'La más legible. Usa write con strings " x " y " = " directamente.',
+      recomendada: true,
+      codigo: `#include <unistd.h>
+
+static void\tput_nbr(int n)
+{
+\tchar\tc;
+
+\tif (n >= 10)
+\t\tput_nbr(n / 10);
+\tc = '0' + n % 10;
+\twrite(1, &c, 1);
+}
+
+int\tmain(int argc, char **argv)
+{
+\tint\tn;
+\tint\ti;
+
+\tif (argc != 2 || argv[1][0] < '1' || argv[1][0] > '9' || argv[1][1])
+\t{
+\t\twrite(1, "\\n", 1);
+\t\treturn (0);
+\t}
+\tn = argv[1][0] - '0';
+\ti = 1;
+\twhile (i <= 9)
+\t{
+\t\tput_nbr(i);
+\t\twrite(1, " x ", 3);
+\t\tput_nbr(n);
+\t\twrite(1, " = ", 3);
+\t\tput_nbr(i * n);
+\t\twrite(1, "\\n", 1);
+\t\ti++;
+\t}
+\treturn (0);
+}`,
+    },
+    {
+      id: 'atoi',
+      nombre: 'Con atoi y validación completa',
+      descripcion: 'Convierte el argumento con ft_atoi y valida el rango.',
+      recomendada: false,
+      codigo: `#include <unistd.h>
+
+static void\tput_nbr(int n)
+{
+\tchar\tc;
+
+\tif (n >= 10)
+\t\tput_nbr(n / 10);
+\tc = '0' + n % 10;
+\twrite(1, &c, 1);
+}
+
+static int\tft_atoi(char *s)
+{
+\tint\tn;
+
+\tn = 0;
+\twhile (*s >= '0' && *s <= '9')
+\t\tn = n * 10 + (*s++ - '0');
+\treturn (n);
+}
+
+int\tmain(int argc, char **argv)
+{
+\tint\tn;
+\tint\ti;
+
+\tif (argc != 2)
+\t{
+\t\twrite(1, "\\n", 1);
+\t\treturn (0);
+\t}
+\tn = ft_atoi(argv[1]);
+\tif (n < 1 || n > 9)
+\t{
+\t\twrite(1, "\\n", 1);
+\t\treturn (0);
+\t}
+\ti = 1;
+\twhile (i <= 9)
+\t{
+\t\tput_nbr(i);
+\t\twrite(1, " x ", 3);
+\t\tput_nbr(n);
+\t\twrite(1, " = ", 3);
+\t\tput_nbr(i * n);
+\t\twrite(1, "\\n", 1);
+\t\ti++;
+\t}
+\treturn (0);
+}`,
+    },
+  ],
+
+  tests: [
+    {
+      id: 'test_9',
+      descripcion: 'n=9 → tabla del 9',
+      entrada: ['9'],
+      salida: '1 x 9 = 9\n2 x 9 = 18\n3 x 9 = 27\n4 x 9 = 36\n5 x 9 = 45\n6 x 9 = 54\n7 x 9 = 63\n8 x 9 = 72\n9 x 9 = 81\n',
+      tipo: 'normal',
+    },
+    {
+      id: 'test_1',
+      descripcion: 'n=1 → tabla del 1',
+      entrada: ['1'],
+      salida: '1 x 1 = 1\n2 x 1 = 2\n3 x 1 = 3\n4 x 1 = 4\n5 x 1 = 5\n6 x 1 = 6\n7 x 1 = 7\n8 x 1 = 8\n9 x 1 = 9\n',
+      tipo: 'normal',
+    },
+    {
+      id: 'test_5',
+      descripcion: 'n=5 → tabla del 5',
+      entrada: ['5'],
+      salida: '1 x 5 = 5\n2 x 5 = 10\n3 x 5 = 15\n4 x 5 = 20\n5 x 5 = 25\n6 x 5 = 30\n7 x 5 = 35\n8 x 5 = 40\n9 x 5 = 45\n',
+      tipo: 'normal',
+    },
+    { id: 'test_0', descripcion: 'n=0 → fuera de rango → "\\n"', entrada: ['0'], salida: '\n', tipo: 'edge' },
+    { id: 'test_10', descripcion: 'n=10 → fuera de rango → "\\n"', entrada: ['10'], salida: '\n', tipo: 'edge' },
+  ],
+
+  gdbSteps: [
+    {
+      paso: 1,
+      titulo: 'n=9, i=1: primera línea',
+      codigo: `n = 9, i = 1
+put_nbr(1) → write('1')
+write(1, " x ", 3) → " x "
+put_nbr(9) → write('9')
+write(1, " = ", 3) → " = "
+put_nbr(1 * 9 = 9) → write('9')
+write(1, "\\n", 1) → "\\n"
+Salida: "1 x 9 = 9\\n"`,
+      variables: [
+        { nombre: 'i', valor: '1', cambio: false, nota: '' },
+        { nombre: 'i * n', valor: '9', cambio: false, nota: '' },
+      ],
+    },
+    {
+      paso: 2,
+      titulo: 'n=9, i=2: segunda línea (resultado de 2 dígitos)',
+      codigo: `i = 2
+put_nbr(2) → "2"
+" x "
+put_nbr(9) → "9"
+" = "
+put_nbr(18): 18>=10 → put_nbr(1) → "1"; c='8' → "8"
+"\\n"
+Salida: "2 x 9 = 18\\n"`,
+      variables: [
+        { nombre: 'i * n', valor: '18', cambio: true, nota: '← 2 dígitos: put_nbr recursivo' },
+      ],
+    },
+    {
+      paso: 3,
+      titulo: 'Bucle termina en i=9',
+      codigo: `i=9:
+"9 x 9 = 81\\n"
+i++ → i=10
+10 <= 9 → FALSE → sale`,
+      variables: [
+        { nombre: 'salida final', valor: '9 líneas, última "9 x 9 = 81\\n"', cambio: true, nota: '✓' },
+      ],
+    },
+  ],
+
+  trampas: [
+    {
+      severidad: 'mortal',
+      titulo: 'Formato incorrecto: sin espacios alrededor de x y =',
+      descripcion: 'El formato EXACTO es "i x n = resultado". Hay espacios antes y después de x, y antes y después de =. Cualquier diferencia da error.',
+      codigoMal: `// ❌ Sin espacios
+write(1, "x", 1);  // "1x9=9" — incorrecto
+write(1, "=", 1);`,
+      codigoBien: `// ✅ Con espacios exactos
+write(1, " x ", 3);  // " x "
+write(1, " = ", 3);  // " = "`,
+    },
+    {
+      severidad: 'mortal',
+      titulo: 'No validar que n esté entre 1 y 9',
+      descripcion: 'Si n=0 o n=10 (u otro valor fuera de rango), el programa debe imprimir solo \\n. Sin validar, imprimiría una tabla inválida.',
+      codigoMal: `// ❌ Sin validación de rango
+n = ft_atoi(argv[1]);
+// n podría ser 0, 10, -5, etc.`,
+      codigoBien: `// ✅ Validar rango
+n = ft_atoi(argv[1]);
+if (n < 1 || n > 9) { write(1, "\\n", 1); return 0; }`,
+    },
+    {
+      severidad: 'warning',
+      titulo: 'Usar printf en vez de write',
+      descripcion: 'Las funciones permitidas son solo write. Aunque printf funciona en el examen real, en el simulador y norminette es importante usar solo write.',
+      codigoMal: `// ❌ printf no permitido
+printf("%d x %d = %d\\n", i, n, i * n);`,
+      codigoBien: `// ✅ write + put_nbr
+put_nbr(i); write(1, " x ", 3); put_nbr(n); write(1, " = ", 3); put_nbr(i * n); write(1, "\\n", 1);`,
+    },
+  ],
+
+  bajoCelCapot: `put_nbr(n) imprime n recursivamente: para n=81, llama put_nbr(8) que imprime '8', luego imprime '1'.
+El formato " x " tiene 3 bytes (espacio, x, espacio) → write(1, " x ", 3).
+Validar el input: argv[1][0] entre '1'-'9' y argv[1][1]==0 es la forma más compacta.
+El bucle de 1 a 9 es el más simple posible para una tabla de multiplicar.`,
+
+  estrategia: 'MEMORIZAR',
+  razonEstrategia: 'El formato exacto "i x n = r" con los espacios correctos y la función put_nbr son lo que hay que memorizar. El bucle de 1 a 9 es trivial.',
+  relacionados: ['paramsum', 'add_prime_sum', 'print_hex'],
+}
