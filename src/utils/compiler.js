@@ -1,5 +1,41 @@
 const WANDBOX_URL = 'https://wandbox.org/api/compile.json'
 
+function parseDiagnosticLine(line, sourceLines) {
+  const detailed = line.match(/^(.*?):(\d+):(\d+):\s*(fatal error|error|warning|note):\s*(.*)$/i)
+  const simple = line.match(/^(.*?):(\d+):\s*(fatal error|error|warning|note):\s*(.*)$/i)
+
+  const match = detailed || simple
+  if (!match) return null
+
+  const hasColumn = Boolean(detailed)
+  const lineNumber = Number(match[2])
+  const columnNumber = hasColumn ? Number(match[3]) : null
+  const severity = hasColumn ? match[4] : match[3]
+  const message = hasColumn ? match[5] : match[4]
+
+  return {
+    raw: line,
+    file: match[1],
+    line: lineNumber,
+    column: columnNumber,
+    severity,
+    message,
+    sourceLine: sourceLines[lineNumber - 1] ?? '',
+  }
+}
+
+export function parseCompilerDiagnostics(compilerError, source = '') {
+  if (!compilerError) return []
+
+  const sourceLines = source ? source.split('\n') : []
+  return String(compilerError)
+    .split('\n')
+    .map((line) => line.trimEnd())
+    .filter(Boolean)
+    .map((line) => parseDiagnosticLine(line, sourceLines))
+    .filter(Boolean)
+}
+
 export async function compileAndRun(code, args = []) {
   const res = await fetch(WANDBOX_URL, {
     method: 'POST',
@@ -27,6 +63,7 @@ export async function compileAndRun(code, args = []) {
 
   return {
     compileError,
+    compileDiagnostics: parseCompilerDiagnostics(compileError, code),
     stdout: data.program_output ?? '',
     stderr: data.program_error ?? '',
     exitCode: data.status !== undefined ? parseInt(data.status, 10) : -1,

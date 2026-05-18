@@ -6,7 +6,8 @@ import { ArrowLeft, Play, Trash2, Sparkles, ChevronDown, ChevronUp, Eye, Timer, 
 import clsx from 'clsx'
 import { getExercise } from '@/data/index'
 import { compileAndRun } from '@/utils/compiler'
-import { buildFullCode } from '@/utils/testHarnesses'
+import { buildFullCode, testHarnesses } from '@/utils/testHarnesses'
+import { getDiff } from '@/utils/simulators/index'
 import { useProgressStore } from '@/store/progressStore'
 import { useUserVariants } from '@/hooks/useUserVariants'
 import LevelBadge from '@/components/layout/LevelBadge'
@@ -19,6 +20,45 @@ function getPlaceholder(exercise) {
     return `#include <unistd.h>\n\n/*\n** ${exercise.nombre}\n** Funciones permitidas: ${fns}\n*/\n\nint main(int ac, char **av)\n{\n\t// Tu código aquí\n\t(void)ac;\n\t(void)av;\n\treturn (0);\n}\n`
   }
   return `#include <unistd.h>\n\n/*\n** ${exercise.nombre}\n** Funciones permitidas: ${fns}\n*/\n\n// Escribe tu función aquí\n// (El main de test se añade automáticamente al compilar)\n\n`
+}
+
+function countLines(text) {
+  if (!text) return 0
+  return text.split('\n').length
+}
+
+function getDiagnosticScope(exercise, code, lineNumber) {
+  if (!exercise || !Number.isInteger(lineNumber)) return 'código generado'
+  if (exercise.tipoEntrega !== 'funcion') return 'tu código'
+
+  const harness = testHarnesses[exercise.id]
+  if (!harness) return 'tu código'
+
+  const headerLines = countLines(harness.header)
+  const userLines = countLines(code)
+  const userStart = headerLines + 1
+  const userEnd = headerLines + userLines
+  const mainStart = userEnd + 1
+
+  if (lineNumber >= userStart && lineNumber <= userEnd) return 'tu código'
+  if (lineNumber >= mainStart) return 'el harness de prueba'
+  return 'el prefijo del harness'
+}
+
+function buildCodeExcerpt(source, lineNumber, radius = 2) {
+  if (!source || !Number.isInteger(lineNumber) || lineNumber < 1) return []
+  const lines = source.split('\n')
+  const start = Math.max(1, lineNumber - radius)
+  const end = Math.min(lines.length, lineNumber + radius)
+
+  return Array.from({ length: end - start + 1 }, (_, index) => {
+    const currentLine = start + index
+    return {
+      number: currentLine,
+      text: lines[currentLine - 1] ?? '',
+      active: currentLine === lineNumber,
+    }
+  })
 }
 
 // ─── Diff renderer ────────────────────────────────────────────────────────────
@@ -103,6 +143,11 @@ function TestRow({ test, index }) {
             <div className="text-xs text-zinc-500 mb-1">
               Input: <code className="font-mono bg-white px-1 rounded">{test.entrada?.length ? test.entrada.join(' ') : '(sin args)'}</code>
             </div>
+            {test.diff && (
+              <div className="text-[11px] font-mono text-orange-700 mb-2">
+                Primer byte distinto en la posición {test.diff.position}: {test.diff.expected} vs {test.diff.got}
+              </div>
+            )}
             <DiffView got={test.output} expected={test.salida} />
           </motion.div>
         )}
@@ -112,8 +157,12 @@ function TestRow({ test, index }) {
 }
 
 // ─── Compile Error Banner ─────────────────────────────────────────────────────
-function CompileErrorBanner({ error, onDismiss }) {
+function CompileErrorBanner({ error, diagnostics = [], source = '', userCode = '', exercise, onDismiss }) {
   if (!error) return null
+  const primary = diagnostics[0]
+  const excerpt = buildCodeExcerpt(source, primary?.line)
+  const scope = getDiagnosticScope(exercise, userCode, primary?.line)
+
   return (
     <motion.div
       initial={{ height: 0, opacity: 0 }}
@@ -129,6 +178,44 @@ function CompileErrorBanner({ error, onDismiss }) {
           </button>
         </div>
         <pre className="text-xs font-mono text-red-700 whitespace-pre-wrap leading-relaxed">{error}</pre>
+        {primary && (
+          <div className="mt-2 rounded-lg border border-red-200 bg-white p-2">
+            <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-[11px] font-mono text-zinc-600 mb-2">
+              <span className="font-semibold text-red-600">
+                Línea {primary.line}{primary.column ? `, columna ${primary.column}` : ''}
+              </span>
+              <span>·</span>
+              <span>{scope}</span>
+            </div>
+            <div className="space-y-0.5 font-mono text-[11px] leading-5">
+              {excerpt.map((line) => (
+                <div
+                  key={line.number}
+                  className={clsx(
+                    'grid grid-cols-[3.5rem_1fr] gap-2 rounded px-2',
+                    line.active ? 'bg-red-50 text-red-900' : 'text-zinc-500'
+                  )}
+                >
+                  <span className="text-right select-none">{line.number}</span>
+                  <span className="whitespace-pre-wrap break-words">{line.text || ' '}</span>
+                </div>
+              ))}
+            </div>
+            <p className="mt-2 text-[11px] text-red-700 font-mono">
+              {primary.message}
+            </p>
+          </div>
+        )}
+        {diagnostics.length > 1 && (
+          <details className="mt-2 text-[11px] text-zinc-500">
+            <summary className="cursor-pointer select-none">Ver más detalles</summary>
+            <ul className="mt-2 space-y-1 font-mono">
+              {diagnostics.slice(1).map((diag, index) => (
+                <li key={`${diag.raw}-${index}`}>{diag.raw}</li>
+              ))}
+            </ul>
+          </details>
+        )}
       </div>
     </motion.div>
   )
@@ -419,12 +506,15 @@ export default function PracticeMode() {
 
   // Tests state
   const [tests, setTests] = useState(() =>
-    (exercise?.tests || []).map(t => ({ ...t, status: 'pending', output: null }))
+    (exercise?.tests || []).map(t => ({ ...t, status: 'pending', output: null, diff: null }))
   )
   const [isRunning, setIsRunning]     = useState(false)
   const [intentos, setIntentos]       = useState(0)
   const [celebrate, setCelebrate]     = useState(false)
   const [compileError, setCompileError] = useState(null)
+  const [compileDiagnostics, setCompileDiagnostics] = useState([])
+  const [compileSource, setCompileSource] = useState('')
+  const [compileUserCode, setCompileUserCode] = useState('')
   const [showSaveModal, setShowSaveModal] = useState(false)
 
   // Track whether all passed using a ref to avoid stale closure in async handleCompile
@@ -455,14 +545,19 @@ export default function PracticeMode() {
     if (!timer.running) timer.start()
     setIsRunning(true)
     setCompileError(null)
+    setCompileDiagnostics([])
+    setCompileSource('')
+    setCompileUserCode('')
     setIntentos(i => i + 1)
 
     // Reset all tests to pending
-    setTests(exercise.tests.map(t => ({ ...t, status: 'pending', output: null })))
+    setTests(exercise.tests.map(t => ({ ...t, status: 'pending', output: null, diff: null })))
     allPassedRef.current = false
 
     // Build code to send (append test harness for funcion-type)
     const fullCode = buildFullCode(exercise.id, exercise.tipoEntrega, code)
+    setCompileSource(fullCode)
+    setCompileUserCode(code)
 
     let hadError = false
     let passedAll = true
@@ -478,7 +573,7 @@ export default function PracticeMode() {
         hadError = true
         passedAll = false
         setCompileError(`Error de red: ${err.message}\n\nVerifica tu conexión o intenta de nuevo.`)
-        setTests(prev => prev.map(t => ({ ...t, status: t.status === 'pending' ? 'failed' : t.status })))
+        setTests(prev => prev.map(t => ({ ...t, status: t.status === 'pending' ? 'failed' : t.status, diff: t.status === 'pending' ? null : t.diff })))
         break
       }
 
@@ -491,22 +586,25 @@ export default function PracticeMode() {
             ? 'El servidor de compilación está ocupado. Intenta de nuevo en unos segundos.'
             : result.compileError
         )
-        setTests(prev => prev.map(t => ({ ...t, status: 'failed', output: '' })))
+        setCompileDiagnostics(result.compileDiagnostics || [])
+        setTests(prev => prev.map(t => ({ ...t, status: 'failed', output: '', diff: null })))
         break
       }
 
       const passed = result.stdout === test.salida
       if (!passed) passedAll = false
+      const diff = passed ? null : getDiff(result.stdout, test.salida)
 
       setTests(prev => {
         const next = [...prev]
-        next[i] = { ...next[i], status: passed ? 'passed' : 'failed', output: result.stdout }
+        next[i] = { ...next[i], status: passed ? 'passed' : 'failed', output: result.stdout, diff }
         return next
       })
     }
 
     setIsRunning(false)
     registrarIntento(id, passedAll)
+    if (!hadError) setCompileDiagnostics([])
     if (passedAll && !hadError) {
       marcarEstado(id, 'dominado')
       setCelebrate(true)
@@ -519,7 +617,10 @@ export default function PracticeMode() {
     const placeholder = getPlaceholder(exercise)
     setCode(placeholder)
     setCompileError(null)
-    setTests((exercise?.tests || []).map(t => ({ ...t, status: 'pending', output: null })))
+    setCompileDiagnostics([])
+    setCompileSource('')
+    setCompileUserCode('')
+    setTests((exercise?.tests || []).map(t => ({ ...t, status: 'pending', output: null, diff: null })))
   }
 
   const handleFormat = () => {
@@ -531,6 +632,9 @@ export default function PracticeMode() {
   const handleUseSolution = (solutionCode) => {
     setCode(solutionCode)
     setCompileError(null)
+    setCompileDiagnostics([])
+    setCompileSource('')
+    setCompileUserCode('')
   }
 
   // Estado badge
@@ -643,7 +747,16 @@ export default function PracticeMode() {
             {compileError && (
               <CompileErrorBanner
                 error={compileError}
-                onDismiss={() => setCompileError(null)}
+                diagnostics={compileDiagnostics}
+                source={compileSource}
+                userCode={compileUserCode}
+                exercise={exercise}
+                onDismiss={() => {
+                  setCompileError(null)
+                  setCompileDiagnostics([])
+                  setCompileSource('')
+                  setCompileUserCode('')
+                }}
               />
             )}
           </AnimatePresence>
