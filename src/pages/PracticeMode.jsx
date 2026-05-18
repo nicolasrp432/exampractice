@@ -2,7 +2,7 @@ import { useState, useEffect, useRef, useCallback } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import Editor from '@monaco-editor/react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { ArrowLeft, Play, Trash2, Sparkles, ChevronDown, ChevronUp, Eye, Timer, CheckCircle2, XCircle, Circle, Trophy, RotateCcw, Save, X } from 'lucide-react'
+import { ArrowLeft, Play, Trash2, Sparkles, ChevronDown, ChevronUp, Eye, Timer, CheckCircle2, XCircle, Circle, Trophy, RotateCcw, Save, X, Microscope } from 'lucide-react'
 import clsx from 'clsx'
 import { getExercise } from '@/data/index'
 import { compileAndRun } from '@/utils/compiler'
@@ -11,6 +11,7 @@ import { getDiff } from '@/utils/simulators/index'
 import { useProgressStore } from '@/store/progressStore'
 import { useUserVariants } from '@/hooks/useUserVariants'
 import LevelBadge from '@/components/layout/LevelBadge'
+import GdbStepper from '@/components/gdb/GdbStepper'
 
 // ─── Default placeholder code ────────────────────────────────────────────────
 function getPlaceholder(exercise) {
@@ -473,6 +474,56 @@ function CelebrationOverlay({ show, onClose }) {
   )
 }
 
+function GdbTraceModal({ open, onClose, exercise }) {
+  return (
+    <AnimatePresence>
+      {open && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4"
+          onMouseDown={onClose}
+        >
+          <motion.div
+            initial={{ scale: 0.96, y: 20, opacity: 0 }}
+            animate={{ scale: 1, y: 0, opacity: 1 }}
+            exit={{ scale: 0.98, opacity: 0 }}
+            transition={{ type: 'spring', stiffness: 260, damping: 24 }}
+            className="w-full max-w-6xl overflow-hidden rounded-3xl border border-zinc-200 bg-white shadow-2xl"
+            onMouseDown={(event) => event.stopPropagation()}
+          >
+            <div className="flex items-center justify-between gap-3 border-b border-zinc-200 bg-zinc-50 px-5 py-4">
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-wide text-zinc-500">Visualizador GDB</p>
+                <h2 className="text-base font-semibold text-zinc-800">
+                  {exercise?.nombre || 'Traza de ejecución'}
+                </h2>
+              </div>
+              <button
+                onClick={onClose}
+                className="rounded-lg border border-zinc-200 bg-white px-3 py-1.5 text-sm text-zinc-600 transition-colors hover:bg-zinc-50"
+              >
+                Cerrar
+              </button>
+            </div>
+
+            <div className="max-h-[82vh] overflow-y-auto bg-zinc-50 p-4">
+              {exercise?.gdbSteps?.length ? (
+                <GdbStepper steps={exercise.gdbSteps} title={`GDB — ${exercise.nombre}`} />
+              ) : (
+                <div className="rounded-xl border border-dashed border-zinc-300 bg-white p-8 text-center text-zinc-400">
+                  No hay traza GDB disponible todavía para este ejercicio.
+                </div>
+              )}
+            </div>
+          </motion.div>
+        </motion.div>
+      )}
+    </AnimatePresence>
+  )
+}
+
 // ─── useTimer ─────────────────────────────────────────────────────────────────
 function useTimer() {
   const [seconds, setSeconds] = useState(0)
@@ -516,6 +567,7 @@ export default function PracticeMode() {
   const [compileSource, setCompileSource] = useState('')
   const [compileUserCode, setCompileUserCode] = useState('')
   const [showSaveModal, setShowSaveModal] = useState(false)
+  const [showGdbTrace, setShowGdbTrace] = useState(false)
 
   // Track whether all passed using a ref to avoid stale closure in async handleCompile
   const allPassedRef = useRef(false)
@@ -661,6 +713,7 @@ export default function PracticeMode() {
   return (
     <div className="flex flex-col h-screen bg-zinc-50 overflow-hidden">
       <CelebrationOverlay show={celebrate} onClose={() => setCelebrate(false)} />
+      <GdbTraceModal open={showGdbTrace} onClose={() => setShowGdbTrace(false)} exercise={exercise} />
 
       {showSaveModal && (
         <SaveVariantModal
@@ -801,6 +854,15 @@ export default function PracticeMode() {
             >
               <Save size={14} />
               Guardar variante
+            </button>
+
+            <button
+              onClick={() => setShowGdbTrace(true)}
+              className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm text-purple-700 bg-purple-50 hover:bg-purple-100 border border-purple-200 transition-colors"
+              title="Ver ejecución paso a paso"
+            >
+              <Microscope size={14} />
+              Ver ejecución paso a paso
             </button>
 
             <span className="ml-auto text-xs text-zinc-400 font-mono">Ctrl+Enter para compilar</span>
