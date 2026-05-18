@@ -16,9 +16,8 @@ import StoryCard        from '@/components/exercise/StoryCard'
 import FormulaVisualizer from '@/components/exercise/FormulaVisualizer'
 import CodeViewer       from '@/components/exercise/CodeViewer'
 import TrapsList        from '@/components/exercise/TrapsList'
-// PROMPT 7 — Simuladores
 import InputPlayground  from '@/components/simulator/InputPlayground'
-import StepTracer       from '@/components/simulator/StepTracer'
+import GdbStepper       from '@/components/gdb/GdbStepper'
 
 // ─── Tabs config ──────────────────────────────────────────────────────────────
 const TABS = [
@@ -82,7 +81,7 @@ function TabSimulador({ exercise }) {
 }
 
 function TabGDB({ exercise }) {
-  return <StepTracer steps={exercise.gdbSteps} title={`GDB — ${exercise.nombre}`} />
+  return <GdbStepper steps={exercise.gdbSteps} title={`GDB — ${exercise.nombre}`} />
 }
 
 function CopyButton({ text }) {

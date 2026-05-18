@@ -3,13 +3,13 @@ const REQUIRED_FIELDS = [
   'archivosEsperados', 'funcionesPermitidas', 'subject', 'descripcion',
   'palacio', 'herramientas', 'formulaClave', 'versiones',
   'tests', 'gdbSteps', 'trampas', 'bajoCelCapot',
-  'estrategia', 'razonEstrategia', 'progreso',
+  'estrategia', 'razonEstrategia',
 ]
 
 const PALACIO_REQUIRED = ['habitacion', 'personaje', 'emoji', 'historia', 'anclas']
 const VALID_NIVELES = [1, 2, 3, 4]
 const VALID_DIFICULTADES = ['fácil', 'medio', 'difícil']
-const VALID_TIPO_ENTREGA = ['programa', 'función']
+const VALID_TIPO_ENTREGA = ['programa', 'función', 'funcion']
 const VALID_HABITACIONES = ['cocina', 'salón', 'dormitorio', 'garaje']
 const VALID_ESTRATEGIAS = ['MEMORIZAR', 'ENTENDER', 'AMBOS']
 const VALID_ESTADOS = ['no_iniciado', 'estudiando', 'practicando', 'dominado']
