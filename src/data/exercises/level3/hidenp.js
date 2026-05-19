@@ -96,6 +96,38 @@ int\tmain(int argc, char **argv)
 \treturn (0);
 }`,
     },
+    {
+      id: 'punteros',
+      nombre: 'Con punteros avanzando sobre ambos strings',
+      descripcion: 'Resuelve la subsecuencia sin índices, moviendo dos punteros en paralelo.',
+      recomendada: false,
+      codigo: `#include <unistd.h>
+
+int\tmain(int argc, char **argv)
+{
+\tchar\t*s1;
+\tchar\t*s2;
+\tchar\tc;
+
+\tif (argc == 3)
+\t{
+\t\ts1 = argv[1];
+\t\ts2 = argv[2];
+\t\twhile (*s1 && *s2)
+\t\t{
+\t\t\tif (*s1 == *s2)
+\t\t\t\ts2++;
+\t\t\ts1++;
+\t\t}
+\t\tc = (*s2 == '\\0') ? '1' : '0';
+\t\twrite(1, &c, 1);
+\t\twrite(1, "\\n", 1);
+\t\treturn (0);
+\t}
+\twrite(1, "\\n", 1);
+\treturn (0);
+}`,
+    },
   ],
 
   tests: [

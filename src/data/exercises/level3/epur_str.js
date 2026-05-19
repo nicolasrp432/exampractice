@@ -85,7 +85,7 @@ int\tmain(int argc, char **argv)
 \t\t\t\t}
 \t\t\t\twrite(1, &argv[1][i], 1);
 \t\t\t}
-\t\t\telse if (argv[1][i - 1] && argv[1][i - 1] != ' ')
+			else if (i > 0 && argv[1][i - 1] && argv[1][i - 1] != ' ')
 \t\t\t\tk = 1;
 \t\t\ti++;
 \t\t}
@@ -131,8 +131,44 @@ int\tmain(int argc, char **argv)
 \treturn (0);
 }`,
     },
-  ],
+    {
+      id: 'estado_explicito',
+      nombre: 'Con estado explícito started/pending',
+      descripcion: 'Hace el mismo trabajo con dos flags separados: si ya empezó y si hay espacio pendiente.',
+      recomendada: false,
+      codigo: `#include <unistd.h>
 
+int	main(int argc, char **argv)
+{
+	int	i;
+	int	started;
+	int	pending;
+
+	if (argc == 2)
+	{
+		i = 0;
+		started = 0;
+		pending = 0;
+		while (argv[1][i])
+		{
+			if (argv[1][i] == ' ')
+				pending = 1;
+			else
+			{
+				if (started && pending)
+					write(1, " ", 1);
+				write(1, &argv[1][i], 1);
+				started = 1;
+				pending = 0;
+			}
+			i++;
+		}
+	}
+	write(1, "\n", 1);
+	return (0);
+}`,
+    },
+  ],
   tests: [
     { id: 'test_clasico', descripcion: '"  hello   world  " → "hello world"', entrada: ['  hello   world  '], salida: 'hello world\n', tipo: 'normal' },
     { id: 'test_solo_espacios', descripcion: '"   " → "" (solo espacios)', entrada: ['   '], salida: '\n', tipo: 'edge' },

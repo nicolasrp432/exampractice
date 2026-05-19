@@ -97,6 +97,39 @@ int\tmain(int argc, char **argv)
 \treturn (0);
 }`,
     },
+    {
+      id: 'punteros',
+      nombre: 'Con puntero y validación explícita',
+      descripcion: 'Recorre el string con un puntero y valida que search y replace sean de un solo carácter.',
+      recomendada: false,
+      codigo: `#include <unistd.h>
+
+int\tmain(int argc, char **argv)
+{
+\tchar\t*s;
+\tchar\tsearch;
+\tchar\treplace;
+
+\tif (argc != 4 || !argv[2][0] || argv[2][1] || !argv[3][0] || argv[3][1])
+\t{
+\t\twrite(1, "\\n", 1);
+\t\treturn (0);
+\t}
+\ts = argv[1];
+\tsearch = argv[2][0];
+\treplace = argv[3][0];
+\twhile (*s)
+\t{
+\t\tif (*s == search)
+\t\t\twrite(1, &replace, 1);
+\t\telse
+\t\t\twrite(1, s, 1);
+\t\ts++;
+\t}
+\twrite(1, "\\n", 1);
+\treturn (0);
+}`,
+    },
   ],
 
   tests: [

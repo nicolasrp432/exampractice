@@ -103,6 +103,46 @@ t_list\t*sort_list(t_list *lst, int (*cmp)(void *, void *))
 \treturn (lst);
 }`,
     },
+    {
+      id: 'dowhile',
+      nombre: 'Con do/while y puntero auxiliar',
+      descripcion: 'La misma burbuja, pero escrita con do/while para que la primera pasada se vea más natural.',
+      recomendada: false,
+      codigo: `typedef struct s_list
+{
+\tstruct s_list\t*next;
+\tvoid\t\t\t*data;
+}\tt_list;
+
+t_list\t*sort_list(t_list *lst, int (*cmp)(void *, void *))
+{
+\tt_list\t*ptr;
+\tvoid\t*tmp;
+\tint\t\tswapped;
+
+\tif (!lst)
+\t\treturn (NULL);
+\tswapped = 1;
+\twhile (swapped)
+\t{
+\t\tswapped = 0;
+\t\tptr = lst;
+\t\tdo
+\t\t{
+\t\t\tif (ptr->next && cmp(ptr->data, ptr->next->data) > 0)
+\t\t\t{
+\t\t\t\ttmp = ptr->data;
+\t\t\t\tptr->data = ptr->next->data;
+\t\t\t\tptr->next->data = tmp;
+\t\t\t\tswapped = 1;
+\t\t\t}
+\t\t\tptr = ptr->next;
+\t\t}
+\t\twhile (ptr && ptr->next);
+\t}
+\treturn (lst);
+}`,
+    },
   ],
 
   tests: [

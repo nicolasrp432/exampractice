@@ -89,6 +89,16 @@ void\tft_putstr(char *str)
       recomendada: false,
       codigo: `#include <unistd.h>
 
+static int\tft_strlen(char *str)
+{
+\tint\ti;
+
+\ti = 0;
+\twhile (str[i])
+\t\ti++;
+\treturn (i);
+}
+
 void\tft_putstr(char *str)
 {
 \twrite(1, str, ft_strlen(str));
