@@ -167,8 +167,49 @@ int\tmain(int argc, char **argv)
 \treturn (0);
 }`,
     },
-  ],
+    {
+      id: 'char_to_int',
+      nombre: 'Con conversión directa del char',
+      descripcion: 'Convierte el argumento con una resta ASCII y usa un solo bucle.',
+      recomendada: false,
+      codigo: `#include <unistd.h>
 
+static void	put_nbr(int n)
+{
+	char	c;
+
+	if (n >= 10)
+		put_nbr(n / 10);
+	c = '0' + n % 10;
+	write(1, &c, 1);
+}
+
+int	main(int argc, char **argv)
+{
+	int	n;
+	int	i;
+
+	if (argc != 2 || argv[1][1] || argv[1][0] < '1' || argv[1][0] > '9')
+	{
+		write(1, "\n", 1);
+		return (0);
+	}
+	n = argv[1][0] - '0';
+	i = 1;
+	while (i <= 9)
+	{
+		put_nbr(i);
+		write(1, " x ", 3);
+		put_nbr(n);
+		write(1, " = ", 3);
+		put_nbr(i * n);
+		write(1, "\n", 1);
+		i++;
+	}
+	return (0);
+}`,
+    },
+  ],
   tests: [
     {
       id: 'test_9',

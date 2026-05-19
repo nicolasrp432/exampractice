@@ -115,6 +115,39 @@ Cuando llega a un carácter no-dígito, para y devuelve el número.`,
 \treturn (result * sign);
 }`,
     },
+    {
+      id: 'puntero_y_estado',
+      nombre: 'Con puntero y función auxiliar para whitespace',
+      descripcion: 'Separa el salto de espacios y el parseo numérico en pasos fáciles de seguir.',
+      recomendada: false,
+      codigo: `static int\tis_ws(char c)
+{
+\treturn (c == ' ' || (c >= '\\t' && c <= '\\r'));
+}
+
+int\tft_atoi(const char *str)
+{
+\tint\tresult;
+\tint\tsign;
+
+\tresult = 0;
+\tsign = 1;
+\twhile (is_ws(*str))
+\t\tstr++;
+\tif (*str == '+' || *str == '-')
+\t{
+\t\tif (*str == '-')
+\t\t\tsign = -1;
+\t\tstr++;
+\t}
+\twhile (*str >= '0' && *str <= '9')
+\t{
+\t\tresult = result * 10 + (*str - '0');
+\t\tstr++;
+\t}
+\treturn (result * sign);
+}`,
+    },
   ],
 
   tests: [
