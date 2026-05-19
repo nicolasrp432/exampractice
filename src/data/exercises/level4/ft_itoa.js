@@ -1,7 +1,7 @@
 export default {
   id: 'ft_itoa',
   nombre: 'ft_itoa',
-  nivel: 3,
+  nivel: 4,
   dificultad: 'medio',
   tipoEntrega: 'funcion',
   archivosEsperados: ['ft_itoa.c'],

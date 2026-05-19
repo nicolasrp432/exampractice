@@ -44,7 +44,7 @@ import lcm             from './exercises/level3/lcm.js'
 import pgcd            from './exercises/level3/pgcd.js'
 import printHex        from './exercises/level3/print_hex.js'
 import ftAtoiBase      from './exercises/level3/ft_atoi_base.js'
-import ftItoa          from './exercises/level3/ft_itoa.js'
+import ftItoa          from './exercises/level4/ft_itoa.js'
 import strCapitalizer  from './exercises/level3/str_capitalizer.js'
 import rstrCapitalizer from './exercises/level3/rstr_capitalizer.js'
 
