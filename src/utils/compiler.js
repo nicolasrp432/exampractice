@@ -36,16 +36,39 @@ export function parseCompilerDiagnostics(compilerError, source = '') {
     .filter(Boolean)
 }
 
-export async function compileAndRun(code, args = []) {
+// status values from Wandbox: numeric exit code as string, or "signal N" for crashes.
+function parseStatus(rawStatus) {
+  if (rawStatus === undefined || rawStatus === null) {
+    return { exitCode: -1, signal: null }
+  }
+  const s = String(rawStatus).trim()
+  const sigMatch = s.match(/signal\s+(\d+)/i)
+  if (sigMatch) {
+    return { exitCode: -1, signal: Number(sigMatch[1]) }
+  }
+  const n = parseInt(s, 10)
+  return { exitCode: Number.isNaN(n) ? -1 : n, signal: null }
+}
+
+export async function compileAndRun(code, args = [], options = {}) {
+  const {
+    stdin = '',
+    compilerOptions = '',
+    compilerOptionRaw = '',
+    compiler = 'gcc-head',
+  } = options
+
   const res = await fetch(WANDBOX_URL, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
       code,
-      compiler: 'gcc-head',
-      options: '',
-      stdin: '',
+      compiler,
+      options: compilerOptions,
+      stdin,
       'runtime-option-raw': args.map(String).join('\n'),
+      'compiler-option-raw': compilerOptionRaw,
+      save: false,
     }),
   })
 
@@ -61,11 +84,15 @@ export async function compileAndRun(code, args = []) {
       ? data.compiler_error
       : null
 
+  const { exitCode, signal } = parseStatus(data.status)
+
   return {
     compileError,
     compileDiagnostics: parseCompilerDiagnostics(compileError, code),
+    compileMessage: data.compiler_message ?? '',
     stdout: data.program_output ?? '',
     stderr: data.program_error ?? '',
-    exitCode: data.status !== undefined ? parseInt(data.status, 10) : -1,
+    exitCode,
+    signal,
   }
 }

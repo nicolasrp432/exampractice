@@ -2,16 +2,19 @@ import { useState, useEffect, useRef, useCallback } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import Editor from '@monaco-editor/react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { ArrowLeft, Play, Trash2, Sparkles, ChevronDown, ChevronUp, Eye, Timer, CheckCircle2, XCircle, Circle, Trophy, RotateCcw, Save, X, Microscope } from 'lucide-react'
+import { ArrowLeft, Play, Trash2, ChevronDown, ChevronUp, Eye, Timer, CheckCircle2, XCircle, Circle, Trophy, RotateCcw, Save, X, Microscope, Terminal, Plus, AlertTriangle, Loader2 } from 'lucide-react'
 import clsx from 'clsx'
 import { getExercise } from '@/data/index'
 import { compileAndRun } from '@/utils/compiler'
 import { buildFullCode, testHarnesses } from '@/utils/testHarnesses'
 import { getDiff } from '@/utils/simulators/index'
 import { useProgressStore } from '@/store/progressStore'
+import { useSettingsStore } from '@/store/settingsStore'
 import { useUserVariants } from '@/hooks/useUserVariants'
+import { useLiveTrace } from '@/hooks/useLiveTrace'
 import LevelBadge from '@/components/layout/LevelBadge'
 import GdbStepper from '@/components/gdb/GdbStepper'
+import RunPanel from '@/components/practice/RunPanel'
 
 // ─── Default placeholder code ────────────────────────────────────────────────
 function getPlaceholder(exercise) {
@@ -474,7 +477,11 @@ function CelebrationOverlay({ show, onClose }) {
   )
 }
 
-function GdbTraceModal({ open, onClose, exercise }) {
+function GdbTraceModal({ open, onClose, exercise, traceState, args, onRerun }) {
+  const { status, error, result } = traceState
+  const steps = result?.steps ?? []
+  const truncated = steps.some((s) => s.title?.startsWith('⚠'))
+
   return (
     <AnimatePresence>
       {open && (
@@ -494,26 +501,72 @@ function GdbTraceModal({ open, onClose, exercise }) {
             onMouseDown={(event) => event.stopPropagation()}
           >
             <div className="flex items-center justify-between gap-3 border-b border-zinc-200 bg-zinc-50 px-5 py-4">
-              <div>
-                <p className="text-xs font-semibold uppercase tracking-wide text-zinc-500">Visualizador GDB</p>
-                <h2 className="text-base font-semibold text-zinc-800">
+              <div className="min-w-0">
+                <p className="text-xs font-semibold uppercase tracking-wide text-zinc-500">Ejecución paso a paso · traza real</p>
+                <h2 className="text-base font-semibold text-zinc-800 truncate">
                   {exercise?.nombre || 'Traza de ejecución'}
+                  <span className="ml-2 text-xs font-mono font-normal text-zinc-500">
+                    argv: [{args.map((a) => JSON.stringify(a)).join(', ')}]
+                  </span>
                 </h2>
               </div>
-              <button
-                onClick={onClose}
-                className="rounded-lg border border-zinc-200 bg-white px-3 py-1.5 text-sm text-zinc-600 transition-colors hover:bg-zinc-50"
-              >
-                Cerrar
-              </button>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={onRerun}
+                  disabled={status === 'running'}
+                  className={clsx(
+                    'rounded-lg border px-3 py-1.5 text-sm transition-colors',
+                    status === 'running'
+                      ? 'border-zinc-200 bg-zinc-50 text-zinc-400 cursor-not-allowed'
+                      : 'border-purple-200 bg-purple-50 text-purple-700 hover:bg-purple-100'
+                  )}
+                  title="Volver a ejecutar con los args actuales"
+                >
+                  {status === 'running' ? 'Trazando…' : 'Re-ejecutar'}
+                </button>
+                <button
+                  onClick={onClose}
+                  className="rounded-lg border border-zinc-200 bg-white px-3 py-1.5 text-sm text-zinc-600 transition-colors hover:bg-zinc-50"
+                >
+                  Cerrar
+                </button>
+              </div>
             </div>
 
             <div className="max-h-[82vh] overflow-y-auto bg-zinc-50 p-4">
-              {exercise?.gdbSteps?.length ? (
-                <GdbStepper steps={exercise.gdbSteps} title={`GDB — ${exercise.nombre}`} />
-              ) : (
+              {status === 'running' && (
+                <div className="rounded-xl border border-dashed border-purple-200 bg-white p-8 text-center text-purple-600">
+                  <Loader2 size={20} className="mx-auto mb-2 animate-spin" />
+                  Instrumentando y ejecutando en Wandbox…
+                </div>
+              )}
+              {status === 'error' && (
+                <div className="rounded-xl border border-amber-200 bg-amber-50 p-5 text-sm text-amber-800">
+                  <div className="flex items-center gap-2 font-semibold mb-1">
+                    <AlertTriangle size={14} />
+                    No se pudo generar la traza
+                  </div>
+                  <p>{error}</p>
+                  {result?.compileError && (
+                    <pre className="mt-3 max-h-40 overflow-auto rounded bg-white p-2 text-[11px] font-mono leading-snug text-zinc-700">
+                      {result.compileError}
+                    </pre>
+                  )}
+                </div>
+              )}
+              {status === 'done' && steps.length > 0 && (
+                <>
+                  {truncated && (
+                    <div className="mb-3 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-800">
+                      ⚠ La traza fue truncada a 8000 pasos. El programa siguió ejecutándose pero ya no estamos registrando.
+                    </div>
+                  )}
+                  <GdbStepper steps={steps} title={`Traza real — ${exercise?.nombre || 'programa'}`} />
+                </>
+              )}
+              {status === 'idle' && (
                 <div className="rounded-xl border border-dashed border-zinc-300 bg-white p-8 text-center text-zinc-400">
-                  No hay traza GDB disponible todavía para este ejercicio.
+                  Pulsa "Re-ejecutar" para generar la traza.
                 </div>
               )}
             </div>
@@ -546,10 +599,13 @@ export default function PracticeMode() {
   const exercise = getExercise(id)
   const { marcarEstado, registrarIntento, ejercicios } = useProgressStore()
   const progreso = ejercicios[id]
+  const strictMoulinette = useSettingsStore(s => s.strictMoulinette)
+  const toggleStrictMoulinette = useSettingsStore(s => s.toggleStrictMoulinette)
   const timer = useTimer()
   const { saveVariant } = useUserVariants(id)
 
   const STORAGE_KEY = `42prep-code-${id}`
+  const ARGS_KEY = `42prep-args-${id}`
 
   // Editor state
   const [code, setCode] = useState(() => localStorage.getItem(STORAGE_KEY) || getPlaceholder(exercise))
@@ -568,6 +624,26 @@ export default function PracticeMode() {
   const [compileUserCode, setCompileUserCode] = useState('')
   const [showSaveModal, setShowSaveModal] = useState(false)
   const [showGdbTrace, setShowGdbTrace] = useState(false)
+  const [activeRightTab, setActiveRightTab] = useState('tests') // tests | run
+
+  // Run-with-params state
+  const [args, setArgs] = useState(() => {
+    try {
+      const stored = JSON.parse(localStorage.getItem(ARGS_KEY) || 'null')
+      if (Array.isArray(stored)) return stored
+    } catch {}
+    return exercise?.tests?.[0]?.entrada?.map(String) ?? []
+  })
+  const [stdin, setStdin] = useState('')
+  const [runResult, setRunResult] = useState(null)
+  const [runStatus, setRunStatus] = useState('idle') // idle | running | done
+
+  useEffect(() => {
+    localStorage.setItem(ARGS_KEY, JSON.stringify(args))
+  }, [args, ARGS_KEY])
+
+  // Live trace hook (Python-Tutor-style stepper)
+  const liveTrace = useLiveTrace()
 
   // Track whether all passed using a ref to avoid stale closure in async handleCompile
   const allPassedRef = useRef(false)
@@ -620,7 +696,9 @@ export default function PracticeMode() {
 
       let result
       try {
-        result = await compileAndRun(fullCode, test.entrada)
+        result = await compileAndRun(fullCode, test.entrada, {
+          compilerOptionRaw: strictMoulinette ? '-Wall\n-Wextra\n-Werror' : '',
+        })
       } catch (err) {
         hadError = true
         passedAll = false
@@ -675,10 +753,35 @@ export default function PracticeMode() {
     setTests((exercise?.tests || []).map(t => ({ ...t, status: 'pending', output: null, diff: null })))
   }
 
-  const handleFormat = () => {
-    if (editorRef.current) {
-      editorRef.current.getAction('editor.action.formatDocument')?.run()
+  const handleRunWithArgs = async () => {
+    if (!exercise || runStatus === 'running') return
+    setRunStatus('running')
+    setRunResult(null)
+    const fullCode = buildFullCode(exercise.id, exercise.tipoEntrega, code)
+    try {
+      const result = await compileAndRun(fullCode, args, { stdin })
+      setRunResult(result)
+    } catch (err) {
+      setRunResult({
+        compileError: null,
+        stdout: '',
+        stderr: '',
+        exitCode: -1,
+        signal: null,
+        compileMessage: '',
+        networkError: err.message,
+      })
+    } finally {
+      setRunStatus('done')
     }
+  }
+
+  const handleTrace = async () => {
+    if (!exercise) return
+    setActiveRightTab('run')
+    setShowGdbTrace(true)
+    const fullCode = buildFullCode(exercise.id, exercise.tipoEntrega, code)
+    await liveTrace.run(fullCode, args, stdin)
   }
 
   const handleUseSolution = (solutionCode) => {
@@ -713,7 +816,14 @@ export default function PracticeMode() {
   return (
     <div className="flex flex-col h-screen bg-zinc-50 overflow-hidden">
       <CelebrationOverlay show={celebrate} onClose={() => setCelebrate(false)} />
-      <GdbTraceModal open={showGdbTrace} onClose={() => setShowGdbTrace(false)} exercise={exercise} />
+      <GdbTraceModal
+        open={showGdbTrace}
+        onClose={() => setShowGdbTrace(false)}
+        exercise={exercise}
+        traceState={liveTrace}
+        args={args}
+        onRerun={handleTrace}
+      />
 
       {showSaveModal && (
         <SaveVariantModal
@@ -840,14 +950,6 @@ export default function PracticeMode() {
             </button>
 
             <button
-              onClick={handleFormat}
-              className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm text-zinc-600 bg-zinc-100 hover:bg-zinc-200 transition-colors"
-            >
-              <Sparkles size={14} />
-              Formato ✨
-            </button>
-
-            <button
               onClick={() => setShowSaveModal(true)}
               className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm text-blue-600 bg-blue-50 hover:bg-blue-100 border border-blue-200 transition-colors"
               title="Guardar el código actual como variante"
@@ -857,38 +959,67 @@ export default function PracticeMode() {
             </button>
 
             <button
-              onClick={() => setShowGdbTrace(true)}
+              onClick={handleTrace}
               className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm text-purple-700 bg-purple-50 hover:bg-purple-100 border border-purple-200 transition-colors"
-              title="Ver ejecución paso a paso"
+              title="Compilar instrumentado y ver paso a paso con los args actuales"
             >
               <Microscope size={14} />
               Ver ejecución paso a paso
             </button>
 
-            <span className="ml-auto text-xs text-zinc-400 font-mono">Ctrl+Enter para compilar</span>
+            <label className="ml-auto flex items-center gap-1.5 text-xs text-zinc-500 cursor-pointer select-none" title="Compilar con -Wall -Wextra -Werror, como la Moulinette del 42">
+              <input
+                type="checkbox"
+                checked={strictMoulinette}
+                onChange={toggleStrictMoulinette}
+                className="accent-zinc-900"
+              />
+              Moulinette estricta
+            </label>
+            <span className="text-xs text-zinc-400 font-mono">Ctrl+Enter</span>
           </div>
         </div>
 
         {/* ── RIGHT: Results panel ── */}
         <div className="w-96 xl:w-[420px] shrink-0 flex flex-col bg-white overflow-hidden">
+          {/* Tabs */}
+          <div className="flex border-b border-zinc-200 bg-zinc-50 shrink-0">
+            <button
+              onClick={() => setActiveRightTab('tests')}
+              className={clsx(
+                'flex-1 flex items-center justify-center gap-1.5 px-3 py-2.5 text-xs font-semibold transition-colors',
+                activeRightTab === 'tests'
+                  ? 'bg-white text-zinc-900 border-b-2 border-zinc-900'
+                  : 'text-zinc-500 hover:text-zinc-700'
+              )}
+            >
+              <Trophy size={13} />
+              Tests Moulinette
+              <span className={clsx(
+                'rounded-full px-1.5 py-0.5 text-[10px] font-mono',
+                allPassed ? 'bg-green-100 text-green-700' : 'bg-zinc-200 text-zinc-600'
+              )}>
+                {passedCount}/{tests.length}
+              </span>
+            </button>
+            <button
+              onClick={() => setActiveRightTab('run')}
+              className={clsx(
+                'flex-1 flex items-center justify-center gap-1.5 px-3 py-2.5 text-xs font-semibold transition-colors',
+                activeRightTab === 'run'
+                  ? 'bg-white text-zinc-900 border-b-2 border-zinc-900'
+                  : 'text-zinc-500 hover:text-zinc-700'
+              )}
+            >
+              <Terminal size={13} />
+              Mis parámetros
+            </button>
+          </div>
+
           <div className="flex-1 overflow-y-auto p-4 space-y-4">
 
-            {/* Tests header */}
-            <div className="flex items-center justify-between">
-              <h2 className="font-semibold text-zinc-800 flex items-center gap-2">
-                <Trophy size={16} className="text-amber-500" />
-                Tests de la Moulinette
-              </h2>
-              <div className="flex items-center gap-2">
-                <span className={clsx(
-                  'text-sm font-bold tabular-nums',
-                  allPassed ? 'text-green-600' : 'text-zinc-500'
-                )}>
-                  {passedCount}/{tests.length}
-                </span>
-              </div>
-            </div>
-
+          {activeRightTab === 'tests' && (
+            <>
             {/* Progress bar */}
             <div className="h-2 bg-zinc-100 rounded-full overflow-hidden">
               <motion.div
@@ -927,7 +1058,27 @@ export default function PracticeMode() {
                 <SolutionReveal exercise={exercise} onUse={handleUseSolution} />
               </motion.div>
             )}
+            </>
+          )}
 
+          {activeRightTab === 'run' && (
+            <RunPanel
+              args={args}
+              setArgs={setArgs}
+              stdin={stdin}
+              setStdin={setStdin}
+              onRun={handleRunWithArgs}
+              onTrace={handleTrace}
+              running={runStatus === 'running'}
+              tracing={liveTrace.status === 'running'}
+              result={runResult?.networkError ? null : runResult}
+              traceError={runResult?.networkError ? `Error de red: ${runResult.networkError}` : null}
+              tests={exercise.tests}
+            />
+          )}
+
+          {activeRightTab === 'tests' && (
+            <>
             {/* Session stats */}
             <div className="rounded-xl border border-zinc-100 bg-zinc-50 p-4">
               <h3 className="text-xs font-semibold text-zinc-500 uppercase tracking-wide mb-3">Estadísticas de la sesión</h3>
@@ -946,6 +1097,8 @@ export default function PracticeMode() {
                 </div>
               </div>
             </div>
+            </>
+          )}
           </div>
         </div>
       </div>
