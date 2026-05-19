@@ -108,6 +108,81 @@ int\tmain(int argc, char **argv)
 \ti = 0;
 \twhile (argv[1][i] >= '0' && argv[1][i] <= '9')
 \t\tn = n * 10 + (argv[1][i++] - '0');
+\tif (argv[1][i] != '\\0' || n == 0)
+\t{
+\t\twrite(1, "0\\n", 2);
+\t\treturn (0);
+\t}
+\tsum = 0;
+\ti = 2;
+\twhile (i <= n)
+\t{
+\t\tif (is_prime(i))
+\t\t\tsum += i;
+\t\ti++;
+\t}
+\tput_nbr(sum);
+\twrite(1, "\\n", 1);
+\treturn (0);
+}`,
+    },
+    {
+      id: 'impar_optimizado',
+      nombre: 'Con salto de pares',
+      descripcion: 'Comprueba el 2 aparte y luego prueba solo divisores impares. Más simple para ver el patrón.',
+      recomendada: false,
+      codigo: `#include <unistd.h>
+
+static int\tis_prime(int n)
+{
+\tint\td;
+
+\tif (n < 2)
+\t\treturn (0);
+\tif (n == 2)
+\t\treturn (1);
+\tif (n % 2 == 0)
+\t\treturn (0);
+\td = 3;
+\twhile (d * d <= n)
+\t{
+\t\tif (n % d == 0)
+\t\t\treturn (0);
+\t\td += 2;
+\t}
+\treturn (1);
+}
+
+static void\tput_nbr(unsigned long n)
+{
+\tchar\tc;
+
+\tif (n >= 10)
+\t\tput_nbr(n / 10);
+\tc = '0' + n % 10;
+\twrite(1, &c, 1);
+}
+
+int\tmain(int argc, char **argv)
+{
+\tunsigned long\tsum;
+\tint\t\t\tn;
+\tint\t\t\ti;
+
+\tif (argc != 2)
+\t{
+\t\twrite(1, "0\\n", 2);
+\t\treturn (0);
+\t}
+\tn = 0;
+\ti = 0;
+\twhile (argv[1][i] >= '0' && argv[1][i] <= '9')
+\t\tn = n * 10 + (argv[1][i++] - '0');
+\tif (argv[1][i] != '\\0' || n == 0)
+\t{
+\t\twrite(1, "0\\n", 2);
+\t\treturn (0);
+\t}
 \tsum = 0;
 \ti = 2;
 \twhile (i <= n)

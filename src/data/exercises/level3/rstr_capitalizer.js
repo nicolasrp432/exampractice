@@ -109,6 +109,60 @@ int\tmain(int argc, char **argv)
 \treturn (0);
 }`,
     },
+    {
+      id: 'por_palabras',
+      nombre: 'Por palabras completas',
+      descripcion: 'Busca el final de cada palabra y solo capitaliza su último carácter.',
+      recomendada: false,
+      codigo: `#include <unistd.h>
+
+int\tmain(int argc, char **argv)
+{
+\tint\ti;
+\tint\tj;
+\tint\tk;
+\tchar\tc;
+
+\tif (argc == 1)
+\t{
+\t\twrite(1, "\\n", 1);
+\t\treturn (0);
+\t}
+\ti = 1;
+\twhile (i < argc)
+\t{
+\t\tj = 0;
+\t\twhile (argv[i][j])
+\t\t{
+\t\t\tif (argv[i][j] == ' ')
+\t\t\t{
+\t\t\t\twrite(1, " ", 1);
+\t\t\t\tj++;
+\t\t\t\tcontinue ;
+\t\t\t}
+\t\t\tk = j;
+\t\t\twhile (argv[i][k] && argv[i][k] != ' ')
+\t\t\t\tk++;
+\t\t\twhile (j < k)
+\t\t\t{
+\t\t\t\tc = argv[i][j];
+\t\t\t\tif (j == k - 1)
+\t\t\t\t{
+\t\t\t\t\tif (c >= 'a' && c <= 'z')
+\t\t\t\t\t\tc -= 32;
+\t\t\t\t}
+\t\t\t\telse if (c >= 'A' && c <= 'Z')
+\t\t\t\t\tc += 32;
+\t\t\t\twrite(1, &c, 1);
+\t\t\t\tj++;
+\t\t\t}
+\t\t}
+\t\twrite(1, "\\n", 1);
+\t\ti++;
+\t}
+\treturn (0);
+}`,
+    },
   ],
 
   tests: [

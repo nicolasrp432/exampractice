@@ -147,6 +147,90 @@ char\t**ft_split(char *str, char c)
 \treturn (result);
 }`,
     },
+    {
+      id: 'punteros',
+      nombre: 'Con punteros y helpers pequeños',
+      descripcion: 'Usa punteros para contar y copiar palabras con una estructura un poco más lineal.',
+      recomendada: false,
+      codigo: `#include <stdlib.h>
+
+static int\tcount_words(char *str, char c)
+{
+\tint\tcount;
+\tint\tin_word;
+
+\tcount = 0;
+\tin_word = 0;
+\twhile (*str)
+\t{
+\t\tif (*str == c)
+\t\t\tin_word = 0;
+\t\telse if (!in_word)
+\t\t{
+\t\t\tcount++;
+\t\t\tin_word = 1;
+\t\t}
+\t\tstr++;
+\t}
+\treturn (count);
+}
+
+static char\t*copy_word(char *str, char c, int *index)
+{
+\tchar\t*word;
+\tint\t\tlen;
+\tint\t\tj;
+
+\twhile (str[*index] == c)
+\t\t(*index)++;
+\tlen = 0;
+\twhile (str[*index + len] && str[*index + len] != c)
+\t\tlen++;
+\tword = (char *)malloc(len + 1);
+\tif (!word)
+\t\treturn (NULL);
+\tj = 0;
+\twhile (j < len)
+\t{
+\t\tword[j] = str[*index + j];
+\t\tj++;
+\t}
+\tword[j] = '\\0';
+\t*index += len;
+\treturn (word);
+}
+
+char\t**ft_split(char *str, char c)
+{
+\tchar\t**result;
+\tint\t\twords;
+\tint\t\tindex;
+\tint\t\tj;
+
+\tif (!str)
+\t\treturn (NULL);
+\twords = count_words(str, c);
+\tresult = (char **)malloc((words + 1) * sizeof(char *));
+\tif (!result)
+\t\treturn (NULL);
+\tindex = 0;
+\tj = 0;
+\twhile (j < words)
+\t{
+\t\tresult[j] = copy_word(str, c, &index);
+\t\tif (!result[j])
+\t\t{
+\t\t\twhile (j > 0)
+\t\t\t\tfree(result[--j]);
+\t\t\tfree(result);
+\t\t\treturn (NULL);
+\t\t}
+\t\tj++;
+\t}
+\tresult[j] = NULL;
+\treturn (result);
+}`,
+    },
   ],
 
   tests: [

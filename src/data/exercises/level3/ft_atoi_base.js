@@ -120,6 +120,61 @@ int\tft_atoi_base(const char *str, const char *base)
 \treturn (result * sign);
 }`,
     },
+    {
+      id: 'punteros',
+      nombre: 'Con búsqueda por punteros',
+      descripcion: 'Recorre la base con un puntero y acumula el resultado sin usar helpers extra.',
+      recomendada: false,
+      codigo: `static int\tft_strlen(const char *s)
+{
+\tint\ti;
+
+\ti = 0;
+\twhile (s[i])
+\t\ti++;
+\treturn (i);
+}
+
+static int\tbase_index(char c, const char *base)
+{
+\tint\ti;
+
+\ti = 0;
+\twhile (base[i])
+\t{
+\t\tif (base[i] == c)
+\t\t\treturn (i);
+\t\ti++;
+\t}
+\treturn (-1);
+}
+
+int\tft_atoi_base(const char *str, const char *base)
+{
+\tint\tbase_len;
+\tint\tsign;
+\tint\tresult;
+\tint\tdigit;
+
+\tbase_len = ft_strlen(base);
+\tsign = 1;
+\tresult = 0;
+\twhile (*str == ' ' || (*str >= '\\t' && *str <= '\\r'))
+\t\tstr++;
+\tif (*str == '+' || *str == '-')
+\t{
+\t\tif (*str == '-')
+\t\t\tsign = -1;
+\t\tstr++;
+\t}
+\twhile ((digit = base_index(*str, base)) >= 0)
+\t{
+\t\tresult = result * base_len + digit;
+\t\tstr++;
+\t}
+\treturn (result * sign);
+}`,
+    },
   ],
 
   tests: [

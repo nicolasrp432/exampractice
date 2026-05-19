@@ -136,6 +136,81 @@ int\tmain(int argc, char **argv)
 \treturn (0);
 }`,
     },
+    {
+      id: 'impares',
+      nombre: 'Con 2 aparte y luego divisores impares',
+      descripcion: 'Hace el caso par explícito y después prueba solo impares, que es más fácil de leer.',
+      recomendada: false,
+      codigo: `#include <unistd.h>
+
+static void\tft_putnbr(unsigned long long n)
+{
+\tchar\tc;
+
+\tif (n >= 10)
+\t\tft_putnbr(n / 10);
+\tc = n % 10 + '0';
+\twrite(1, &c, 1);
+}
+
+int\tmain(int argc, char **argv)
+{
+\tunsigned long long\tn;
+\tunsigned long long\td;
+\tint\t\t\t\ti;
+\tint\t\t\t\tfirst;
+
+\tif (argc != 2)
+\t{
+\t\twrite(1, "\\n", 1);
+\t\treturn (0);
+\t}
+\tn = 0;
+\ti = 0;
+\twhile (argv[1][i] >= '0' && argv[1][i] <= '9')
+\t\tn = n * 10 + (argv[1][i++] - '0');
+\tif (argv[1][i] != '\\0' || n == 0)
+\t{
+\t\twrite(1, "\\n", 1);
+\t\treturn (0);
+\t}
+\tif (n == 1)
+\t{
+\t\twrite(1, "1\\n", 2);
+\t\treturn (0);
+\t}
+\tfirst = 1;
+\twhile (n % 2 == 0)
+\t{
+\t\tif (!first)
+\t\t\twrite(1, "*", 1);
+\t\tft_putnbr(2);
+\t\tn /= 2;
+\t\tfirst = 0;
+\t}
+\td = 3;
+\twhile (d * d <= n)
+\t{
+\t\twhile (n % d == 0)
+\t\t{
+\t\t\tif (!first)
+\t\t\t\twrite(1, "*", 1);
+\t\t\tft_putnbr(d);
+\t\t\tn /= d;
+\t\t\tfirst = 0;
+\t\t}
+\t\td += 2;
+\t}
+\tif (n > 1)
+\t{
+\t\tif (!first)
+\t\t\twrite(1, "*", 1);
+\t\tft_putnbr(n);
+\t}
+\twrite(1, "\\n", 1);
+\treturn (0);
+}`,
+    },
   ],
 
   tests: [

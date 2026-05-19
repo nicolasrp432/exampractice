@@ -112,6 +112,53 @@ int\tmain(int argc, char **argv)
 \treturn (0);
 }`,
     },
+    {
+      id: 'previo',
+      nombre: 'Con revisión del carácter anterior',
+      descripcion: 'Detecta el inicio de palabra mirando el carácter previo en vez de usar un flag.',
+      recomendada: false,
+      codigo: `#include <unistd.h>
+
+int\tmain(int argc, char **argv)
+{
+\tint\ti;
+\tint\tj;
+\tchar\tc;
+
+\tif (argc == 1)
+\t{
+\t\twrite(1, "\\n", 1);
+\t\treturn (0);
+\t}
+\ti = 1;
+\twhile (i < argc)
+\t{
+\t\tj = 0;
+\t\twhile (argv[i][j])
+\t\t{
+\t\t\tc = argv[i][j];
+\t\t\tif (c == ' ')
+\t\t\t\twrite(1, &c, 1);
+\t\t\telse if (j == 0 || argv[i][j - 1] == ' ')
+\t\t\t{
+\t\t\t\tif (c >= 'a' && c <= 'z')
+\t\t\t\t\tc -= 32;
+\t\t\t\twrite(1, &c, 1);
+\t\t\t}
+\t\t\telse
+\t\t\t{
+\t\t\t\tif (c >= 'A' && c <= 'Z')
+\t\t\t\t\tc += 32;
+\t\t\t\twrite(1, &c, 1);
+\t\t\t}
+\t\t\tj++;
+\t\t}
+\t\twrite(1, "\\n", 1);
+\t\ti++;
+\t}
+\treturn (0);
+}`,
+    },
   ],
 
   tests: [

@@ -144,6 +144,99 @@ int\tmain(int argc, char **argv)
 \treturn (0);
 }`,
     },
+    {
+      id: 'switch',
+      nombre: 'Con switch sobre el operador',
+      descripcion: 'Agrupa las operaciones en un switch para que la lógica del examen sea más fácil de seguir.',
+      recomendada: false,
+      codigo: `#include <unistd.h>
+
+static int\tft_atoi(char *str)
+{
+\tint\tresult;
+\tint\tsign;
+
+\tresult = 0;
+\tsign = 1;
+\twhile (*str == ' ' || (*str >= '\\t' && *str <= '\\r'))
+\t\tstr++;
+\tif (*str == '-' || *str == '+')
+\t{
+\t\tif (*str == '-')
+\t\t\tsign = -1;
+\t\tstr++;
+\t}
+\twhile (*str >= '0' && *str <= '9')
+\t\tresult = result * 10 + (*str++ - '0');
+\treturn (result * sign);
+}
+
+static void\tft_putnbr(int n)
+{
+\tchar\tc;
+
+\tif (n < 0)
+\t{
+\t\twrite(1, "-", 1);
+\t\tn = -n;
+\t}
+\tif (n >= 10)
+\t\tft_putnbr(n / 10);
+\tc = '0' + (n % 10);
+\twrite(1, &c, 1);
+}
+
+int\tmain(int argc, char **argv)
+{
+\tint\ta;
+\tint\tb;
+\tchar\top;
+\tint\tresult;
+
+\tif (argc != 4)
+\t{
+\t\twrite(1, "Error\\n", 6);
+\t\treturn (0);
+\t}
+\ta = ft_atoi(argv[1]);
+\top = argv[2][0];
+\tb = ft_atoi(argv[3]);
+\tswitch (op)
+\t{
+\t\tcase '+':
+\t\t\tresult = a + b;
+\t\t\tbreak ;
+\t\tcase '-':
+\t\t\tresult = a - b;
+\t\t\tbreak ;
+\t\tcase '*':
+\t\t\tresult = a * b;
+\t\t\tbreak ;
+\t\tcase '/':
+\t\t\tif (b == 0)
+\t\t\t{
+\t\t\t\twrite(1, "Error\\n", 6);
+\t\t\t\treturn (0);
+\t\t\t}
+\t\t\tresult = a / b;
+\t\t\tbreak ;
+\t\tcase '%':
+\t\t\tif (b == 0)
+\t\t\t{
+\t\t\t\twrite(1, "Error\\n", 6);
+\t\t\t\treturn (0);
+\t\t\t}
+\t\t\tresult = a % b;
+\t\t\tbreak ;
+\t\tdefault:
+\t\t\twrite(1, "Error\\n", 6);
+\t\t\treturn (0);
+\t}
+\tft_putnbr(result);
+\twrite(1, "\\n", 1);
+\treturn (0);
+}`,
+    },
   ],
 
   tests: [

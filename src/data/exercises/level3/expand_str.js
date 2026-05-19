@@ -96,6 +96,42 @@ int\tmain(int argc, char **argv)
 \treturn (0);
 }`,
     },
+    {
+      id: 'pendiente',
+      nombre: 'Con bandera pending_spaces',
+      descripcion: 'Usa una bandera más descriptiva: hay espacios pendientes antes del siguiente carácter.',
+      recomendada: false,
+      codigo: `#include <unistd.h>
+
+int\tmain(int argc, char **argv)
+{
+\tint\ti;
+\tint\tpending_spaces;
+
+\tif (argc == 2)
+\t{
+\t\ti = 0;
+\t\tpending_spaces = 0;
+\t\twhile (argv[1][i])
+\t\t{
+\t\t\tif (argv[1][i] == ' ')
+\t\t\t\tpending_spaces = 1;
+\t\t\telse
+\t\t\t{
+\t\t\t\tif (pending_spaces)
+\t\t\t\t{
+\t\t\t\t\twrite(1, "   ", 3);
+\t\t\t\t\tpending_spaces = 0;
+\t\t\t\t}
+\t\t\t\twrite(1, &argv[1][i], 1);
+\t\t\t}
+\t\t\ti++;
+\t\t}
+\t}
+\twrite(1, "\\n", 1);
+\treturn (0);
+}`,
+    },
   ],
 
   tests: [

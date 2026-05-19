@@ -87,6 +87,31 @@ int\tmain(int argc, char **argv)
 \treturn (0);
 }`,
     },
+    {
+      id: 'puntero_final',
+      nombre: 'Con puntero al final',
+      descripcion: 'Encuentra el final del string y retrocede un carácter a la vez.',
+      recomendada: false,
+      codigo: `#include <unistd.h>
+
+int\tmain(int argc, char **argv)
+{
+\tchar\t*end;
+
+\tif (argc != 2)
+\t{
+\t\twrite(1, "\\n", 1);
+\t\treturn (0);
+\t}
+\tend = argv[1];
+\twhile (*end)
+\t\tend++;
+\twhile (end != argv[1])
+\t\twrite(1, --end, 1);
+\twrite(1, "\\n", 1);
+\treturn (0);
+}`,
+    },
   ],
 
   tests: [

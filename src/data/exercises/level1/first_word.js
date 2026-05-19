@@ -93,6 +93,31 @@ int\tmain(int argc, char **argv)
 \treturn (0);
 }`,
     },
+    {
+      id: 'punteros',
+      nombre: 'Con punteros y avance lineal',
+      descripcion: 'Usa un puntero para saltar separadores y escribir la primera palabra sin índices.',
+      recomendada: false,
+      codigo: `#include <unistd.h>
+
+int\tmain(int argc, char **argv)
+{
+\tchar\t*s;
+
+\tif (argc != 2)
+\t{
+\t\twrite(1, "\\n", 1);
+\t\treturn (0);
+\t}
+\ts = argv[1];
+\twhile (*s == ' ' || *s == '\\t')
+\t\ts++;
+\twhile (*s && *s != ' ' && *s != '\\t')
+\t\twrite(1, s++, 1);
+\twrite(1, "\\n", 1);
+\treturn (0);
+}`,
+    },
   ],
 
   tests: [
