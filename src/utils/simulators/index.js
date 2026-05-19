@@ -490,6 +490,69 @@ export const simulators = {
     const nums = args.map(Number).sort((a, b) => a - b)
     return nums.map(String).join('\n') + '\n'
   },
+
+  max: (args) => {
+    if (args.length === 0) return '0\n'
+    const nums = args.map(Number)
+    if (nums.some(Number.isNaN)) return '0\n'
+    return String(Math.max(...nums)) + '\n'
+  },
+
+  snake_to_camel: (args) => {
+    if (args.length !== 1) return '\n'
+    const str = args[0]
+    let out = ''
+    let upper = false
+    for (const c of str) {
+      if (c === '_') upper = true
+      else if (upper) {
+        out += c.toUpperCase()
+        upper = false
+      } else out += c
+    }
+    return out + '\n'
+  },
+
+  ft_itoa: (args) => {
+    if (args.length !== 1) return '0\n'
+    const n = Number(args[0])
+    if (!Number.isFinite(n)) return '0\n'
+    return `${Math.trunc(n)}\n`
+  },
+
+  rev_wstr: (args) => {
+    if (args.length !== 1) return '\n'
+    const words = args[0].trim().split(/\s+/).filter(Boolean)
+    return words.reverse().join(' ') + '\n'
+  },
+
+  rostring: (args) => {
+    if (args.length < 1) return '\n'
+    const words = args[0].trim().split(/\s+/).filter(Boolean)
+    if (words.length <= 1) return (words[0] ?? '') + '\n'
+    return [...words.slice(1), words[0]].join(' ') + '\n'
+  },
+
+  sort_int_tab: (args) => {
+    if (args.length === 0) return '\n'
+    return args.map(Number).sort((a, b) => a - b).map(String).join('\n') + '\n'
+  },
+
+  ft_list_foreach: (args) => {
+    if (args.length === 0) return '\n'
+    return args.map((n) => String(Number(n) + 1)).join('\n') + '\n'
+  },
+
+  ft_list_remove_if: (args) => {
+    if (args.length < 1) return '\n'
+    const [ref, ...rest] = args
+    return rest.filter((n) => Number(n) !== Number(ref)).map(String).join('\n') + (rest.filter((n) => Number(n) !== Number(ref)).length ? '\n' : '\n')
+  },
+
+  flood_fill: (args) => {
+    const output = '11111111\n10001001\n10010001\n10110001\n11100001\n\nFFFFFFFF\nF000F00F\nF00F000F\nF0FF000F\nFFF0000F\n'
+    return output
+  },
 }
 
 // ─── getDiff: primer byte diferente ──────────────────────────────────────────

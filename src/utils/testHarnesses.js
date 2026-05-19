@@ -407,6 +407,270 @@ int main(int argc, char **argv)
 \treturn (0);
 }`,
   },
+
+  max: {
+    header: '',
+    main: `#include <stdio.h>
+#include <stdlib.h>
+int main(int argc, char **argv)
+{
+\tint tab[1024];
+\tunsigned int len;
+\tint i;
+
+\tif (argc < 2) { printf("0\\n"); return (0); }
+\tlen = 0;
+\ti = 1;
+\twhile (i < argc)
+\t\ttab[len++] = atoi(argv[i++]);
+\tprintf("%d\\n", max(tab, len));
+\treturn (0);
+}`,
+  },
+
+  ft_itoa: {
+    header: '',
+    main: `#include <stdio.h>
+#include <stdlib.h>
+int main(int argc, char **argv)
+{
+\tchar *s;
+\tint n;
+
+\tn = (argc < 2) ? 0 : atoi(argv[1]);
+\ts = ft_itoa(n);
+\tif (!s) { printf("(null)\\n"); return (0); }
+\tprintf("%s\\n", s);
+\tfree(s);
+\treturn (0);
+}`,
+  },
+
+  sort_int_tab: {
+    header: '',
+    main: `#include <stdio.h>
+#include <stdlib.h>
+int main(int argc, char **argv)
+{
+\tint tab[1024];
+\tunsigned int size;
+\tint i;
+
+\tsize = 0;
+\ti = 1;
+\twhile (i < argc)
+\t\ttab[size++] = atoi(argv[i++]);
+\tsort_int_tab(tab, size);
+\tif (size == 0) { printf("\\n"); return (0); }
+\ti = 0;
+\twhile (i < (int)size)
+\t\tprintf("%d\\n", tab[i++]);
+\treturn (0);
+}`,
+  },
+
+  ft_list_foreach: {
+    header: `typedef struct s_list
+{
+\tstruct s_list\t*next;
+\tvoid\t\t\t*data;
+}\tt_list;\n\n`,
+    main: `#include <stdio.h>
+#include <stdlib.h>
+
+static void inc_int(void *data)
+{
+\t(*(int *)data)++;
+}
+
+int main(int argc, char **argv)
+{
+\tt_list *head;
+\tt_list *tail;
+\tt_list *node;
+\tint *value;
+\tint i;
+
+\thead = NULL;
+\ttail = NULL;
+\ti = 1;
+\twhile (i < argc)
+\t{
+\t\tnode = malloc(sizeof(t_list));
+\t\tvalue = malloc(sizeof(int));
+\t\t*value = atoi(argv[i++]);
+\t\tnode->data = value;
+\t\tnode->next = NULL;
+\t\tif (tail)
+\t\t\ttail->next = node;
+\t\telse
+\t\t\thead = node;
+\t\ttail = node;
+\t}
+\tif (!head)
+\t{
+\t\tprintf("\\n");
+\t\treturn (0);
+\t}
+\tft_list_foreach(head, inc_int);
+\twhile (head)
+\t{
+\t\tnode = head;
+\t\tprintf("%d\\n", *(int *)node->data);
+\t\thead = head->next;
+\t\tfree(node->data);
+\t\tfree(node);
+\t}
+\treturn (0);
+}`,
+  },
+
+  ft_list_remove_if: {
+    header: `typedef struct s_list
+{
+\tstruct s_list\t*next;
+\tvoid\t\t\t*data;
+}\tt_list;\n\n`,
+    main: `#include <stdio.h>
+#include <stdlib.h>
+
+static int cmp_int(void *a, void *b)
+{
+\treturn (*(int *)a - *(int *)b);
+}
+
+static void push_back(t_list **head, t_list **tail, int value)
+{
+\tt_list *node;
+\tint *data;
+
+\tnode = malloc(sizeof(t_list));
+\tdata = malloc(sizeof(int));
+\t*data = value;
+\tnode->data = data;
+\tnode->next = NULL;
+\tif (*tail)
+\t\t(*tail)->next = node;
+\telse
+\t\t*head = node;
+\t*tail = node;
+}
+
+int main(int argc, char **argv)
+{
+\tt_list *head;
+\tt_list *tail;
+\tt_list *cur;
+\tint ref;
+\tint i;
+
+\tif (argc < 2) return (0);
+\thead = NULL;
+\ttail = NULL;
+\tref = atoi(argv[1]);
+\ti = 2;
+\twhile (i < argc)
+\t\tpush_back(&head, &tail, atoi(argv[i++]));
+\tft_list_remove_if(&head, &ref, cmp_int);
+\tif (!head)
+\t{
+\t\tprintf("\\n");
+\t\treturn (0);
+\t}
+\tcur = head;
+\twhile (cur)
+\t{
+\t\tprintf("%d\\n", *(int *)cur->data);
+\t\tcur = cur->next;
+\t}
+\twhile (head)
+\t{
+\t\tcur = head;
+\t\thead = head->next;
+\t\tfree(cur->data);
+\t\tfree(cur);
+\t}
+\treturn (0);
+}`,
+  },
+
+  flood_fill: {
+    header: `typedef struct  s_point
+{
+\tint x;
+\tint y;
+}\tt_point;\n\n`,
+    main: `#include <stdio.h>
+#include <stdlib.h>
+
+static char **make_area(t_point size, char **zone)
+{
+\tchar **new;
+\tint i;
+\tint j;
+
+\tnew = malloc(sizeof(char *) * size.y);
+\ti = 0;
+\twhile (i < size.y)
+\t{
+\t\tnew[i] = malloc(size.x + 1);
+\t\tj = 0;
+\t\twhile (j < size.x)
+\t\t{
+\t\t\tnew[i][j] = zone[i][j];
+\t\t\tj++;
+\t\t}
+\t\tnew[i][size.x] = '\\0';
+\t\ti++;
+\t}
+\treturn (new);
+}
+
+static void print_area(t_point size, char **area)
+{
+\tint i;
+
+\ti = 0;
+\twhile (i < size.y)
+\t{
+\t\tprintf("%s\\n", area[i]);
+\t\ti++;
+\t}
+}
+
+static void free_area(t_point size, char **area)
+{
+\tint i;
+
+\ti = 0;
+\twhile (i < size.y)
+\t\tfree(area[i++]);
+\tfree(area);
+}
+
+int main(int argc, char **argv)
+{
+\tt_point size = {8, 5};
+\tt_point begin = {7, 4};
+\tchar *zone[] = {
+\t\t"11111111",
+\t\t"10001001",
+\t\t"10010001",
+\t\t"10110001",
+\t\t"11100001",
+\t};
+\tchar **area;
+\t(void)argc;
+\t(void)argv;
+\tarea = make_area(size, zone);
+\tprint_area(size, area);
+\tprintf("\\n");
+\tflood_fill(area, size, begin);
+\tprint_area(size, area);
+\tfree_area(size, area);
+\treturn (0);
+}`,
+  },
 }
 
 // Build the full C code to send to Piston.

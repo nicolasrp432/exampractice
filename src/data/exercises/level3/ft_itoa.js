@@ -1,0 +1,207 @@
+export default {
+  id: 'ft_itoa',
+  nombre: 'ft_itoa',
+  nivel: 3,
+  dificultad: 'medio',
+  tipoEntrega: 'funcion',
+  archivosEsperados: ['ft_itoa.c'],
+  funcionesPermitidas: ['malloc'],
+
+  subject: `Assignment name  : ft_itoa
+Expected files   : ft_itoa.c
+Allowed functions: malloc
+--------------------------------------------------------------------------------
+
+Write a function that takes an int and converts it to a null-terminated string.
+The function returns the result in a char array that you must allocate.
+
+Your function must be declared as follows:
+
+char\t*ft_itoa(int nbr);`,
+
+  descripcion: 'Función que convierte un int en una cadena terminada en \\0, reservando memoria con malloc.',
+
+  palacio: {
+    habitacion: 'dormitorio',
+    mueble: 'caja fuerte',
+    personaje: 'El Traductor Decimal',
+    emoji: '🔢',
+    historia: `El Traductor Decimal mete un número en una caja fuerte y lo saca como texto.
+Primero cuenta cuántos dígitos hará falta reservar.
+Luego rellena la cadena desde el final hacia el inicio.
+Si el número es negativo, añade el signo menos.
+Si vale 0, debe devolver "0".`,
+    anclas: [
+      'contar dígitos antes de malloc',
+      'reservar espacio para el \\0',
+      'llenar desde el final',
+      '0 → "0"',
+      'INT_MIN necesita cuidado especial',
+    ],
+  },
+
+  herramientas: ['strings', 'malloc'],
+
+  formulaClave: {
+    descripcion: 'Calcular longitud, reservar, y escribir desde el final',
+    formula: 'len = digits(n) + sign; result = malloc(len + 1); result[len] = "\\0"; fill from back',
+    ejemplo: {
+      entrada: '-13268',
+      calculo: 'len=6 ("-13268") → escribir 8,6,2,3,1,-',
+      resultado: '"-13268"',
+    },
+  },
+
+  versiones: [
+    {
+      id: 'clasica',
+      nombre: 'Con longitud previa y relleno inverso',
+      descripcion: 'La versión más estable: calcula el tamaño y rellena desde atrás.',
+      recomendada: true,
+      codigo: `#include <stdlib.h>
+
+static int\tlen_nbr(long n)
+{
+\tint len;
+
+\tlen = (n <= 0);
+\twhile (n != 0)
+\t{
+\t\tlen++;
+\t\tn /= 10;
+\t}
+\treturn (len);
+}
+
+char\t*ft_itoa(int nbr)
+{
+\tlong\tn;
+\tchar\t*res;
+\tint\t\tlen;
+
+\tn = nbr;
+\tlen = len_nbr(n);
+\tres = malloc(len + 1);
+\tif (!res)
+\t\treturn (NULL);
+\tres[len] = '\\0';
+\tif (n == 0)
+\t\tres[0] = '0';
+\tif (n < 0)
+\t\tn = -n;
+\twhile (n != 0)
+\t{
+\t\tres[--len] = (n % 10) + '0';
+\t\tn /= 10;
+\t}
+\tif (nbr < 0)
+\t\tres[0] = '-';
+\treturn (res);
+}`,
+    },
+    {
+      id: 'compacta',
+      nombre: 'Con división sucesiva y signo aparte',
+      descripcion: 'Más breve, pero con el mismo patrón de longitud + relleno posterior.',
+      recomendada: false,
+      codigo: `#include <stdlib.h>
+
+char\t*ft_itoa(int nbr)
+{
+\tlong\tn;
+\tint\t\tlen;
+\tchar\t*res;
+
+\tn = nbr;
+\tlen = 1;
+\tif (n <= 0)
+\t\tlen++;
+\twhile (n / 10 != 0)
+\t{
+\t\tlen++;
+\t\tn /= 10;
+\t}
+\tres = malloc(len + 1);
+\tif (!res)
+\t\treturn (NULL);
+\tres[len] = '\\0';
+\tn = nbr;
+\tif (n == 0)
+\t\tres[0] = '0';
+\tif (n < 0)
+\t\tn = -n;
+\twhile (n != 0)
+\t{
+\t\tres[--len] = (n % 10) + '0';
+\t\tn /= 10;
+\t}
+\tif (nbr < 0)
+\t\tres[0] = '-';
+\treturn (res);
+}`,
+    },
+  ],
+
+  tests: [
+    { id: 'test_zero', descripcion: '0 → "0"', entrada: ['0'], salida: '0\n', tipo: 'edge' },
+    { id: 'test_pos', descripcion: '13268 → "13268"', entrada: ['13268'], salida: '13268\n', tipo: 'normal' },
+    { id: 'test_neg', descripcion: '-13268 → "-13268"', entrada: ['-13268'], salida: '-13268\n', tipo: 'normal' },
+    { id: 'test_small', descripcion: '16 → "16"', entrada: ['16'], salida: '16\n', tipo: 'normal' },
+  ],
+
+  gdbSteps: [
+    {
+      paso: 1,
+      titulo: 'nbr = -13268',
+      codigo: `n = -13268
+len = 6
+malloc(7 bytes)
+res[6] = '\\0'`,
+      variables: [
+        { nombre: 'len', valor: '6', cambio: true, nota: '5 dígitos + signo' },
+        { nombre: 'res', valor: 'buffer[7]', cambio: true, nota: 'heap' },
+      ],
+    },
+    {
+      paso: 2,
+      titulo: 'Relleno desde el final',
+      codigo: `n = 13268
+res[5] = '8'
+res[4] = '6'
+res[3] = '2'`,
+      variables: [
+        { nombre: 'res', valor: '"-13268"', cambio: true, nota: 'cadena final' },
+      ],
+    },
+  ],
+
+  trampas: [
+    {
+      severidad: 'mortal',
+      titulo: 'Olvidar INT_MIN',
+      descripcion: 'Si se hace nbr = -nbr con INT_MIN hay overflow. Hay que trabajar con long o tratar ese caso.',
+      codigoMal: `// ❌ overflow con INT_MIN
+if (nbr < 0)
+\tnbr = -nbr;`,
+      codigoBien: `// ✅ usar long
+long n = nbr;
+if (n < 0)
+\tn = -n;`,
+    },
+    {
+      severidad: 'warning',
+      titulo: 'No reservar espacio para "\\0"',
+      descripcion: 'La cadena devuelta debe terminar en null byte.',
+      codigoMal: `res = malloc(len);`,
+      codigoBien: `res = malloc(len + 1);`,
+    },
+  ],
+
+  bajoCelCapot: `ft_itoa convierte un entero en texto decimal.
+La estrategia robusta es contar dígitos primero y escribir de derecha a izquierda.
+El caso INT_MIN merece atención porque el opuesto no cabe en int.`,
+
+  estrategia: 'ENTENDER',
+  razonEstrategia: 'Es un clásico de manipulación de números y memoria dinámica. Conviene entender la longitud y el signo antes de escribir.',
+  relacionados: ['ft_atoi', 'max', 'print_hex'],
+}
