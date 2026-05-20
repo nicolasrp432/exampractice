@@ -24,6 +24,27 @@ $> ./rev_print ""
 
 $>`,
 
+  // Subject literal del repo rank02 (sub.txt). Útil para comparar con
+  // el subject didáctico activo y para la pestaña "Examen real".
+  subjectReal: `Assignment name  : rev_print
+Expected files   : rev_print.c
+Allowed functions: write
+--------------------------------------------------------------------------------
+
+Write a program that takes a string, and displays the string in reverse
+followed by a newline.
+
+If the number of parameters is not 1, the program displays a newline.
+
+Examples:
+
+$> ./rev_print "zaz" | cat -e
+zaz$
+$> ./rev_print "dub0 a POIL" | cat -e
+LIOP a 0bud$
+$> ./rev_print | cat -e
+$`,
+
   descripcion: 'Programa que imprime el string al revés (desde el último carácter hasta el primero) seguido de \\n. Con argc != 2, solo \\n.',
 
   palacio: {

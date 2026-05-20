@@ -16,6 +16,19 @@ Write a function that returns the length of a string.
 
 int\tft_strlen(char *str);`,
 
+  // Subject literal del repo rank02 (sub.txt). Útil para comparar con
+  // el subject didáctico activo y para la pestaña "Examen real".
+  subjectReal: `Assignment name  : ft_strlen
+Expected files   : ft_strlen.c
+Allowed functions:
+--------------------------------------------------------------------------------
+
+Write a function that returns the length of a string.
+
+Your function must be declared as follows:
+
+int	ft_strlen(char *str);`,
+
   descripcion: 'Función que recorre el string carácter a carácter hasta encontrar el \\0 y devuelve el número de posiciones contadas.',
 
   palacio: {

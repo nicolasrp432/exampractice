@@ -5,9 +5,69 @@ export default {
   dificultad: 'medio',
   tipoEntrega: 'programa',
   archivosEsperados: ['search_and_replace.c'],
-  funcionesPermitidas: ['write'],
+  funcionesPermitidas: ['write', 'exit'],
 
+  // ── Subject real del examen (rank02/level0/search_and_replace/sub.txt) ──
   subject: `Assignment name  : search_and_replace
+Expected files   : search_and_replace.c
+Allowed functions: write, exit
+--------------------------------------------------------------------------------
+
+Write a program called search_and_replace that takes 3 arguments, the first
+arguments is a string in which to replace a letter (2nd argument) by
+another one (3rd argument).
+
+If the number of arguments is not 3, just display a newline.
+
+If the second argument is not contained in the first one (the string)
+then the program simply rewrites the string followed by a newline.
+
+Examples:
+$>./search_and_replace "Papache est un sabre" "a" "o"
+Popoche est un sobre
+$>./search_and_replace "zaz" "art" "zul" | cat -e
+$
+$>./search_and_replace "zaz" "r" "u" | cat -e
+zaz$
+$>./search_and_replace "jacob" "a" "b" "c" "e" | cat -e
+$
+$>./search_and_replace "ZoZ eT Dovid oiME le METol." "o" "a" | cat -e
+ZaZ eT David aiME le METal.$
+$>./search_and_replace "wNcOre Un ExEmPle Pas Facilw a Ecrirw " "w" "e" | cat -e
+eNcOre Un ExEmPle Pas Facile a Ecrire $`,
+
+  // Copia literal del sub.txt para auditoría — no se renderiza por defecto.
+  subjectReal: `Assignment name  : search_and_replace
+Expected files   : search_and_replace.c
+Allowed functions: write, exit
+--------------------------------------------------------------------------------
+
+Write a program called search_and_replace that takes 3 arguments, the first
+arguments is a string in which to replace a letter (2nd argument) by
+another one (3rd argument).
+
+If the number of arguments is not 3, just display a newline.
+
+If the second argument is not contained in the first one (the string)
+then the program simply rewrites the string followed by a newline.
+
+Examples:
+$>./search_and_replace "Papache est un sabre" "a" "o"
+Popoche est un sobre
+$>./search_and_replace "zaz" "art" "zul" | cat -e
+$
+$>./search_and_replace "zaz" "r" "u" | cat -e
+zaz$
+$>./search_and_replace "jacob" "a" "b" "c" "e" | cat -e
+$
+$>./search_and_replace "ZoZ eT Dovid oiME le METol." "o" "a" | cat -e
+ZaZ eT David aiME le METal.$
+$>./search_and_replace "wNcOre Un ExEmPle Pas Facilw a Ecrirw " "w" "e" | cat -e
+eNcOre Un ExEmPle Pas Facile a Ecrire $`,
+
+  // Subject didáctico previo, conservado como variante. Endurecía la
+  // especificación al exigir que 2º y 3º arg fueran exactamente 1 char.
+  subjectAlternativo: `Assignment name  : search_and_replace
 Expected files   : search_and_replace.c
 Allowed functions: write
 --------------------------------------------------------------------------------
@@ -233,6 +293,18 @@ stdout: "herro\\n"`,
   ],
 
   trampas: [
+    {
+      severidad: 'info',
+      titulo: 'Diferencia plataforma vs examen real',
+      descripcion: 'El subject real (rank02) permite también la función exit y solo exige newline cuando argc != 4 (no valida que el 2º/3º arg sean un único char). La versión didáctica de la plataforma era más estricta. La sub.txt del repo se conserva en `subjectReal`; el subject anterior queda como `subjectAlternativo` por si quieres entrenar con esa variante.',
+      codigoMal: `// Versión didáctica vieja: rechaza si 2º arg tiene >1 char
+if (argc != 4 || argv[2][1] || argv[3][1])
+\twrite(1, "\\n", 1);`,
+      codigoBien: `// Subject real: basta con argc != 4
+// (extras tras el primer char del 2º/3º arg se ignoran sin error)
+if (argc != 4)
+\twrite(1, "\\n", 1);`,
+    },
     {
       severidad: 'mortal',
       titulo: 'argc != 3 en vez de argc != 4 (el programa mismo cuenta)',

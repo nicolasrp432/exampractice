@@ -16,6 +16,19 @@ Reproduce the behavior of the function strcpy (man strcpy).
 
 char\t*ft_strcpy(char *dest, char *src);`,
 
+  // Subject literal del repo rank02 (sub.txt). Útil para comparar con
+  // el subject didáctico activo y para la pestaña "Examen real".
+  subjectReal: `Assignment name  : ft_strcpy
+Expected files   : ft_strcpy.c
+Allowed functions:
+--------------------------------------------------------------------------------
+
+Reproduce the behavior of the function strcpy (man strcpy).
+
+Your function must be declared as follows:
+
+char    *ft_strcpy(char *s1, char *s2);`,
+
   descripcion: 'Función que copia el string src en dest (incluyendo el \\0 final) y devuelve dest. dest debe tener espacio suficiente para contener src.',
 
   palacio: {

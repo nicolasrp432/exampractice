@@ -16,6 +16,22 @@ Write a function that displays a string on the standard output.
 
 void\tft_putstr(char *str);`,
 
+  // Subject literal del repo rank02 (sub.txt). Útil para comparar con
+  // el subject didáctico activo y para la pestaña "Examen real".
+  subjectReal: `Assignment name  : ft_putstr
+Expected files   : ft_putstr.c
+Allowed functions: write
+--------------------------------------------------------------------------------
+
+Write a function that displays a string on the standard output.
+
+The pointer passed to the function contains the address of the string's first
+character.
+
+Your function must be declared as follows:
+
+void	ft_putstr(char *str);`,
+
   descripcion: 'Función que escribe un string en la salida estándar usando write(). NO añade \\n al final — escribe exactamente los bytes del string.',
 
   palacio: {

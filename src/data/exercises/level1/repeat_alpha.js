@@ -35,6 +35,38 @@ $>./repeat_alpha ""
 
 $>./repeat_alpha`,
 
+  // Subject literal del repo rank02 (sub.txt). Útil para comparar con
+  // el subject didáctico activo y para la pestaña "Examen real".
+  subjectReal: `Assignment name  : repeat_alpha
+Expected files   : repeat_alpha.c
+Allowed functions: write
+--------------------------------------------------------------------------------
+
+Write a program called repeat_alpha that takes a string and display it
+repeating each alphabetical character as many times as its alphabetical index,
+followed by a newline.
+
+'a' becomes 'a', 'b' becomes 'bb', 'e' becomes 'eeeee', etc...
+
+Case remains unchanged.
+
+If the number of arguments is not 1, just display a newline.
+
+Examples:
+
+$>./repeat_alpha "abc"
+abbccc
+$>./repeat_alpha "Alex." | cat -e
+Alllllllllllleeeeexxxxxxxxxxxxxxxxxxxxxxxx.$
+$>./repeat_alpha 'abacadaba 42!' | cat -e
+abbacccaddddabba 42!$
+$>./repeat_alpha | cat -e
+$
+$>
+$>./repeat_alpha "" | cat -e
+$
+$>`,
+
   descripcion: 'Programa que recibe un string y repite cada letra tantas veces como su posición en el alfabeto: a=1 vez, b=2 veces, ..., z=26 veces. Minúsculas y mayúsculas tienen la misma posición. Los símbolos se imprimen 1 vez.',
 
   palacio: {

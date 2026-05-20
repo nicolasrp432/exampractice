@@ -31,6 +31,36 @@ $> ./first_word "  "
 
 $>`,
 
+  // Subject literal del repo rank02 (sub.txt). Útil para comparar con
+  // el subject didáctico activo y para la pestaña "Examen real".
+  subjectReal: `Assignment name  : first_word
+Expected files   : first_word.c
+Allowed functions: write
+--------------------------------------------------------------------------------
+
+Write a program that takes a string and displays its first word, followed by a
+newline.
+
+A word is a section of string delimited by spaces/tabs or by the start/end of
+the string.
+
+If the number of parameters is not 1, or if there are no words, simply display
+a newline.
+
+Examples:
+
+$> ./first_word "FOR PONY" | cat -e
+FOR$
+$> ./first_word "this        ...    is sparta, then again, maybe    not" | cat -e
+this$
+$> ./first_word "   " | cat -e
+$
+$> ./first_word "a" "b" | cat -e
+$
+$> ./first_word "  lorem,ipsum  " | cat -e
+lorem,ipsum$
+$>`,
+
   descripcion: 'Programa que imprime la primera palabra del string (separadores: espacio y tab). Si no hay exactamente 1 argumento o no hay palabras, imprime solo \\n.',
 
   palacio: {

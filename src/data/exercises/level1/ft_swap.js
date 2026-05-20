@@ -17,6 +17,20 @@ are given as parameters.
 
 void\tft_swap(int *a, int *b);`,
 
+  // Subject literal del repo rank02 (sub.txt). Útil para comparar con
+  // el subject didáctico activo y para la pestaña "Examen real".
+  subjectReal: `Assignment name  : ft_swap
+Expected files   : ft_swap.c
+Allowed functions:
+--------------------------------------------------------------------------------
+
+Write a function that swaps the contents of two integers the adresses of which
+are passed as parameters.
+
+Your function must be declared as follows:
+
+void	ft_swap(int *a, int *b);`,
+
   descripcion: 'Función que intercambia los valores de dos enteros usando sus direcciones de memoria. Requiere una variable temporal.',
 
   palacio: {
@@ -178,6 +192,18 @@ $2 = 3`,
   ],
 
   trampas: [
+    {
+      severidad: 'info',
+      titulo: 'Diferencia plataforma vs examen real',
+      descripcion: 'Tu función ft_swap del repo rank02 está bien, pero el `main.c` que la acompaña imprime los enteros con `printf("%u", *a)` — `%u` es para `unsigned int`, no `int`. Con `-Wall -Wextra -Werror` ese main NO compila. El subject real no obliga a usar ese main: la Moulinette enlaza tu .c con uno propio. La plataforma usa su propio harness limpio (ver Practica), así que no te encontrarás ese warning aquí.',
+      codigoMal: `// ❌ main.c real del rank02 (no compila con -Werror)
+printf("Value of n1 is: %u and the value of n2 is: %u.", *a, *b);
+// warning: format '%u' expects 'unsigned int', argument has type 'int'`,
+      codigoBien: `// ✅ Lo que hace la plataforma: %d para int
+printf("Antes:  a = %d, b = %d\\n", *a, *b);
+ft_swap(&a, &b);
+printf("Después: a = %d, b = %d\\n", *a, *b);`,
+    },
     {
       severidad: 'mortal',
       titulo: 'int *tmp en vez de int tmp → segfault',

@@ -28,6 +28,37 @@ $> ./rotone ""
 
 $>`,
 
+  // Subject literal del repo rank02 (sub.txt). Útil para comparar con
+  // el subject didáctico activo y para la pestaña "Examen real".
+  subjectReal: `Assignment name  : rotone
+Expected files   : rotone.c
+Allowed functions: write
+--------------------------------------------------------------------------------
+
+Write a program that takes a string and displays it, replacing each of its
+letters by the next one in alphabetical order.
+
+'z' becomes 'a' and 'Z' becomes 'A'. Case remains unaffected.
+
+The output will be followed by a \\n.
+
+If the number of arguments is not 1, the program displays \\n.
+
+Example:
+
+$>./rotone "abc"
+bcd
+$>./rotone "Les stagiaires du staff ne sentent pas toujours tres bon." | cat -e
+Mft tubhjbjsft ev tubgg of tfoufou qbt upvkpvst usft cpo.$
+$>./rotone "AkjhZ zLKIJz , 23y " | cat -e
+BlkiA aMLJKa , 23z $
+$>./rotone | cat -e
+$
+$>
+$>./rotone "" | cat -e
+$
+$>`,
+
   descripcion: 'Programa que rota cada letra +1 en el alfabeto (a→b, y→z, z→a). Mayúsculas y minúsculas se tratan por separado. Símbolos sin cambio.',
 
   palacio: {
