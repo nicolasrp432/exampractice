@@ -15,6 +15,7 @@ import { useLiveTrace } from '@/hooks/useLiveTrace'
 import LevelBadge from '@/components/layout/LevelBadge'
 import GdbStepper from '@/components/gdb/GdbStepper'
 import RunPanel from '@/components/practice/RunPanel'
+import PracticeDiagnostics from '@/components/practice/PracticeDiagnostics'
 
 // ─── Default placeholder code ────────────────────────────────────────────────
 function getPlaceholder(exercise) {
@@ -717,7 +718,15 @@ export default function PracticeMode() {
             : result.compileError
         )
         setCompileDiagnostics(result.compileDiagnostics || [])
-        setTests(prev => prev.map(t => ({ ...t, status: 'failed', output: '', diff: null })))
+        // Cada test queda marcado como failed con el compileError adjunto,
+        // para que PracticeDiagnostics pueda razonar sobre él.
+        setTests(prev => prev.map(t => ({
+          ...t,
+          status: 'failed',
+          output: '',
+          diff: null,
+          compileError: result.compileError,
+        })))
         break
       }
 
@@ -727,7 +736,18 @@ export default function PracticeMode() {
 
       setTests(prev => {
         const next = [...prev]
-        next[i] = { ...next[i], status: passed ? 'passed' : 'failed', output: result.stdout, diff }
+        next[i] = {
+          ...next[i],
+          status: passed ? 'passed' : 'failed',
+          output: result.stdout,
+          diff,
+          // Campos extra para heurísticas de PracticeDiagnostics. Son aditivos
+          // y no afectan al resto del flujo.
+          stderr: result.stderr ?? '',
+          exitCode: result.exitCode ?? null,
+          signal: result.signal ?? null,
+          compileError: null,
+        }
         return next
       })
     }
@@ -1045,6 +1065,17 @@ export default function PracticeMode() {
                 ))}
               </div>
             )}
+
+            {/* Diagnóstico: "siguiente cosa que arreglar" — sólo aparece si hay
+                tests fallidos y aporta una sugerencia heurística por cada uno. */}
+            <PracticeDiagnostics
+              tests={tests}
+              exercise={exercise}
+              onInspect={(test) => {
+                setArgs((test.entrada || []).map(String))
+                setActiveRightTab('run')
+              }}
+            />
 
             {/* Separator */}
             <div className="h-px bg-zinc-100" />
