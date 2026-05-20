@@ -26,6 +26,21 @@ is_power_of_2(8)   → 1  (2^3)
 is_power_of_2(0)   → 0  (no es potencia de 2)
 is_power_of_2(3)   → 0  (no es potencia de 2)`,
 
+  // Subject literal del repo rank02 (sub.txt). Útil para comparar con
+  // el subject didáctico activo y para la pestaña "Examen real".
+  subjectReal: `Assignment name  : is_power_of_2
+Expected files   : is_power_of_2.c
+Allowed functions: None
+--------------------------------------------------------------------------------
+
+Write a function that determines if a given number is a power of 2.
+
+This function returns 1 if the given number is a power of 2, otherwise it returns 0.
+
+Your function must be declared as follows:
+
+int	    is_power_of_2(unsigned int n);`,
+
   descripcion: 'Función que devuelve 1 si n es potencia de 2, 0 si no. El truco bit a bit: una potencia de 2 tiene exactamente 1 bit activo. n & (n-1) pone ese bit a 0. Si el resultado es 0 (y n>0), es potencia de 2.',
 
   palacio: {

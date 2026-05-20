@@ -21,6 +21,22 @@ Example:
 print_bits(2)  → 00000010
 print_bits(42) → 00101010`,
 
+  // Subject literal del repo rank02 (sub.txt). Útil para comparar con
+  // el subject didáctico activo y para la pestaña "Examen real".
+  subjectReal: `Assignment name  : print_bits
+Expected files   : print_bits.c
+Allowed functions: write
+--------------------------------------------------------------------------------
+
+Write a function that takes a byte, and prints it in binary WITHOUT A NEWLINE
+AT THE END.
+
+Your function must be declared as follows:
+
+void	print_bits(unsigned char octet);
+
+Example, if you pass 2 to print_bits, it will print "00000010"`,
+
   descripcion: 'Función que imprime los 8 bits de un byte en orden MSB→LSB. Itera desde el bit 7 al bit 0, extrayendo cada bit con (octet >> i) & 1 y escribiendo "0" o "1".',
 
   palacio: {

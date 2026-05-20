@@ -17,6 +17,19 @@ to the duplicated string, or NULL if there was insufficient memory.
 
 char\t*ft_strdup(char *s);`,
 
+  // Subject literal del repo rank02 (sub.txt). Útil para comparar con
+  // el subject didáctico activo y para la pestaña "Examen real".
+  subjectReal: `Assignment name  : ft_strdup
+Expected files   : ft_strdup.c
+Allowed functions: malloc
+--------------------------------------------------------------------------------
+
+Reproduce the behavior of the function strdup (man strdup).
+
+Your function must be declared as follows:
+
+char    *ft_strdup(char *src);`,
+
   descripcion: 'Función que crea una copia del string en memoria dinámica. Usa malloc para reservar strlen(s)+1 bytes, copia con strcpy y devuelve el puntero.',
 
   palacio: {

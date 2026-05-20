@@ -5,9 +5,70 @@ export default {
   dificultad: 'fácil',
   tipoEntrega: 'programa',
   archivosEsperados: ['do_op.c'],
-  funcionesPermitidas: ['write'],
+  funcionesPermitidas: ['atoi', 'printf', 'write'],
 
+  // ── Subject real (rank02/level1/do_op/sub.txt) ──
   subject: `Assignment name  : do_op
+Expected files   : do_op.c
+Allowed functions: atoi, printf, write
+--------------------------------------------------------------------------------
+
+Write a program that takes three strings:
+- The first and the third one are representations of base-10 signed integers
+  that fit in an int.
+- The second one is an arithmetic operator chosen from: + - * / %
+
+The program must display the result of the requested arithmetic operation,
+followed by a newline. If the number of parameters is not 3, the program
+just displays a newline.
+
+You can assume the string have no mistakes or extraneous characters. Negative
+numbers, in input or output, will have one and only one leading '-'. The
+result of the operation fits in an int.
+
+Examples:
+
+$> ./do_op "123" "*" 456 | cat -e
+56088$
+$> ./do_op "9828" "/" 234 | cat -e
+42$
+$> ./do_op "1" "+" "-43" | cat -e
+-42$
+$> ./do_op | cat -e
+$`,
+
+  subjectReal: `Assignment name  : do_op
+Expected files   : do_op.c
+Allowed functions: atoi, printf, write
+--------------------------------------------------------------------------------
+
+Write a program that takes three strings:
+- The first and the third one are representations of base-10 signed integers
+  that fit in an int.
+- The second one is an arithmetic operator chosen from: + - * / %
+
+The program must display the result of the requested arithmetic operation,
+followed by a newline. If the number of parameters is not 3, the program
+just displays a newline.
+
+You can assume the string have no mistakes or extraneous characters. Negative
+numbers, in input or output, will have one and only one leading '-'. The
+result of the operation fits in an int.
+
+Examples:
+
+$> ./do_op "123" "*" 456 | cat -e
+56088$
+$> ./do_op "9828" "/" 234 | cat -e
+42$
+$> ./do_op "1" "+" "-43" | cat -e
+-42$
+$> ./do_op | cat -e
+$`,
+
+  // Subject didáctico previo (más estricto: exige "Error" en bad-argc, valida
+  // operador y división por cero). Conservado por si quieres practicarlo así.
+  subjectAlternativo: `Assignment name  : do_op
 Expected files   : do_op.c
 Allowed functions: write
 --------------------------------------------------------------------------------
@@ -292,6 +353,19 @@ if (op == '/' && b != 0) → FALSE (b==0)
   ],
 
   trampas: [
+    {
+      severidad: 'info',
+      titulo: 'Diferencia plataforma vs examen real',
+      descripcion: 'El subject real (rank02) permite usar `atoi` y `printf` directamente, y en argc != 4 sólo imprime un newline (NO "Error"). El subject didáctico de la plataforma era más exigente: prohibía `atoi`/`printf` (te obligaba a escribir ft_atoi y ft_putnbr) y exigía la cadena literal "Error" en bad-argc / operador inválido / división por cero. El didáctico queda en `subjectAlternativo` por si quieres practicarlo. Los `tests` actuales aún siguen la versión didáctica (se actualizarán cuando se añadan `testsRank02`).',
+      codigoMal: `// Versión didáctica antigua: implementabas ft_atoi/ft_putnbr a mano
+// y escribías "Error\\n" en bad-argc. Pasa la moulinette didáctica pero
+// duplica trabajo respecto al examen real.`,
+      codigoBien: `// Subject real: puedes apoyarte en atoi y printf
+int a = atoi(argv[1]);
+int b = atoi(argv[3]);
+if (argc != 4) { write(1, "\\n", 1); return 0; }
+// ...switch sobre argv[2][0], printf("%d\\n", result);`,
+    },
     {
       severidad: 'mortal',
       titulo: 'argc != 3 en vez de argc != 4',

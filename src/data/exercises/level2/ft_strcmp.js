@@ -19,6 +19,19 @@ found, respectively, to be less than, to match, or to be greater than s2.
 
 int\tft_strcmp(char *s1, char *s2);`,
 
+  // Subject literal del repo rank02 (sub.txt). Útil para comparar con
+  // el subject didáctico activo y para la pestaña "Examen real".
+  subjectReal: `Assignment name  : ft_strcmp
+Expected files   : ft_strcmp.c
+Allowed functions:
+--------------------------------------------------------------------------------
+
+Reproduce the behavior of the function strcmp (man strcmp).
+
+Your function must be declared as follows:
+
+int    ft_strcmp(char *s1, char *s2);`,
+
   descripcion: 'Función que compara dos strings byte a byte. Devuelve 0 si iguales, positivo si s1>s2, negativo si s1<s2. El valor es la diferencia de los primeros bytes distintos.',
 
   palacio: {

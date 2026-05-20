@@ -22,6 +22,29 @@ swap_bits(1)  → 16   (00000001 → 00010000)
 swap_bits(16) → 1    (00010000 → 00000001)
 swap_bits(65) → 20   (01000001 → 00010100)`,
 
+  // Subject literal del repo rank02 (sub.txt). Útil para comparar con
+  // el subject didáctico activo y para la pestaña "Examen real".
+  subjectReal: `Assignment name  : swap_bits
+Expected files   : swap_bits.c
+Allowed functions:
+--------------------------------------------------------------------------------
+
+Write a function that takes a byte, swaps its halves (like the example) and
+returns the result.
+
+Your function must be declared as follows:
+
+unsigned char	swap_bits(unsigned char octet);
+
+Example:
+
+  1 byte
+_____________
+ 0100 | 0001
+     \\ /
+     / \\
+ 0001 | 0100`,
+
   descripcion: 'Función que intercambia los dos nibbles (mitades de 4 bits) de un byte. El nibble bajo (bits 0-3) pasa a ser el alto (bits 4-7) y viceversa. Fórmula: (octet << 4) | (octet >> 4).',
 
   palacio: {

@@ -22,6 +22,29 @@ reverse_bits(1)   → 128   (00000001 → 10000000)
 reverse_bits(2)   → 64    (00000010 → 01000000)
 reverse_bits(170) → 85    (10101010 → 01010101)`,
 
+  // Subject literal del repo rank02 (sub.txt). Útil para comparar con
+  // el subject didáctico activo y para la pestaña "Examen real".
+  subjectReal: `Assignment name  : reverse_bits
+Expected files   : reverse_bits.c
+Allowed functions:
+--------------------------------------------------------------------------------
+
+Write a function that takes a byte, reverses it, bit by bit (like the
+example) and returns the result.
+
+Your function must be declared as follows:
+
+unsigned char	reverse_bits(unsigned char octet);
+
+Example:
+
+  1 byte
+_____________
+ 0010  0110
+	 ||
+	 \\/
+ 0110  0100`,
+
   descripcion: 'Función que invierte el orden de los bits de un byte. Usa acumulación: bit = bit*2 + octet%2, octet /= 2, repetido 8 veces. Inicializar bit=0.',
 
   palacio: {

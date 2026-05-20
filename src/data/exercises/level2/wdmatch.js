@@ -27,6 +27,35 @@ $> ./wdmatch "foobar" "rab" | cat -e
 $
 $>`,
 
+  // Subject literal del repo rank02 (sub.txt). Útil para comparar con
+  // el subject didáctico activo y para la pestaña "Examen real".
+  subjectReal: `Assignment name  : wdmatch
+Expected files   : wdmatch.c
+Allowed functions: write
+--------------------------------------------------------------------------------
+
+Write a program that takes two strings and checks whether it's possible to
+write the first string with characters from the second string, while respecting
+the order in which these characters appear in the second string.
+
+If it's possible, the program displays the string, followed by a \\n, otherwise
+it simply displays a \\n.
+
+If the number of arguments is not 2, the program displays a \\n.
+
+Examples:
+
+$>./wdmatch "faya" "fgvvfdxcacpolhyghbreda" | cat -e
+faya$
+$>./wdmatch "faya" "fgvvfdxcacpolhyghbred" | cat -e
+$
+$>./wdmatch "quarante deux" "qfqfsudf arzgsayns tsregfdgs sjytdekuoixq " | cat -e
+quarante deux$
+$>./wdmatch "error" rrerrrfiiljdfxjyuifrrvcoojh | cat -e
+$
+$>./wdmatch | cat -e
+$`,
+
   descripcion: 'Programa que comprueba si s2 es una subsecuencia de s1 (los chars de s2 aparecen en s1 en el mismo orden, pero no necesariamente contiguos). Si sí, imprime s2; si no, solo \\n.',
 
   palacio: {

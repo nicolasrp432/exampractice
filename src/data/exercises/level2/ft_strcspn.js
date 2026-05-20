@@ -21,6 +21,20 @@ Example:
 ft_strcspn("hello", "lo")  → 2 (h and e are not in "lo", l is)
 ft_strcspn("hello", "xyz") → 5 (no chars from s2 in s1)`,
 
+  // Subject literal del repo rank02 (sub.txt). Útil para comparar con
+  // el subject didáctico activo y para la pestaña "Examen real".
+  subjectReal: `Assignment name	: ft_strcspn
+Expected files	: ft_strcspn.c
+Allowed functions: None
+---------------------------------------------------------------
+
+Reproduce exactly the behavior of the function strcspn
+(man strcspn).
+
+The function should be prototyped as follows:
+
+size_t	ft_strcspn(const char *s, const char *reject);`,
+
   descripcion: 'Función que devuelve la longitud del segmento inicial de s1 que NO contiene ningún carácter de s2. Es el índice del primer char de s1 que aparece en s2.',
 
   palacio: {

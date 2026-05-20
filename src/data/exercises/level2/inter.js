@@ -27,6 +27,32 @@ $> ./inter "padinton" ""
 
 $>`,
 
+  // Subject literal del repo rank02 (sub.txt). Útil para comparar con
+  // el subject didáctico activo y para la pestaña "Examen real".
+  subjectReal: `Assignment name  : inter
+Expected files   : inter.c
+Allowed functions: write
+--------------------------------------------------------------------------------
+
+Write a program that takes two strings and displays, without doubles, the
+characters that appear in both strings, in the order they appear in the first
+one.
+
+The display will be followed by a \\n.
+
+If the number of arguments is not 2, the program displays \\n.
+
+Examples:
+
+$>./inter "padinton" "paqefwtdjetyiytjneytjoeyjnejeyj" | cat -e
+padinto$
+$>./inter ddf6vewg64f gtwthgdwthdwfteewhrtag6h4ffdhsd | cat -e
+df6ewg4$
+$>./inter "rien" "cette phrase ne cache rien" | cat -e
+rien$
+$>./inter | cat -e
+$`,
+
   descripcion: 'Programa que imprime los caracteres comunes a s1 y s2, en el orden de aparición en s1, sin duplicados. Usa función auxiliar iter() para buscar en s2, y tabla seen[] para evitar duplicados.',
 
   palacio: {

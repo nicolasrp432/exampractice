@@ -23,6 +23,22 @@ The function should behave like the standard atoi(3) function:
 - Read digits until non-digit.
 - Return the resulting integer.`,
 
+  // Subject literal del repo rank02 (sub.txt). Útil para comparar con
+  // el subject didáctico activo y para la pestaña "Examen real".
+  subjectReal: `Assignment name  : ft_atoi
+Expected files   : ft_atoi.c
+Allowed functions: None
+--------------------------------------------------------------------------------
+
+Write a function that converts the string argument str to an integer (type int)
+and returns it.
+
+It works much like the standard atoi(const char *str) function, see the man.
+
+Your function must be declared as follows:
+
+int	ft_atoi(const char *str);`,
+
   descripcion: 'Función que convierte un string a int: salta espacios blancos, lee signo opcional, acumula dígitos. Replica el comportamiento de atoi(3).',
 
   palacio: {
