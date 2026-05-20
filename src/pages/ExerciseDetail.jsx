@@ -134,7 +134,13 @@ function TabSimulador({ exercise }) {
 }
 
 function TabGDB({ exercise }) {
-  return <GdbStepper steps={exercise.gdbSteps} title={`GDB — ${exercise.nombre}`} />
+  return (
+    <GdbStepper
+      steps={exercise.gdbSteps}
+      caminos={exercise.gdbCaminos}
+      title={`GDB — ${exercise.nombre}`}
+    />
+  )
 }
 
 function CopyButton({ text }) {

@@ -146,9 +146,24 @@ function MemoryPanel({ memory = [], note = '' }) {
   )
 }
 
-export default function GdbStepper({ steps = [], title = 'Traza de ejecución' }) {
-  const trace = useMemo(() => normalizeGdbTrace(steps), [steps])
+export default function GdbStepper({
+  steps = [],
+  caminos = null,                // opcional: [{ id, nombre, pasos: [...] }]
+  title = 'Traza de ejecución',
+}) {
+  // Si vienen caminos múltiples, ofrecemos selector. Si no, fallback al
+  // comportamiento clásico con `steps` (backwards-compatible).
+  const tieneCaminos = Array.isArray(caminos) && caminos.length > 0
+  const [caminoIdx, setCaminoIdx] = useState(0)
+  const activeSteps = tieneCaminos
+    ? (caminos[caminoIdx]?.pasos ?? [])
+    : steps
+
+  const trace = useMemo(() => normalizeGdbTrace(activeSteps), [activeSteps])
   const [currentStepIndex, setCurrentStepIndex] = useState(0)
+
+  // Al cambiar de camino, reseteamos el paso actual.
+  useEffect(() => { setCurrentStepIndex(0) }, [caminoIdx])
 
   useEffect(() => {
     setCurrentStepIndex((index) => Math.min(index, Math.max(trace.length - 1, 0)))
@@ -189,6 +204,26 @@ export default function GdbStepper({ steps = [], title = 'Traza de ejecución' }
 
   return (
     <div className="flex flex-col gap-4 rounded-xl border border-zinc-200 bg-white min-h-[420px] overflow-hidden">
+      {tieneCaminos && caminos.length > 1 && (
+        <div className="border-b border-zinc-100 bg-white px-4 py-2 flex flex-wrap items-center gap-2 text-xs">
+          <span className="text-zinc-500 font-semibold uppercase tracking-wide mr-1">Camino GDB</span>
+          {caminos.map((c, i) => (
+            <button
+              key={c.id ?? i}
+              onClick={() => setCaminoIdx(i)}
+              className={
+                'px-2.5 py-1 rounded-md border ' +
+                (i === caminoIdx
+                  ? 'bg-purple-600 text-white border-purple-600'
+                  : 'bg-white text-zinc-600 border-zinc-200 hover:bg-zinc-50')
+              }
+              title={c.descripcion}
+            >
+              {c.nombre || c.id || `Camino ${i + 1}`}
+            </button>
+          ))}
+        </div>
+      )}
       <div className="border-b border-zinc-200 bg-zinc-50 px-4 py-3">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div className="flex items-center gap-2">
