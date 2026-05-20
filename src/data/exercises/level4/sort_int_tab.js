@@ -23,6 +23,24 @@ Doubles must be preserved.
 
 Input is always coherent.`,
 
+  // Subject literal del repo rank02 (sub.txt). Útil para comparar con
+  // el subject didáctico activo y para la pestaña "Examen real".
+  subjectReal: `Assignment name  : sort_int_tab
+Expected files   : sort_int_tab.c
+Allowed functions:
+--------------------------------------------------------------------------------
+
+Write the following function:
+
+void sort_int_tab(int *tab, unsigned int size);
+
+It must sort (in-place) the 'tab' int array, that contains exactly 'size'
+members, in ascending order.
+
+Doubles must be preserved.
+
+Input is always coherent.`,
+
   descripcion: 'Función que ordena in-place un array de enteros en orden ascendente, conservando duplicados.',
 
   palacio: {

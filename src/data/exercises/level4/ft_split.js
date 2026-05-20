@@ -28,6 +28,23 @@ ft_split("hello world foo", ' ')  → {"hello", "world", "foo", NULL}
 ft_split("hello::world", ':')     → {"hello", "world", NULL}
 ft_split("  spaces  ", ' ')       → {"spaces", NULL}`,
 
+  // Subject literal del repo rank02 (sub.txt). Útil para comparar con
+  // el subject didáctico activo y para la pestaña "Examen real".
+  subjectReal: `Assignment name  : ft_split
+Expected files   : ft_split.c
+Allowed functions: malloc
+--------------------------------------------------------------------------------
+
+Write a function that takes a string, splits it into words, and returns them as
+a NULL-terminated array of strings.
+
+A "word" is defined as a part of a string delimited either by spaces/tabs/new
+lines, or by the start/end of the string.
+
+Your function must be declared as follows:
+
+char    **ft_split(char *str);`,
+
   descripcion: 'Función que divide un string por un delimitador y devuelve un array de strings (terminado en NULL). Requiere malloc para el array de punteros y para cada substring. Sin strings vacíos en el resultado.',
 
   palacio: {

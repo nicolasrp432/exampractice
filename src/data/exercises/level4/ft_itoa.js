@@ -19,6 +19,20 @@ Your function must be declared as follows:
 
 char\t*ft_itoa(int nbr);`,
 
+  // Subject literal del repo rank02 (sub.txt). Útil para comparar con
+  // el subject didáctico activo y para la pestaña "Examen real".
+  subjectReal: `Assignment name  : ft_itoa
+Expected files   : ft_itoa.c
+Allowed functions: malloc
+--------------------------------------------------------------------------------
+
+Write a function that takes an int and converts it to a null-terminated string.
+The function returns the result in a char array that you must allocate.
+
+Your function must be declared as follows:
+
+char	*ft_itoa(int nbr);`,
+
   descripcion: 'Función que convierte un int en una cadena terminada en \\0, reservando memoria con malloc.',
 
   palacio: {

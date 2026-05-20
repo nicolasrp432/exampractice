@@ -5,7 +5,10 @@ export default {
   dificultad: 'medio',
   tipoEntrega: 'programa',
   archivosEsperados: ['fprime.c'],
-  funcionesPermitidas: ['write'],
+  // El subject real permite atoi y printf. La plataforma había restringido
+  // a write para forzar a memorizar ft_putnbr; mantenemos esa versión como
+  // alternativa y abrimos atoi/printf para acercarnos al examen real.
+  funcionesPermitidas: ['atoi', 'printf', 'write'],
 
   subject: `Assignment name  : fprime
 Expected files   : fprime.c
@@ -33,6 +36,42 @@ $> ./fprime | cat -e
 $
 $> ./fprime 42 | cat -e
 2*3*7$`,
+
+  // Subject literal del repo rank02 (sub.txt). Útil para comparar con
+  // el subject didáctico activo y para la pestaña "Examen real".
+  subjectReal: `Assignment name  : fprime
+Expected files   : fprime.c
+Allowed functions: printf, atoi
+--------------------------------------------------------------------------------
+
+Write a program that takes a positive int and displays its prime factors on the
+standard output, followed by a newline.
+
+Factors must be displayed in ascending order and separated by '*', so that
+the expression in the output gives the right result.
+
+If the number of parameters is not 1, simply display a newline.
+
+The input, when there is one, will be valid.
+
+Examples:
+
+$> ./fprime 225225 | cat -e
+3*3*5*5*7*11*13$
+$> ./fprime 8333325 | cat -e
+3*3*5*5*7*11*13*37$
+$> ./fprime 9539 | cat -e
+9539$
+$> ./fprime 804577 | cat -e
+804577$
+$> ./fprime 42 | cat -e
+2*3*7$
+$> ./fprime 1 | cat -e
+1$
+$> ./fprime | cat -e
+$
+$> ./fprime 42 21 | cat -e
+$`,
 
   descripcion: 'Descomposición en factores primos. Divide el número por divisores empezando en 2. Cada vez que el divisor divide exactamente, imprime el factor y continúa con el cociente. Si quedan factores, imprime el número restante.',
 
@@ -261,6 +300,32 @@ Salida: "2*3*7"`,
   ],
 
   trampas: [
+    {
+      severidad: 'info',
+      titulo: 'Diferencia plataforma vs examen real',
+      descripcion: 'El subject real permite `atoi` y `printf` directamente. Esto simplifica mucho: en lugar de implementar ft_atoi + ft_putnbr a mano, escribes `int n = atoi(argv[1]); printf("%d", factor);`. Las soluciones write-only que ya tienes siguen siendo válidas — pero conviene practicar también la versión simplificada porque es más corta y rápida de escribir bajo presión de tiempo.',
+      codigoMal: `// Versión didáctica: implementabas ft_atoi + ft_putnbr de cero
+static void put_nbr(int n) { /* ... 10 líneas ... */ }
+// y main convertía argv a int byte a byte`,
+      codigoBien: `// Subject real: atoi + printf
+#include <stdio.h>
+#include <stdlib.h>
+int main(int argc, char **argv) {
+\tif (argc != 2) { printf("\\n"); return 0; }
+\tint n = atoi(argv[1]);
+\tif (n == 1) { printf("1\\n"); return 0; }
+\tint d = 2, first = 1;
+\twhile (n > 1) {
+\t\twhile (n % d == 0) {
+\t\t\tprintf("%s%d", first ? "" : "*", d);
+\t\t\tfirst = 0; n /= d;
+\t\t}
+\t\td++;
+\t}
+\tprintf("\\n");
+\treturn 0;
+}`,
+    },
     {
       severidad: 'mortal',
       titulo: 'Olvidar el caso n=1: sin factores, pero hay que imprimir "1"',
