@@ -125,6 +125,32 @@ Los duplicados se quedan exactamente donde toca en el orden final.`,
 \t}
 }`,
     },
+  
+    {
+      id: 'rank02',
+      nombre: 'Versión rank02 (solución de referencia)',
+      descripcion: 'Solución tal y como aparece en el repo de referencia rank02. Útil para comparar estilo, validaciones y constraints reales del examen.',
+      recomendada: false,
+      origen: 'rank02',
+      codigo: `void	sort_int_tab(int *tab, unsigned int size)
+{
+	unsigned int	i = 0;
+	int	temp;
+
+	while (i < (size - 1))
+	{
+		if (tab[i] > tab[i + 1])
+		{
+			temp = tab[i];
+			tab[i] = tab[i+ 1];
+			tab[i + 1] = temp;
+			i = 0;
+		}
+		else
+			i++;
+	}
+}`,
+    },
   ],
 
   tests: [

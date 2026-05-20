@@ -104,6 +104,21 @@ Combina ambas partes con OR y listo: los nibbles están intercambiados.`,
 \treturn (low | high);
 }`,
     },
+  
+    {
+      id: 'rank02',
+      nombre: 'Versión rank02 (solución de referencia)',
+      descripcion: 'Solución tal y como aparece en el repo de referencia rank02. Útil para comparar estilo, validaciones y constraints reales del examen.',
+      recomendada: false,
+      origen: 'rank02',
+      codigo: `
+#include <unistd.h>
+
+unsigned char	swap_bits(unsigned char octet)
+{
+	return ((octet >> 4) | (octet << 4));
+}`,
+    },
   ],
 
   tests: [

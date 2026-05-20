@@ -115,6 +115,42 @@ Es el fundamento de lcm y muchos algoritmos de criptografía.`,
 \treturn (pgcd(b, a % b));
 }`,
     },
+  
+    {
+      id: 'rank02',
+      nombre: 'Versión rank02 (solución de referencia)',
+      descripcion: 'Solución tal y como aparece en el repo de referencia rank02. Útil para comparar estilo, validaciones y constraints reales del examen.',
+      recomendada: false,
+      origen: 'rank02',
+      codigo: `
+
+#include <stdio.h>
+#include <stdlib.h>
+
+void	pgcd(int a, int b)
+{
+	int n = a;
+
+	while (n > 0)
+	{
+		if (a % n == 0 && b % n == 0)
+		{
+			printf("%d", n);
+			return;
+		}
+		--n;
+	}
+}
+
+int		main(int argc, char **argv)
+{
+	if (argc == 3)
+		pgcd(atoi(argv[1]), atoi(argv[2]));
+
+	printf("\\n");
+	return (0);
+}`,
+    },
   ],
 
   tests: [

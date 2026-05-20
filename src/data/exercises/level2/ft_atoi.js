@@ -164,6 +164,35 @@ int\tft_atoi(const char *str)
 \treturn (result * sign);
 }`,
     },
+  
+    {
+      id: 'rank02',
+      nombre: 'Versión rank02 (solución de referencia)',
+      descripcion: 'Solución tal y como aparece en el repo de referencia rank02. Útil para comparar estilo, validaciones y constraints reales del examen.',
+      recomendada: false,
+      origen: 'rank02',
+      codigo: `#include <stdio.h>
+
+int     ft_atoi(const char *str)
+{
+	int	nbr;
+	int sig;
+	int	i;
+
+	nbr = 0;
+	sig = 1;
+	i = 0;
+	if (str[0] == '-' || str[0] == '+')
+	{
+		if (str[0] == '-')
+			sig = -1;
+		i += 1;
+	}
+	while (str[i] && str[i] >= '0' && str[i] <= '9')
+		nbr = (nbr * 10) + (str[i++] - '0');
+	return (nbr * sig);
+}`,
+    },
   ],
 
   tests: [

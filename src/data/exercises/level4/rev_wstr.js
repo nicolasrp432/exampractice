@@ -131,6 +131,69 @@ int main(int ac, char **av)
 \treturn (0);
 }`,
     },
+  
+    {
+      id: 'rank02',
+      nombre: 'Versión rank02 (solución de referencia)',
+      descripcion: 'Solución tal y como aparece en el repo de referencia rank02. Útil para comparar estilo, validaciones y constraints reales del examen.',
+      recomendada: false,
+      origen: 'rank02',
+      codigo: `
+#include <unistd.h>
+
+void ft_putchar(char c)
+{
+	write(1, &c, 1);
+}
+
+int ft_strlen(char *str)
+{
+	int i = 0;
+	
+	while (str[i])
+		i++;
+	return (i);
+}
+
+int main(int ac, char *av[])
+{
+	char *tmp;
+	char *rev;
+	int len;
+
+	if (ac == 2)
+	{
+		tmp = av[1];
+		len = ft_strlen(tmp);
+		rev = NULL;
+		len--;
+		while (tmp[len])
+		{
+			if (tmp[len - 1] == ' ')
+			{
+				rev = &tmp[len];
+				while (*rev && *rev != ' ')
+				{
+					ft_putchar(*rev);
+					rev++;
+				}
+				ft_putchar(' ');
+			}
+			else if (len == 0)
+			{
+				rev = &tmp[len];
+				while (*rev && *rev != ' ')
+				{
+					ft_putchar(*rev);
+					rev++;
+				}
+			}
+			len--;
+		}
+	}
+	ft_putchar('\\n');
+}`,
+    },
   ],
 
   tests: [

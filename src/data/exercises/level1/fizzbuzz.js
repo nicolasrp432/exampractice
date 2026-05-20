@@ -176,6 +176,48 @@ int\tmain(void)
 \treturn (0);
 }`,
     },
+  
+    {
+      id: 'rank02',
+      nombre: 'Versión rank02 (solución de referencia)',
+      descripcion: 'Solución tal y como aparece en el repo de referencia rank02. Útil para comparar estilo, validaciones y constraints reales del examen.',
+      recomendada: false,
+      origen: 'rank02',
+      codigo: `#include <unistd.h>
+
+int	main(void)
+{
+	int	i;
+	int k;
+	int l;
+
+	i = 1;
+	while (i <= 100)
+	{
+		if ((i % 3 == 0) && (i % 5 == 0))
+			write(1, "fizzbuzz", 8);
+		else if (i % 3 == 0)
+			write(1, "fizz", 4);
+		else if (i % 5 == 0)
+			write(1, "buzz", 4);
+		else if (i > 10)
+		{
+			k = i / 10 + '0';
+			l = i % 10 + '0';
+			write (1, &k, 1);
+			write (1, &l, 1);
+		}
+		else
+		
+		{
+			k = i + '0';
+			write(1, &k, 1);
+		}
+		write(1,"\\n", 1);
+		i++;
+	}		
+}`,
+    },
   ],
 
   tests: [

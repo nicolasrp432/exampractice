@@ -113,6 +113,27 @@ void\tprint_bits(unsigned char octet)
 \t}
 }`,
     },
+  
+    {
+      id: 'rank02',
+      nombre: 'Versión rank02 (solución de referencia)',
+      descripcion: 'Solución tal y como aparece en el repo de referencia rank02. Útil para comparar estilo, validaciones y constraints reales del examen.',
+      recomendada: false,
+      origen: 'rank02',
+      codigo: `#include <unistd.h>
+
+void print_bits(unsigned char octet)
+{
+	int	i = 8;
+	unsigned char 	bit;
+
+	while (i--)
+	{
+		bit = (octet >> i & 1) + '0';
+		write(1, &bit, 1);
+	}
+}`,
+    },
   ],
 
   tests: [

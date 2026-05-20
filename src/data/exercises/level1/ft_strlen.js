@@ -93,6 +93,23 @@ Ancla mental: el alien NUNCA cuenta al fantasma, solo se detiene ante él.`,
 \treturn (p - str);
 }`,
     },
+  
+    {
+      id: 'rank02',
+      nombre: 'Versión rank02 (solución de referencia)',
+      descripcion: 'Solución tal y como aparece en el repo de referencia rank02. Útil para comparar estilo, validaciones y constraints reales del examen.',
+      recomendada: false,
+      origen: 'rank02',
+      codigo: `int     ft_strlen(char *str)
+{
+	int		i;
+
+	i = 0;
+	while (str[i] != '\\0')
+		i++;
+	return (i);
+}`,
+    },
   ],
 
   tests: [

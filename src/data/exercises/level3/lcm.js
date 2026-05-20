@@ -132,6 +132,31 @@ unsigned int\tlcm(unsigned int a, unsigned int b)
 \treturn (a / gcd(a, b) * b);
 }`,
     },
+  
+    {
+      id: 'rank02',
+      nombre: 'Versión rank02 (solución de referencia)',
+      descripcion: 'Solución tal y como aparece en el repo de referencia rank02. Útil para comparar estilo, validaciones y constraints reales del examen.',
+      recomendada: false,
+      origen: 'rank02',
+      codigo: `unsigned int lcm(unsigned int a, unsigned int b)
+{
+	unsigned int n;	
+
+	if (a == 0 || b == 0)
+		return (0);
+	if (a > b)
+		n = a;
+	else
+		n = b;
+	while (1)
+	{
+		if (n % a == 0 && n % b == 0)
+			return (n);
+		++n;
+	}
+}`,
+    },
   ],
 
   tests: [

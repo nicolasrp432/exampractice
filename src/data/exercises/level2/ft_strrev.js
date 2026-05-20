@@ -120,6 +120,30 @@ SIEMPRE devuelve el mismo puntero (str) — modifica in-place, sin malloc.`,
 \treturn (str);
 }`,
     },
+  
+    {
+      id: 'rank02',
+      nombre: 'Versión rank02 (solución de referencia)',
+      descripcion: 'Solución tal y como aparece en el repo de referencia rank02. Útil para comparar estilo, validaciones y constraints reales del examen.',
+      recomendada: false,
+      origen: 'rank02',
+      codigo: `char *ft_strrev(char *str)
+{
+	int i = -1;
+	int length = 0;
+	char temporary;
+
+	while (str[length])
+		length++;
+	while (++i < length / 2)
+	{
+		temporary = str[i];
+		str[i] = str[length - 1 - i];
+		str[length - 1 - i] = temporary;
+	}
+	return (str);
+}`,
+    },
   ],
 
   tests: [

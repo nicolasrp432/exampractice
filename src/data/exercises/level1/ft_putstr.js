@@ -120,6 +120,27 @@ void\tft_putstr(char *str)
 \twrite(1, str, ft_strlen(str));
 }`,
     },
+  
+    {
+      id: 'rank02',
+      nombre: 'Versión rank02 (solución de referencia)',
+      descripcion: 'Solución tal y como aparece en el repo de referencia rank02. Útil para comparar estilo, validaciones y constraints reales del examen.',
+      recomendada: false,
+      origen: 'rank02',
+      codigo: `#include <unistd.h>
+
+void    ft_putstr(char *str)
+{
+	int	i;
+
+	i = 0;
+	while (str[i] != '\\0')
+	{
+		write(1, &str[i], 1);
+		i++;
+	}
+}`,
+    },
   ],
 
   tests: [

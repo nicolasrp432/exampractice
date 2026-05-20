@@ -119,6 +119,26 @@ Si la montaña está vacía, el Guardián devuelve 0 y no mira nada más.`,
 \treturn (res);
 }`,
     },
+  
+    {
+      id: 'rank02',
+      nombre: 'Versión rank02 (solución de referencia)',
+      descripcion: 'Solución tal y como aparece en el repo de referencia rank02. Útil para comparar estilo, validaciones y constraints reales del examen.',
+      recomendada: false,
+      origen: 'rank02',
+      codigo: `int	max(int* tab, unsigned int len)
+{
+	if (len == 0)
+		return (0);
+	int res = tab[0];
+	for (unsigned int i = 0; i < len; i += 1)
+	{
+		if (res < tab[i])
+			res = tab[i];
+	}
+	return (res);
+}`,
+    },
   ],
 
   tests: [

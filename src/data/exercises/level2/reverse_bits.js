@@ -123,6 +123,27 @@ CLAVE: inicializar bit=0 (no 1, no octet).`,
 \treturn (bit);
 }`,
     },
+  
+    {
+      id: 'rank02',
+      nombre: 'Versión rank02 (solución de referencia)',
+      descripcion: 'Solución tal y como aparece en el repo de referencia rank02. Útil para comparar estilo, validaciones y constraints reales del examen.',
+      recomendada: false,
+      origen: 'rank02',
+      codigo: `unsigned char	reverse_bits(unsigned char octet)
+{
+	int		i = 8;
+	unsigned char	res = 0;
+
+	while (i > 0)
+	{
+		res = res * 2 + (octet % 2);
+		octet = octet / 2;
+		i--;
+	}
+	return (res);
+}`,
+    },
   ],
 
   tests: [

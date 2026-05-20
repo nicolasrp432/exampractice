@@ -103,6 +103,30 @@ La fórmula es: return (n > 0 && (n & (n - 1)) == 0).`,
 \treturn (1);
 }`,
     },
+  
+    {
+      id: 'rank02',
+      nombre: 'Versión rank02 (solución de referencia)',
+      descripcion: 'Solución tal y como aparece en el repo de referencia rank02. Útil para comparar estilo, validaciones y constraints reales del examen.',
+      recomendada: false,
+      origen: 'rank02',
+      codigo: `
+#include <stdio.h>
+
+int         is_power_of_2(unsigned int n)
+{
+	if (n == 0)
+		return (0);
+	while (n > 1)
+	{
+		if (n % 2 == 0)
+			n = n / 2;
+		else
+			return (0);
+	}
+	return (1);
+}`,
+    },
   ],
 
   tests: [
