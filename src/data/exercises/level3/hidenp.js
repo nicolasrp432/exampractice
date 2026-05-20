@@ -29,6 +29,35 @@ $> ./hidenp "foobar" "rab" | cat -e
 $> ./hidenp "hello" "heo" | cat -e
 1$`,
 
+  // Subject literal del repo rank02 (sub.txt). Útil para comparar con
+  // el subject didáctico activo y para la pestaña "Examen real".
+  subjectReal: `Assignment name  : hidenp
+Expected files   : hidenp.c
+Allowed functions: write
+--------------------------------------------------------------------------------
+
+Write a program named hidenp that takes two strings and displays 1
+followed by a newline if the first string is hidden in the second one,
+otherwise displays 0 followed by a newline.
+
+Let s1 and s2 be strings. We say that s1 is hidden in s2 if it's possible to
+find each character from s1 in s2, in the same order as they appear in s1.
+Also, the empty string is hidden in any string.
+
+If the number of parameters is not 2, the program displays a newline.
+
+Examples :
+
+$>./hidenp "fgex.;" "tyf34gdgf;'ektufjhgdgex.;.;rtjynur6" | cat -e
+1$
+$>./hidenp "abc" "2altrb53c.sse" | cat -e
+1$
+$>./hidenp "abc" "btarc" | cat -e
+0$
+$>./hidenp | cat -e
+$
+$>`,
+
   descripcion: 'Programa que verifica si s2 es una subsecuencia de s1 (los chars de s2 aparecen en s1 en el mismo orden). Imprime "1\\n" si sí, "0\\n" si no. Similar a wdmatch pero imprime 1/0 en vez de s2/vacío.',
 
   palacio: {

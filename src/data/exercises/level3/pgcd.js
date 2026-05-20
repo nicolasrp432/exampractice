@@ -23,6 +23,34 @@ pgcd(4, 6)   → 2
 pgcd(17, 13) → 1  (coprimes)
 pgcd(0, 5)   → 5`,
 
+  // Subject literal del repo rank02 (sub.txt). Útil para comparar con
+  // el subject didáctico activo y para la pestaña "Examen real".
+  subjectReal: `Assignment name  : pgcd
+Expected files   : pgcd.c
+Allowed functions: printf, atoi, malloc, free
+--------------------------------------------------------------------------------
+
+Write a program that takes two strings representing two strictly positive
+integers that fit in an int.
+
+Display their highest common denominator followed by a newline (It's always a
+strictly positive integer).
+
+If the number of parameters is not 2, display a newline.
+
+Examples:
+
+$> ./pgcd 42 10 | cat -e
+2$
+$> ./pgcd 42 12 | cat -e
+6$
+$> ./pgcd 14 77 | cat -e
+7$
+$> ./pgcd 17 3 | cat -e 
+1$
+$> ./pgcd | cat -e
+$`,
+
   descripcion: 'Función que calcula el Máximo Común Divisor (MCD/GCD). PGCD = "Plus Grand Commun Diviseur" en francés. Usa el algoritmo de Euclides: pgcd(a,b) = pgcd(b, a%b) hasta b=0.',
 
   palacio: {
@@ -126,6 +154,24 @@ pgcd(0,5) = 5`,
   ],
 
   trampas: [
+    {
+      severidad: 'info',
+      titulo: 'Diferencia plataforma vs examen real',
+      descripcion: 'El subject real (rank02) plantea pgcd como un PROGRAMA: `./pgcd 42 10` lee dos enteros de argv, calcula su MCD y lo imprime con printf. Permite `printf, atoi, malloc, free`. La plataforma lo modela como una FUNCIÓN pura `pgcd(int a, int b)` para enfocarse en el algoritmo (Euclides). Ambos enfoques calculan lo mismo; el harness de la plataforma envuelve tu función con un main que hace atoi+printf por ti. Si quieres entregar la versión-programa al examen, mira `subjectReal` y la versión correspondiente que se añadirá en próximas fases.',
+      codigoMal: `// El subject real espera un main que parsea argv:
+// ./pgcd 42 10 → 2
+// Si entregas solo una función pgcd(int,int), el examen no la enlazará.`,
+      codigoBien: `// Para el examen real:
+#include <stdio.h>
+#include <stdlib.h>
+int main(int argc, char **argv) {
+\tif (argc != 3) { write(1, "\\n", 1); return 0; }
+\tint a = atoi(argv[1]), b = atoi(argv[2]);
+\twhile (b) { int t = b; b = a % b; a = t; }
+\tprintf("%d\\n", a);
+\treturn 0;
+}`,
+    },
     {
       severidad: 'mortal',
       titulo: 'Olvidar la variable tmp → perder el valor de b',

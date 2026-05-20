@@ -5,7 +5,9 @@ export default {
   dificultad: 'medio',
   tipoEntrega: 'programa',
   archivosEsperados: ['add_prime_sum.c'],
-  funcionesPermitidas: ['write'],
+  // El subject real permite además `exit`. La plataforma solo había
+  // declarado `write` — ampliamos sin romper soluciones existentes.
+  funcionesPermitidas: ['write', 'exit'],
 
   subject: `Assignment name  : add_prime_sum
 Expected files   : add_prime_sum.c
@@ -25,6 +27,31 @@ $> ./add_prime_sum 7 | cat -e
 17$
 $> ./add_prime_sum 1 | cat -e
 0$`,
+
+  // Subject literal del repo rank02 (sub.txt). Útil para comparar con
+  // el subject didáctico activo y para la pestaña "Examen real".
+  subjectReal: `Assignment name  : add_prime_sum
+Expected files   : add_prime_sum.c
+Allowed functions: write, exit
+--------------------------------------------------------------------------------
+
+Write a program that takes a positive integer as argument and displays the sum
+of all prime numbers inferior or equal to it followed by a newline.
+
+If the number of arguments is not 1, or the argument is not a positive number,
+just display 0 followed by a newline.
+
+Yes, the examples are right.
+
+Examples:
+
+$>./add_prime_sum 5
+10
+$>./add_prime_sum 7 | cat -e
+17$
+$>./add_prime_sum | cat -e
+0$
+$>`,
 
   descripcion: 'Programa que suma todos los números primos hasta N (inclusive). Requiere is_prime() con verificación hasta sqrt(n), y put_nbr para imprimir el resultado.',
 
@@ -247,6 +274,19 @@ Salida: "10\\n"`,
   ],
 
   trampas: [
+    {
+      severidad: 'info',
+      titulo: 'Diferencia plataforma vs examen real',
+      descripcion: 'El subject real permite también la función `exit` (útil para salir limpiamente si el argumento no es un entero positivo). Las soluciones write-only de la plataforma siguen siendo válidas.',
+      codigoMal: `// La versión didáctica forzaba return 0 con guardas anidadas:
+if (argc != 2) { write(1, "0\\n", 2); return 0; }
+if (!is_positive_int(argv[1])) { write(1, "0\\n", 2); return 0; }`,
+      codigoBien: `// Con exit puedes simplificar la salida temprana:
+if (argc != 2 || !is_positive_int(argv[1])) {
+\twrite(1, "0\\n", 2);
+\texit(0);
+}`,
+    },
     {
       severidad: 'mortal',
       titulo: 'is_prime: probar hasta n/2 en vez de sqrt(n)',
