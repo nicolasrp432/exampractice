@@ -83,6 +83,42 @@ La struct t_list tiene: next (puntero al siguiente) y data (el contenido).`,
     },
   },
 
+  // Tester oficial copiado literalmente desde rank02 (tester.sh).
+  testerReal: `#!/bin/bash
+source ../../../main/colors.sh
+file1=ft_list_size.c
+file2=../../../../rendu/ft_list_size/ft_list_size.c
+
+
+# 1. test
+    gcc -Werror -Wall -Wextra -o out1 "$file1" main.c
+    gcc -Werror -Wall -Wextra -o out2 "$file2" main.c
+
+    ./out1 > out1.txt 2>/dev/null
+    ./out2 > out2.txt 2>/dev/null
+
+    if ! diff -q out1.txt out2.txt >/dev/null ; then
+        out1=$(cat out1.txt)
+        out2=$(cat out2.txt)
+        echo "$(tput setaf 1)$(tput bold)FAIL$(tput sgr 0)"
+        echo "\${GREEN}Expected Output:\${RESET} \\"$out1\\""
+        echo "\${RED}Your Output:\${RESET}     \\"$out2\\""
+        rm out1 out2 out1.txt out2.txt 2>/dev/null
+        exit 1
+    fi
+    
+    
+    rm out1 out2 out1.txt out2.txt 2>/dev/null
+    echo "$(tput setaf 2)$(tput bold)PASSED 🎉$(tput sgr 0)"
+    exit 1
+    `,
+
+  // Tests derivados del tester.sh real. Las salidas se obtuvieron
+  // compilando la solución de rank02 con gcc -w y ejecutándola.
+  testsRank02: [
+    { id: 'tester_1', entrada: [], salida: "3\n", fuente: 'tester.sh' },
+  ],
+
   versiones: [
     {
       id: 'clasica',

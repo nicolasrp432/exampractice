@@ -108,6 +108,131 @@ Usa put_nbr para imprimir los números sin printf.`,
     },
   },
 
+  // Tester oficial copiado literalmente desde rank02 (tester.sh).
+  testerReal: `#!/bin/bash
+source ../../../main/colors.sh
+file1=tab_mult.c
+file2=../../../../rendu/tab_mult/tab_mult.c
+
+
+# 1. test
+    gcc -Werror -Wall -Wextra -o out1 "$file1"
+    gcc -Werror -Wall -Wextra -o out2 "$file2"
+
+    ./out1 > out1.txt 2>/dev/null
+    ./out2 > out2.txt 2>/dev/null
+
+    if ! diff -q out1.txt out2.txt >/dev/null ; then
+        out1=$(cat out1.txt)
+        out2=$(cat out2.txt)
+        echo "$(tput setaf 1)$(tput bold)FAIL$(tput sgr 0)"
+        echo "\${GREEN}Expected Output:\${RESET} \\"$out1\\""
+        echo "\${RED}Your Output:\${RESET}     \\"$out2\\""
+        rm out1 out2 out1.txt out2.txt 2>/dev/null
+        exit 1
+    fi
+
+# 2. test
+    gcc -w -o out1 "$file1"
+    gcc -w -o out2 "$file2"
+
+    ./out1 "9" > out1.txt 2>/dev/null
+    ./out2 "9" > out2.txt 2>/dev/null
+
+    if ! diff -q out1.txt out2.txt >/dev/null ; then
+        out1=$(cat out1.txt)
+        out2=$(cat out2.txt)
+        echo "$(tput setaf 1)$(tput bold)FAIL$(tput sgr 0)"
+        echo "\${GREEN}Expected Output:\${RESET} \\"$out1\\""
+        echo "\${RED}Your Output:\${RESET}     \\"$out2\\""
+        rm out1 out2 out1.txt out2.txt 2>/dev/null
+        exit 1
+    fi
+
+# 3. test
+    gcc -w -o out1 "$file1"
+    gcc -w -o out2 "$file2"
+
+    ./out1 "12" > out1.txt 2>/dev/null
+    ./out2 "12" > out2.txt 2>/dev/null
+
+    if ! diff -q out1.txt out2.txt >/dev/null ; then
+        out1=$(cat out1.txt)
+        out2=$(cat out2.txt)
+        echo "$(tput setaf 1)$(tput bold)FAIL$(tput sgr 0)"
+        echo "\${GREEN}Expected Output:\${RESET} \\"$out1\\""
+        echo "\${RED}Your Output:\${RESET}     \\"$out2\\""
+        rm out1 out2 out1.txt out2.txt 2>/dev/null
+        exit 1
+    fi
+
+# 4. test
+    gcc -w -o out1 "$file1"
+    gcc -w -o out2 "$file2"
+
+    ./out1 "1" > out1.txt 2>/dev/null
+    ./out2 "1" > out2.txt 2>/dev/null
+
+    if ! diff -q out1.txt out2.txt >/dev/null ; then
+        out1=$(cat out1.txt)
+        out2=$(cat out2.txt)
+        echo "$(tput setaf 1)$(tput bold)FAIL$(tput sgr 0)"
+        echo "\${GREEN}Expected Output:\${RESET} \\"$out1\\""
+        echo "\${RED}Your Output:\${RESET}     \\"$out2\\""
+        rm out1 out2 out1.txt out2.txt 2>/dev/null
+        exit 1
+    fi
+
+# 5. test 
+    gcc -w -o out1 "$file1"
+    gcc -w -o out2 "$file2"
+
+    ./out1 "4" > out1.txt 2>/dev/null
+    ./out2 "4" > out2.txt 2>/dev/null
+
+    if ! diff -q out1.txt out2.txt >/dev/null ; then
+        out1=$(cat out1.txt)
+        out2=$(cat out2.txt)
+        echo "$(tput setaf 1)$(tput bold)FAIL$(tput sgr 0)"
+        echo "\${GREEN}Expected Output:\${RESET} \\"$out1\\""
+        echo "\${RED}Your Output:\${RESET}     \\"$out2\\""
+        rm out1 out2 out1.txt out2.txt 2>/dev/null
+        exit 1
+    fi
+
+# 6. test 
+    gcc -w -o out1 "$file1"
+    gcc -w -o out2 "$file2"
+
+    ./out1 "0" > out1.txt 2>/dev/null
+    ./out2 "0" > out2.txt 2>/dev/null
+
+    if ! diff -q out1.txt out2.txt >/dev/null ; then
+        out1=$(cat out1.txt)
+        out2=$(cat out2.txt)
+        echo "$(tput setaf 1)$(tput bold)FAIL$(tput sgr 0)"
+        echo "\${GREEN}Expected Output:\${RESET} \\"$out1\\""
+        echo "\${RED}Your Output:\${RESET}     \\"$out2\\""
+        rm out1 out2 out1.txt out2.txt 2>/dev/null
+        exit 1
+    fi
+
+
+    rm out1 out2 out1.txt out2.txt 2>/dev/null
+    echo "$(tput setaf 2)$(tput bold)PASSED 🎉$(tput sgr 0)"
+    exit 1`,
+
+  // Tests derivados del tester.sh real. Las salidas se obtuvieron
+  // compilando la solución de rank02 con gcc -w y ejecutándola.
+  testsRank02: [
+    { id: 'tester_1', entrada: [], salida: "\n", fuente: 'tester.sh' },
+    { id: 'tester_2', entrada: ["9"], salida: "1 x 9 = 9\n2 x 9 = 18\n3 x 9 = 27\n4 x 9 = 36\n5 x 9 = 45\n6 x 9 = 54\n7 x 9 = 63\n8 x 9 = 72\n9 x 9 = 81\n", fuente: 'tester.sh' },
+    { id: 'tester_3', entrada: ["12"], salida: "1 x 12 = 12\n2 x 12 = 24\n3 x 12 = 36\n4 x 12 = 48\n5 x 12 = 60\n6 x 12 = 72\n7 x 12 = 84\n8 x 12 = 96\n9 x 12 = 108\n", fuente: 'tester.sh' },
+    { id: 'tester_4', entrada: ["1"], salida: "1 x 1 = 1\n2 x 1 = 2\n3 x 1 = 3\n4 x 1 = 4\n5 x 1 = 5\n6 x 1 = 6\n7 x 1 = 7\n8 x 1 = 8\n9 x 1 = 9\n", fuente: 'tester.sh' },
+    { id: 'tester_5', entrada: ["4"], salida: "1 x 4 = 4\n2 x 4 = 8\n3 x 4 = 12\n4 x 4 = 16\n5 x 4 = 20\n6 x 4 = 24\n7 x 4 = 28\n8 x 4 = 32\n9 x 4 = 36\n", fuente: 'tester.sh' },
+    { id: 'tester_6', entrada: ["0"], salida: "1 x 0 = 0\n2 x 0 = 0\n3 x 0 = 0\n4 x 0 = 0\n5 x 0 = 0\n6 x 0 = 0\n7 x 0 = 0\n8 x 0 = 0\n9 x 0 = 0\n", fuente: 'tester.sh' },
+  ],
+
   versiones: [
     {
       id: 'clasica',

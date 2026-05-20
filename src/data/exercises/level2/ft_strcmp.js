@@ -65,6 +65,114 @@ Si s1 termina antes que s2, el \\0 de s1 "pesa" menos que el char de s2.`,
     },
   },
 
+  // Tester oficial copiado literalmente desde rank02 (tester.sh).
+  testerReal: `#!/bin/bash
+source ../../../main/colors.sh
+file1=ft_strcmp.c
+file2=../../../../rendu/ft_strcmp/ft_strcmp.c
+
+
+# 1. test
+    gcc -Werror -Wall -Wextra -o out1 "$file1" main.c
+    gcc -Werror -Wall -Wextra -o out2 "$file2" main.c
+
+    ./out1 "Ceci permet de decouvrir le fonctionnement de ton ft_atoi." > out1.txt 2>/dev/null
+    ./out2 "Ceci permet de decouvrir le fonctionnement de ton ft_atoi." > out2.txt 2>/dev/null
+
+    if ! diff -q out1.txt out2.txt >/dev/null ; then
+        out1=$(cat out1.txt)
+        out2=$(cat out2.txt)
+        echo "$(tput setaf 1)$(tput bold)FAIL$(tput sgr 0)"
+        echo "\${GREEN}Expected Output:\${RESET} \\"$out1\\""
+        echo "\${RED}Your Output:\${RESET}     \\"$out2\\""
+        rm out1 out2 out1.txt out2.txt 2>/dev/null
+        exit 1
+    fi
+
+# 2. test
+    gcc -w -o out1 "$file1" main.c
+    gcc -w -o out2 "$file2" main.c
+
+    ./out1 "OH ! 13268!" > out1.txt 2>/dev/null
+    ./out2 "OH ! 13268!" > out2.txt 2>/dev/null
+
+    if ! diff -q out1.txt out2.txt >/dev/null ; then
+        out1=$(cat out1.txt)
+        out2=$(cat out2.txt)
+        echo "$(tput setaf 1)$(tput bold)FAIL$(tput sgr 0)"
+        echo "\${GREEN}Expected Output:\${RESET} \\"$out1\\""
+        echo "\${RED}Your Output:\${RESET}     \\"$out2\\""
+        rm out1 out2 out1.txt out2.txt 2>/dev/null
+        exit 1
+    fi
+
+# 3. test
+    gcc -w -o out1 "$file1" main.c
+    gcc -w -o out2 "$file2" main.c
+
+    ./out1 "hello World" "hello world" > out1.txt 2>/dev/null
+    ./out2 "hello World" "hello world" > out2.txt 2>/dev/null
+
+    if ! diff -q out1.txt out2.txt >/dev/null ; then
+        out1=$(cat out1.txt)
+        out2=$(cat out2.txt)
+        echo "$(tput setaf 1)$(tput bold)FAIL$(tput sgr 0)"
+        echo "\${GREEN}Expected Output:\${RESET} \\"$out1\\""
+        echo "\${RED}Your Output:\${RESET}     \\"$out2\\""
+        rm out1 out2 out1.txt out2.txt 2>/dev/null
+        exit 1
+    fi
+
+# 4. test
+    gcc -w -o out1 "$file1" main.c
+    gcc -w -o out2 "$file2" main.c
+
+    ./out1 "hello World" "" > out1.txt 2>/dev/null
+    ./out2 "hello World" "" > out2.txt 2>/dev/null
+
+    if ! diff -q out1.txt out2.txt >/dev/null ; then
+        out1=$(cat out1.txt)
+        out2=$(cat out2.txt)
+        echo "$(tput setaf 1)$(tput bold)FAIL$(tput sgr 0)"
+        echo "\${GREEN}Expected Output:\${RESET} \\"$out1\\""
+        echo "\${RED}Your Output:\${RESET}     \\"$out2\\""
+        rm out1 out2 out1.txt out2.txt 2>/dev/null
+        exit 1
+    fi
+
+# 5. test 
+    gcc -w -o out1 "$file1" main.c
+    gcc -w -o out2 "$file2" main.c
+
+    ./out1 "13268!" "+13268!" > out1.txt 2>/dev/null
+    ./out2 "13268!" "+13268!" > out2.txt 2>/dev/null
+
+    if ! diff -q out1.txt out2.txt >/dev/null ; then
+        out1=$(cat out1.txt)
+        out2=$(cat out2.txt)
+        echo "$(tput setaf 1)$(tput bold)FAIL$(tput sgr 0)"
+        echo "\${GREEN}Expected Output:\${RESET} \\"$out1\\""
+        echo "\${RED}Your Output:\${RESET}     \\"$out2\\""
+        rm out1 out2 out1.txt out2.txt 2>/dev/null
+        exit 1
+    fi
+
+
+    rm out1 out2 out1.txt out2.txt 2>/dev/null
+    echo "$(tput setaf 2)$(tput bold)PASSED 🎉$(tput sgr 0)"
+    exit 1
+`,
+
+  // Tests derivados del tester.sh real. Las salidas se obtuvieron
+  // compilando la solución de rank02 con gcc -w y ejecutándola.
+  testsRank02: [
+    { id: 'tester_1', entrada: ["Ceci permet de decouvrir le fonctionnement de ton ft_atoi."], salida: "", fuente: 'tester.sh' },
+    { id: 'tester_2', entrada: ["OH ! 13268!"], salida: "", fuente: 'tester.sh' },
+    { id: 'tester_3', entrada: ["hello World","hello world"], salida: "ft_strcmp(\"hello World\", \"hello world\") = -32\n", fuente: 'tester.sh' },
+    { id: 'tester_4', entrada: ["hello World",""], salida: "ft_strcmp(\"hello World\", \"\") = 104\n", fuente: 'tester.sh' },
+    { id: 'tester_5', entrada: ["13268!","+13268!"], salida: "ft_strcmp(\"13268!\", \"+13268!\") = 6\n", fuente: 'tester.sh' },
+  ],
+
   versiones: [
     {
       id: 'clasica',

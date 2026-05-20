@@ -107,6 +107,170 @@ Caso especial: n=1 → imprimir "1".`,
     },
   },
 
+  // Tester oficial copiado literalmente desde rank02 (tester.sh).
+  testerReal: `#!/bin/bash
+source ../../../main/colors.sh
+file1=fprime.c
+file2=../../../../rendu/fprime/fprime.c
+
+
+# 1. test
+    gcc -Werror -Wall -Wextra -o out1 "$file1"
+    gcc -Werror -Wall -Wextra -o out2 "$file2"
+
+    ./out1 > out1.txt 2>/dev/null
+    ./out2 > out2.txt 2>/dev/null
+
+    if ! diff -q out1.txt out2.txt >/dev/null ; then
+        out1=$(cat out1.txt)
+        out2=$(cat out2.txt)
+        echo "$(tput setaf 1)$(tput bold)FAIL$(tput sgr 0)"
+        echo "\${GREEN}Expected Output:\${RESET} \\"$out1\\""
+        echo "\${RED}Your Output:\${RESET}     \\"$out2\\""
+        rm out1 out2 out1.txt out2.txt 2>/dev/null
+        exit 1
+    fi
+
+
+# 2. test
+    gcc -w -o out1 "$file1"
+    gcc -w -o out2 "$file2"
+
+    ./out1 "225225" > out1.txt 2>/dev/null
+    ./out2 "225225" > out2.txt 2>/dev/null
+
+    if ! diff -q out1.txt out2.txt >/dev/null ; then
+        out1=$(cat out1.txt)
+        out2=$(cat out2.txt)
+        echo "$(tput setaf 1)$(tput bold)FAIL$(tput sgr 0)"
+        echo "\${GREEN}Expected Output:\${RESET} \\"$out1\\""
+        echo "\${RED}Your Output:\${RESET}     \\"$out2\\""
+        rm out1 out2 out1.txt out2.txt 2>/dev/null
+        exit 1
+    fi
+
+# 3. test
+    gcc -w -o out1 "$file1"
+    gcc -w -o out2 "$file2"
+
+    ./out1 "8333325" > out1.txt 2>/dev/null
+    ./out2 "8333325" > out2.txt 2>/dev/null
+
+    if ! diff -q out1.txt out2.txt >/dev/null ; then
+        out1=$(cat out1.txt)
+        out2=$(cat out2.txt)
+        echo "$(tput setaf 1)$(tput bold)FAIL$(tput sgr 0)"
+        echo "\${GREEN}Expected Output:\${RESET} \\"$out1\\""
+        echo "\${RED}Your Output:\${RESET}     \\"$out2\\""
+        rm out1 out2 out1.txt out2.txt 2>/dev/null
+        exit 1
+    fi
+
+# 4. test
+    gcc -w -o out1 "$file1"
+    gcc -w -o out2 "$file2"
+
+    ./out1 "9539" "btarc" > out1.txt 2>/dev/null
+    ./out2 "9539" "btarc" > out2.txt 2>/dev/null
+
+    if ! diff -q out1.txt out2.txt >/dev/null ; then
+        out1=$(cat out1.txt)
+        out2=$(cat out2.txt)
+        echo "$(tput setaf 1)$(tput bold)FAIL$(tput sgr 0)"
+        echo "\${GREEN}Expected Output:\${RESET} \\"$out1\\""
+        echo "\${RED}Your Output:\${RESET}     \\"$out2\\""
+        rm out1 out2 out1.txt out2.txt 2>/dev/null
+        exit 1
+    fi
+
+
+# 5. test 
+    gcc -w -o out1 "$file1"
+    gcc -w -o out2 "$file2"
+
+    ./out1 "42" > out1.txt 2>/dev/null
+    ./out2 "42" > out2.txt 2>/dev/null
+
+    if ! diff -q out1.txt out2.txt >/dev/null ; then
+        out1=$(cat out1.txt)
+        out2=$(cat out2.txt)
+        echo "$(tput setaf 1)$(tput bold)FAIL$(tput sgr 0)"
+        echo "\${GREEN}Expected Output:\${RESET} \\"$out1\\""
+        echo "\${RED}Your Output:\${RESET}     \\"$out2\\""
+        rm out1 out2 out1.txt out2.txt 2>/dev/null
+        exit 1
+    fi
+
+    rm out1 out2 out1.txt out2.txt 2>/dev/null
+# 6. test
+    gcc -w -o out1 "$file1"
+    gcc -w -o out2 "$file2"
+
+    ./out1 "mais non!" "mais non!" > out1.txt 2>/dev/null
+    ./out2 "mais non!" "mais non!" > out2.txt 2>/dev/null
+
+    if ! diff -q out1.txt out2.txt >/dev/null ; then
+        out1=$(cat out1.txt)
+        out2=$(cat out2.txt)
+        echo "$(tput setaf 1)$(tput bold)FAIL$(tput sgr 0)"
+        echo "\${GREEN}Expected Output:\${RESET} \\"$out1\\""
+        echo "\${RED}Your Output:\${RESET}     \\"$out2\\""
+        rm out1 out2 out1.txt out2.txt 2>/dev/null
+        exit 1
+    fi
+
+# 7. test
+    gcc -w -o out1 "$file1"
+    gcc -w -o out2 "$file2"
+
+    ./out1 "-52" > out1.txt 2>/dev/null
+    ./out2 "-52" > out2.txt 2>/dev/null
+
+    if ! diff -q out1.txt out2.txt >/dev/null ; then
+        out1=$(cat out1.txt)
+        out2=$(cat out2.txt)
+        echo "$(tput setaf 1)$(tput bold)FAIL$(tput sgr 0)"
+        echo "\${GREEN}Expected Output:\${RESET} \\"$out1\\""
+        echo "\${RED}Your Output:\${RESET}     \\"$out2\\""
+        rm out1 out2 out1.txt out2.txt 2>/dev/null
+        exit 1
+    fi
+
+# 8. test
+    gcc -w -o out1 "$file1"
+    gcc -w -o out2 "$file2"
+
+    ./out1 "0" > out1.txt 2>/dev/null
+    ./out2 "0" > out2.txt 2>/dev/null
+
+    if ! diff -q out1.txt out2.txt >/dev/null ; then
+        out1=$(cat out1.txt)
+        out2=$(cat out2.txt)
+        echo "$(tput setaf 1)$(tput bold)FAIL$(tput sgr 0)"
+        echo "\${GREEN}Expected Output:\${RESET} \\"$out1\\""
+        echo "\${RED}Your Output:\${RESET}     \\"$out2\\""
+        rm out1 out2 out1.txt out2.txt 2>/dev/null
+        exit 1
+    fi
+
+
+    rm out1 out2 out1.txt out2.txt 2>/dev/null
+    echo "$(tput setaf 2)$(tput bold)PASSED 🎉$(tput sgr 0)"
+    exit 1`,
+
+  // Tests derivados del tester.sh real. Las salidas se obtuvieron
+  // compilando la solución de rank02 con gcc -w y ejecutándola.
+  testsRank02: [
+    { id: 'tester_1', entrada: [], salida: "\n", fuente: 'tester.sh' },
+    { id: 'tester_2', entrada: ["225225"], salida: "3*3*5*5*7*11*13\n", fuente: 'tester.sh' },
+    { id: 'tester_3', entrada: ["8333325"], salida: "3*3*5*5*7*11*13*37\n", fuente: 'tester.sh' },
+    { id: 'tester_4', entrada: ["9539","btarc"], salida: "\n", fuente: 'tester.sh' },
+    { id: 'tester_5', entrada: ["42"], salida: "2*3*7\n", fuente: 'tester.sh' },
+    { id: 'tester_6', entrada: ["mais non!","mais non!"], salida: "\n", fuente: 'tester.sh' },
+    { id: 'tester_7', entrada: ["-52"], salida: "\n", fuente: 'tester.sh' },
+    { id: 'tester_8', entrada: ["0"], salida: "\n", fuente: 'tester.sh' },
+  ],
+
   versiones: [
     {
       id: 'clasica',

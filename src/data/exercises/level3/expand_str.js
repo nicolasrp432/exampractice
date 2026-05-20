@@ -98,6 +98,167 @@ El algoritmo es idéntico a epur_str pero escribe "   " en vez de " ".`,
     },
   },
 
+  // Tester oficial copiado literalmente desde rank02 (tester.sh).
+  testerReal: `#!/bin/bash
+source ../../../main/colors.sh
+file1=expand_str.c
+file2=../../../../rendu/expand_str/expand_str.c
+
+
+# 1. test
+    gcc -Werror -Wall -Wextra -o out1 "$file1"
+    gcc -Werror -Wall -Wextra -o out2 "$file2"
+
+    ./out1 > out1.txt 2>/dev/null
+    ./out2 > out2.txt 2>/dev/null
+
+    if ! diff -q out1.txt out2.txt >/dev/null ; then
+        out1=$(cat out1.txt)
+        out2=$(cat out2.txt)
+        echo "$(tput setaf 1)$(tput bold)FAIL$(tput sgr 0)"
+        echo "\${GREEN}Expected Output:\${RESET} \\"$out1\\""
+        echo "\${RED}Your Output:\${RESET}     \\"$out2\\""
+        rm out1 out2 out1.txt out2.txt 2>/dev/null
+        exit 1
+    fi
+
+# 2. test
+    gcc -w -o out1 "$file1"
+    gcc -w -o out2 "$file2"
+
+    ./out1 "See? It's easy to print the same thing" > out1.txt 2>/dev/null
+    ./out2 "See? It's easy to print the same thing" > out2.txt 2>/dev/null
+
+    if ! diff -q out1.txt out2.txt >/dev/null ; then
+        out1=$(cat out1.txt)
+        out2=$(cat out2.txt)
+        echo "$(tput setaf 1)$(tput bold)FAIL$(tput sgr 0)"
+        echo "\${GREEN}Expected Output:\${RESET} \\"$out1\\""
+        echo "\${RED}Your Output:\${RESET}     \\"$out2\\""
+        rm out1 out2 out1.txt out2.txt 2>/dev/null
+        exit 1
+    fi
+
+# 3. test
+    gcc -w -o out1 "$file1"
+    gcc -w -o out2 "$file2"
+
+    ./out1 " this        time it      will     be    more complex  . " > out1.txt 2>/dev/null
+    ./out2 " this        time it      will     be    more complex  . " > out2.txt 2>/dev/null
+
+    if ! diff -q out1.txt out2.txt >/dev/null ; then
+        out1=$(cat out1.txt)
+        out2=$(cat out2.txt)
+        echo "$(tput setaf 1)$(tput bold)FAIL$(tput sgr 0)"
+        echo "\${GREEN}Expected Output:\${RESET} \\"$out1\\""
+        echo "\${RED}Your Output:\${RESET}     \\"$out2\\""
+        rm out1 out2 out1.txt out2.txt 2>/dev/null
+        exit 1
+    fi
+
+# 4. test
+    gcc -w -o out1 "$file1"
+    gcc -w -o out2 "$file2"
+
+    ./out1 "No S*** Sherlock..." "nAw S*** ShErLaWQ..." > out1.txt 2>/dev/null
+    ./out2 "No S*** Sherlock..." "nAw S*** ShErLaWQ..." > out2.txt 2>/dev/null
+
+    if ! diff -q out1.txt out2.txt >/dev/null ; then
+        out1=$(cat out1.txt)
+        out2=$(cat out2.txt)
+        echo "$(tput setaf 1)$(tput bold)FAIL$(tput sgr 0)"
+        echo "\${GREEN}Expected Output:\${RESET} \\"$out1\\""
+        echo "\${RED}Your Output:\${RESET}     \\"$out2\\""
+        rm out1 out2 out1.txt out2.txt 2>/dev/null
+        exit 1
+    fi
+
+# 5. test 
+    gcc -w -o out1 "$file1"
+    gcc -w -o out2 "$file2"
+
+    ./out1 "comme c'est cocasse" "vous avez entendu, Mathilde ?" > out1.txt 2>/dev/null
+    ./out2 "comme c'est cocasse" "vous avez entendu, Mathilde ?" > out2.txt 2>/dev/null
+
+    if ! diff -q out1.txt out2.txt >/dev/null ; then
+        out1=$(cat out1.txt)
+        out2=$(cat out2.txt)
+        echo "$(tput setaf 1)$(tput bold)FAIL$(tput sgr 0)"
+        echo "\${GREEN}Expected Output:\${RESET} \\"$out1\\""
+        echo "\${RED}Your Output:\${RESET}     \\"$out2\\""
+        rm out1 out2 out1.txt out2.txt 2>/dev/null
+        exit 1
+    fi
+
+# 6. test
+    gcc -w -o out1 "$file1"
+    gcc -w -o out2 "$file2"
+
+    ./out1 "5" > out1.txt 2>/dev/null
+    ./out2 "5"> out2.txt 2>/dev/null
+
+    if ! diff -q out1.txt out2.txt >/dev/null ; then
+        out1=$(cat out1.txt)
+        out2=$(cat out2.txt)
+        echo "$(tput setaf 1)$(tput bold)FAIL$(tput sgr 0)"
+        echo "\${GREEN}Expected Output:\${RESET} \\"$out1\\""
+        echo "\${RED}Your Output:\${RESET}     \\"$out2\\""
+        rm out1 out2 out1.txt out2.txt 2>/dev/null
+        exit 1
+    fi
+
+# 7. test
+    gcc -w -o out1 "$file1"
+    gcc -w -o out2 "$file2"
+
+    ./out1 "Too" "Many" "Arguments" > out1.txt 2>/dev/null
+    ./out2 "Too" "Many" "Arguments" > out2.txt 2>/dev/null
+
+    if ! diff -q out1.txt out2.txt >/dev/null ; then
+        out1=$(cat out1.txt)
+        out2=$(cat out2.txt)
+        echo "$(tput setaf 1)$(tput bold)FAIL$(tput sgr 0)"
+        echo "\${GREEN}Expected Output:\${RESET} \\"$out1\\""
+        echo "\${RED}Your Output:\${RESET}     \\"$out2\\""
+        rm out1 out2 out1.txt out2.txt 2>/dev/null
+        exit 1
+    fi
+
+# 8. test
+    gcc -w -o out1 "$file1"
+    gcc -w -o out2 "$file2"
+
+    ./out1 "7" > out1.txt 2>/dev/null
+    ./out2 "7" > out2.txt 2>/dev/null
+
+    if ! diff -q out1.txt out2.txt >/dev/null ; then
+        out1=$(cat out1.txt)
+        out2=$(cat out2.txt)
+        echo "$(tput setaf 1)$(tput bold)FAIL$(tput sgr 0)"
+        echo "\${GREEN}Expected Output:\${RESET} \\"$out1\\""
+        echo "\${RED}Your Output:\${RESET}     \\"$out2\\""
+        rm out1 out2 out1.txt out2.txt 2>/dev/null
+        exit 1
+    fi
+
+
+    rm out1 out2 out1.txt out2.txt 2>/dev/null
+    echo "$(tput setaf 2)$(tput bold)PASSED 🎉$(tput sgr 0)"
+    exit 1`,
+
+  // Tests derivados del tester.sh real. Las salidas se obtuvieron
+  // compilando la solución de rank02 con gcc -w y ejecutándola.
+  testsRank02: [
+    { id: 'tester_1', entrada: [], salida: "\n", fuente: 'tester.sh' },
+    { id: 'tester_2', entrada: ["See? It's easy to print the same thing"], salida: "See?   It's   easy   to   print   the   same   thing\n", fuente: 'tester.sh' },
+    { id: 'tester_3', entrada: [" this        time it      will     be    more complex  . "], salida: "this   time   it   will   be   more   complex   .\n", fuente: 'tester.sh' },
+    { id: 'tester_4', entrada: ["No S*** Sherlock...","nAw S*** ShErLaWQ..."], salida: "\n", fuente: 'tester.sh' },
+    { id: 'tester_5', entrada: ["comme c'est cocasse","vous avez entendu, Mathilde ?"], salida: "\n", fuente: 'tester.sh' },
+    { id: 'tester_6', entrada: ["5"], salida: "5\n", fuente: 'tester.sh' },
+    { id: 'tester_7', entrada: ["Too","Many","Arguments"], salida: "\n", fuente: 'tester.sh' },
+    { id: 'tester_8', entrada: ["7"], salida: "7\n", fuente: 'tester.sh' },
+  ],
+
   versiones: [
     {
       id: 'clasica',
