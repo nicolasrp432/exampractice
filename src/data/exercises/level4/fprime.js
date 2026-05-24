@@ -5,10 +5,10 @@ export default {
   dificultad: 'medio',
   tipoEntrega: 'programa',
   archivosEsperados: ['fprime.c'],
-  // El subject real permite atoi y printf. La plataforma había restringido
-  // a write para forzar a memorizar ft_putnbr; mantenemos esa versión como
-  // alternativa y abrimos atoi/printf para acercarnos al examen real.
-  funcionesPermitidas: ['atoi', 'printf', 'write'],
+  // Match al subject real del rank02 (sub.txt): solo printf y atoi.
+  // Versiones alternativas con write/ft_putnbr disponibles en `versiones`
+  // para quien quiera practicar el enfoque sin printf.
+  funcionesPermitidas: ['printf', 'atoi'],
 
   subject: `Assignment name  : fprime
 Expected files   : fprime.c

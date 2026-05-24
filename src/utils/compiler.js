@@ -55,7 +55,10 @@ export async function compileAndRun(code, args = [], options = {}) {
     stdin = '',
     compilerOptions = '',
     compilerOptionRaw = '',
-    compiler = 'gcc-head',
+    // `gcc-head-c` compila como C. NO usar `gcc-head` (que es C++ y
+    // rechaza construcciones legales en C como funciones sin tipo de
+    // retorno explícito o conversiones implícitas void* ↔ T*).
+    compiler = 'gcc-head-c',
   } = options
 
   const res = await fetch(WANDBOX_URL, {

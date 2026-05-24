@@ -28,8 +28,11 @@ int main(int argc, char **argv)
 #include <stdlib.h>
 int main(int argc, char **argv)
 {
-\tint a = atoi(argv[1]);
-\tint b = atoi(argv[2]);
+\tint a;
+\tint b;
+\tif (argc < 3) { printf("0 0\\n"); return (0); }
+\ta = atoi(argv[1]);
+\tb = atoi(argv[2]);
 \tft_swap(&a, &b);
 \tprintf("%d %d\\n", a, b);
 \treturn (0);

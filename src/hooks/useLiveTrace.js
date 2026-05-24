@@ -1,16 +1,20 @@
-import { useCallback, useState } from 'react'
+import { useCallback, useRef, useState } from 'react'
 import { compileAndRun } from '@/utils/compiler'
 import { instrument } from '@/utils/tracer/instrumenter'
 import { parseTraceStream, stripTraceFromStderr, attachOutputToLastStep } from '@/utils/tracer/traceParser'
+import { useTraceCache, makeTraceKey } from '@/hooks/useTraceCache'
 
 // Hook returning a function that takes `(fullSource, args, stdin)` and
 // returns `{ steps, stdout, stderr, exitCode, signal, compileError }`.
-// It instruments the source, sends it to Wandbox, parses the stderr
-// stream into trace steps and exposes them to the caller.
+// Instruments the source, sends to Wandbox, parses stderr into steps.
+// Caches results by (source + args + stdin) hash to avoid re-running.
+// `status` exposes idle | running | done | error | cached.
 export function useLiveTrace() {
-  const [status, setStatus] = useState('idle') // idle | running | done | error
+  const [status, setStatus] = useState('idle')
   const [error, setError] = useState(null)
   const [result, setResult] = useState(null)
+  const cache = useTraceCache()
+  const inflight = useRef(0)
 
   const reset = useCallback(() => {
     setStatus('idle')
@@ -19,8 +23,18 @@ export function useLiveTrace() {
   }, [])
 
   const run = useCallback(async (fullSource, args = [], stdin = '') => {
-    setStatus('running')
+    const runId = ++inflight.current
     setError(null)
+
+    const cacheKey = makeTraceKey(fullSource, args, stdin)
+    const hit = cache.get(cacheKey)
+    if (hit) {
+      setStatus('cached')
+      setResult(hit)
+      return hit
+    }
+
+    setStatus('running')
     setResult(null)
 
     let instrumentedCode
@@ -29,6 +43,7 @@ export function useLiveTrace() {
       const { instrumented } = instrument(fullSource)
       instrumentedCode = instrumented
     } catch (err) {
+      if (runId !== inflight.current) return null
       setStatus('error')
       setError('No se pudo instrumentar el código: ' + err.message)
       return null
@@ -38,10 +53,13 @@ export function useLiveTrace() {
     try {
       runResult = await compileAndRun(instrumentedCode, args, { stdin })
     } catch (err) {
+      if (runId !== inflight.current) return null
       setStatus('error')
       setError('Error de red con el compilador: ' + err.message)
       return null
     }
+
+    if (runId !== inflight.current) return null
 
     if (runResult.compileError) {
       setStatus('error')
@@ -84,9 +102,11 @@ export function useLiveTrace() {
         'Puede que tu código no use ninguna función instrumentable, o que el ' +
         'parser haya saltado tu función por una construcción que no reconoce.'
       )
+    } else {
+      cache.set(cacheKey, payload)
     }
     return payload
-  }, [])
+  }, [cache])
 
   return { run, reset, status, error, result }
 }

@@ -1,8 +1,11 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
-import { ChevronLeft, ChevronRight, Cpu, RotateCcw } from 'lucide-react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { ChevronLeft, ChevronRight, RotateCcw, Zap } from 'lucide-react'
 import clsx from 'clsx'
 import { motion, AnimatePresence } from 'framer-motion'
-import { normalizeGdbTrace, formatMemoryAddress } from '@/utils/gdbTrace'
+import { normalizeGdbTrace } from '@/utils/gdbTrace'
+import StackFrameView from '@/components/viz/StackFrameView'
+import PointerArrows from '@/components/viz/PointerArrows'
+import ConceptPanel from '@/components/viz/ConceptPanel'
 
 function CodeExcerpt({ code = '', lineNumber = null }) {
   const lines = useMemo(() => {
@@ -42,117 +45,62 @@ function CodeExcerpt({ code = '', lineNumber = null }) {
   )
 }
 
-function ValueBadge({ value }) {
-  return (
-    <span className="inline-flex items-center rounded bg-white px-1.5 py-0.5 font-mono text-[11px] text-zinc-700">
-      {value}
-    </span>
-  )
-}
-
-function Section({ title, children }) {
+function Section({ title, children, action = null }) {
   return (
     <div className="rounded-xl border border-zinc-200 bg-white overflow-hidden">
-      <div className="border-b border-zinc-100 bg-zinc-50 px-3 py-2">
+      <div className="border-b border-zinc-100 bg-zinc-50 px-3 py-2 flex items-center justify-between gap-2">
         <p className="text-xs font-semibold uppercase tracking-wide text-zinc-500">{title}</p>
+        {action}
       </div>
       <div className="p-3">{children}</div>
     </div>
   )
 }
 
-function VariableList({ variables = [] }) {
-  if (!variables.length) {
-    return <p className="text-sm text-zinc-400">Sin variables locales en este paso.</p>
-  }
+function Timeline({ trace, currentStepIndex, onPick }) {
+  const fnColors = useMemo(() => {
+    const palette = ['#8b5cf6', '#06b6d4', '#f59e0b', '#10b981', '#ef4444', '#ec4899']
+    const map = new Map()
+    let i = 0
+    for (const s of trace) {
+      const fn = s.functionName || 'main'
+      if (!map.has(fn)) { map.set(fn, palette[i % palette.length]); i++ }
+    }
+    return map
+  }, [trace])
 
   return (
-    <div className="space-y-2">
-      {variables.map((variable) => (
-        <div
-          key={variable.name}
-          className={clsx(
-            'rounded-lg border px-3 py-2 text-sm',
-            variable.changed ? 'border-green-200 bg-green-50' : 'border-zinc-200 bg-zinc-50'
-          )}
-        >
-          <div className="flex items-start justify-between gap-3">
-            <div className="min-w-0">
-              <p className="font-mono font-semibold text-zinc-800">{variable.name}</p>
-              <p className="mt-0.5 text-[11px] uppercase tracking-wide text-zinc-400">{variable.type}</p>
-            </div>
-            <ValueBadge value={variable.value || '—'} />
-          </div>
-          {variable.note && <p className="mt-2 text-xs text-zinc-600">{variable.note}</p>}
-          {variable.address && (
-            <p className="mt-1 text-[11px] font-mono text-zinc-500">
-              dirección: {variable.address}
-            </p>
-          )}
-        </div>
-      ))}
-    </div>
-  )
-}
-
-function FrameList({ frames = [] }) {
-  if (!frames.length) {
-    return <p className="text-sm text-zinc-400">Sin stack frames en este paso.</p>
-  }
-
-  return (
-    <div className="space-y-2">
-      {frames.map((frame, index) => (
-        <div key={`${frame.functionName}-${index}`} className="rounded-lg border border-zinc-200 bg-zinc-50 px-3 py-2">
-          <p className="text-sm font-semibold text-zinc-800">{frame.functionName}</p>
-          {frame.location && <p className="mt-1 text-xs font-mono text-zinc-500">{frame.location}</p>}
-        </div>
-      ))}
-    </div>
-  )
-}
-
-function MemoryPanel({ memory = [], note = '' }) {
-  return (
-    <div className="space-y-3">
-      {note && (
-        <div className="rounded-lg border border-blue-200 bg-blue-50 px-3 py-2">
-          <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-blue-700">
-            <Cpu size={13} />
-            Nota de memoria
-          </div>
-          <p className="mt-1 text-sm leading-relaxed text-blue-900 whitespace-pre-wrap">{note}</p>
-        </div>
-      )}
-
-      {memory.length > 0 ? (
-        <div className="space-y-2">
-          {memory.map((entry, index) => (
-            <div key={`${entry.address ?? index}-${entry.label}`} className="rounded-lg border border-zinc-200 bg-white px-3 py-2">
-              <div className="flex items-center justify-between gap-3">
-                <p className="font-mono text-sm font-semibold text-zinc-800">{entry.label}</p>
-                <ValueBadge value={formatMemoryAddress(entry.address)} />
-              </div>
-              <p className="mt-1 text-xs text-zinc-500">
-                {entry.kind || 'memoria'} · {entry.value || '—'}
-              </p>
-            </div>
-          ))}
-        </div>
-      ) : (
-        <p className="text-sm text-zinc-400">No hay referencias de memoria en este paso.</p>
-      )}
+    <div className="mt-3 flex gap-[2px] overflow-x-auto pb-1" data-timeline="ticks">
+      {trace.map((step, index) => {
+        const isActive = index === currentStepIndex
+        const color = fnColors.get(step.functionName || 'main') || '#8b5cf6'
+        return (
+          <button
+            key={step.id}
+            onClick={() => onPick(index)}
+            title={`#${index + 1} · ${step.functionName} · L${step.lineNumber ?? '?'}`}
+            className={clsx(
+              'shrink-0 w-2.5 transition-all rounded-sm',
+              isActive ? 'h-7' : 'h-4 hover:h-6'
+            )}
+            style={{
+              backgroundColor: isActive ? color : color + '60',
+              boxShadow: isActive ? `0 0 0 2px ${color}30` : 'none',
+            }}
+          />
+        )
+      })}
     </div>
   )
 }
 
 export default function GdbStepper({
   steps = [],
-  caminos = null,                // opcional: [{ id, nombre, pasos: [...] }]
+  caminos = null,
   title = 'Traza de ejecución',
+  exerciseConceptos = [],
+  cached = false,
 }) {
-  // Si vienen caminos múltiples, ofrecemos selector. Si no, fallback al
-  // comportamiento clásico con `steps` (backwards-compatible).
   const tieneCaminos = Array.isArray(caminos) && caminos.length > 0
   const [caminoIdx, setCaminoIdx] = useState(0)
   const activeSteps = tieneCaminos
@@ -161,9 +109,11 @@ export default function GdbStepper({
 
   const trace = useMemo(() => normalizeGdbTrace(activeSteps), [activeSteps])
   const [currentStepIndex, setCurrentStepIndex] = useState(0)
+  const [playing, setPlaying] = useState(false)
+  const [speed, setSpeed] = useState(1)
+  const stackContainerRef = useRef(null)
 
-  // Al cambiar de camino, reseteamos el paso actual.
-  useEffect(() => { setCurrentStepIndex(0) }, [caminoIdx])
+  useEffect(() => { setCurrentStepIndex(0); setPlaying(false) }, [caminoIdx])
 
   useEffect(() => {
     setCurrentStepIndex((index) => Math.min(index, Math.max(trace.length - 1, 0)))
@@ -181,13 +131,27 @@ export default function GdbStepper({
 
   const handleReset = useCallback(() => {
     setCurrentStepIndex(0)
+    setPlaying(false)
   }, [])
+
+  // Auto-play
+  useEffect(() => {
+    if (!playing) return
+    if (currentStepIndex >= trace.length - 1) { setPlaying(false); return }
+    const ms = 800 / speed
+    const t = setTimeout(() => setCurrentStepIndex(i => i + 1), ms)
+    return () => clearTimeout(t)
+  }, [playing, currentStepIndex, trace.length, speed])
 
   useEffect(() => {
     const handleKeyDown = (event) => {
       if (event.key === 'ArrowRight') handleNext()
       if (event.key === 'ArrowLeft') handlePrev()
       if (event.key === 'Home') handleReset()
+      if (event.key === ' ' && event.target === document.body) {
+        event.preventDefault()
+        setPlaying(p => !p)
+      }
     }
 
     window.addEventListener('keydown', handleKeyDown)
@@ -231,6 +195,7 @@ export default function GdbStepper({
               onClick={handlePrev}
               disabled={currentStepIndex === 0}
               className="rounded-md border border-zinc-200 bg-white p-1.5 text-zinc-600 transition-colors hover:bg-zinc-50 disabled:cursor-not-allowed disabled:opacity-40"
+              title="Anterior (←)"
             >
               <ChevronLeft size={16} />
             </button>
@@ -238,61 +203,81 @@ export default function GdbStepper({
               onClick={handleNext}
               disabled={currentStepIndex === trace.length - 1}
               className="rounded-md border border-zinc-200 bg-white p-1.5 text-zinc-600 transition-colors hover:bg-zinc-50 disabled:cursor-not-allowed disabled:opacity-40"
+              title="Siguiente (→)"
             >
               <ChevronRight size={16} />
             </button>
             <button
-              onClick={handleReset}
-              className="flex items-center gap-2 rounded-md border border-zinc-200 bg-white px-3 py-1.5 text-sm text-zinc-600 transition-colors hover:bg-zinc-50"
+              onClick={() => setPlaying(p => !p)}
+              className={clsx(
+                'rounded-md border px-2.5 py-1 text-xs font-medium transition-colors',
+                playing
+                  ? 'border-purple-300 bg-purple-600 text-white'
+                  : 'border-zinc-200 bg-white text-zinc-600 hover:bg-zinc-50'
+              )}
+              title="Play / pausa (espacio)"
             >
-              <RotateCcw size={14} />
+              {playing ? '⏸ Pausa' : '▶ Play'}
+            </button>
+            <select
+              value={speed}
+              onChange={(e) => setSpeed(Number(e.target.value))}
+              className="rounded-md border border-zinc-200 bg-white px-1.5 py-1 text-xs text-zinc-600"
+              title="Velocidad"
+            >
+              <option value={0.5}>0.5×</option>
+              <option value={1}>1×</option>
+              <option value={2}>2×</option>
+              <option value={4}>4×</option>
+            </select>
+            <button
+              onClick={handleReset}
+              className="flex items-center gap-1.5 rounded-md border border-zinc-200 bg-white px-2.5 py-1 text-xs text-zinc-600 transition-colors hover:bg-zinc-50"
+            >
+              <RotateCcw size={12} />
               Inicio
             </button>
           </div>
 
-          <div className="min-w-0">
-            <p className="truncate text-sm font-semibold text-zinc-800">{title}</p>
-            <p className="text-xs text-zinc-500">
-              Paso {currentStepIndex + 1} de {trace.length}
-            </p>
+          <div className="min-w-0 flex items-center gap-2">
+            {cached && (
+              <span className="flex items-center gap-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide">
+                <Zap size={10} /> cached
+              </span>
+            )}
+            <div>
+              <p className="truncate text-sm font-semibold text-zinc-800">{title}</p>
+              <p className="text-xs text-zinc-500">
+                Paso {currentStepIndex + 1} de {trace.length}
+              </p>
+            </div>
           </div>
         </div>
 
-        <div className="mt-3 flex gap-1 overflow-x-auto pb-1">
-          {trace.map((step, index) => (
-            <button
-              key={step.id}
-              onClick={() => setCurrentStepIndex(index)}
-              className={clsx(
-                'shrink-0 rounded-full px-3 py-1 text-xs font-medium transition-colors',
-                index === currentStepIndex
-                  ? 'bg-zinc-900 text-white'
-                  : 'bg-white text-zinc-500 hover:bg-zinc-100'
-              )}
-            >
-              {index + 1}
-            </button>
-          ))}
-        </div>
+        <Timeline trace={trace} currentStepIndex={currentStepIndex} onPick={setCurrentStepIndex} />
       </div>
 
-      <div className="grid flex-1 gap-4 p-4 lg:grid-cols-[1.4fr_1fr]">
+      <div className="grid flex-1 gap-4 p-4 lg:grid-cols-[1.1fr_1fr]">
         <div className="space-y-4">
-          <Section title={currentStep?.title || 'Paso actual'}>
-            <div className="flex flex-wrap items-center gap-2 text-xs text-zinc-500">
-              <span className="rounded-full bg-zinc-100 px-2 py-0.5 font-semibold text-zinc-600">
-                {currentStep?.functionName || 'main'}
-              </span>
-              {currentStep?.file && currentStep?.lineNumber && (
-                <span className="font-mono">
-                  {currentStep.file}:{currentStep.lineNumber}
+          <Section
+            title={currentStep?.title || 'Paso actual'}
+            action={
+              <span className="flex items-center gap-2 text-[10px] text-zinc-400">
+                <span className="rounded-full bg-zinc-100 px-2 py-0.5 font-semibold text-zinc-600 normal-case">
+                  {currentStep?.functionName || 'main'}
                 </span>
-              )}
-            </div>
-            <div className="mt-3 rounded-lg border border-zinc-200 bg-zinc-50 p-3">
+                {currentStep?.lineNumber && (
+                  <span className="font-mono">L{currentStep.lineNumber}</span>
+                )}
+              </span>
+            }
+          >
+            <div className="rounded-lg border border-zinc-200 bg-zinc-50 p-3">
               <CodeExcerpt code={currentStep?.code} lineNumber={currentStep?.lineNumber} />
             </div>
           </Section>
+
+          <ConceptPanel step={currentStep} exerciseConceptos={exerciseConceptos} />
 
           {currentStep?.output && (
             <Section title="Salida parcial">
@@ -304,14 +289,18 @@ export default function GdbStepper({
         </div>
 
         <div className="space-y-4">
-          <Section title="Stack frames">
-            <FrameList frames={currentStep?.frames} />
-          </Section>
-          <Section title="Variables locales">
-            <VariableList variables={currentStep?.variables} />
-          </Section>
-          <Section title="Memoria">
-            <MemoryPanel memory={currentStep?.memory} note={currentStep?.note} />
+          <Section title="Stack y memoria">
+            <div className="relative" ref={stackContainerRef}>
+              <StackFrameView
+                steps={trace}
+                currentStepIndex={currentStepIndex}
+              />
+              <PointerArrows
+                containerRef={stackContainerRef}
+                deps={[currentStepIndex, trace.length]}
+                enabled
+              />
+            </div>
           </Section>
         </div>
       </div>
@@ -322,9 +311,16 @@ export default function GdbStepper({
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="border-t border-zinc-100 px-4 py-3 text-xs text-zinc-500"
+          className="border-t border-zinc-100 px-4 py-2 text-xs text-zinc-500 flex items-center justify-between"
         >
-          {currentStep?.lineNumber ? `Línea activa: ${currentStep.lineNumber}` : 'Sin línea activa detectada.'}
+          <span>
+            {currentStep?.lineNumber
+              ? `Línea activa: ${currentStep.lineNumber}`
+              : 'Sin línea activa detectada.'}
+          </span>
+          <span className="text-zinc-400">
+            ← / →: navegar · Espacio: play/pausa · Home: reiniciar
+          </span>
         </motion.div>
       </AnimatePresence>
     </div>

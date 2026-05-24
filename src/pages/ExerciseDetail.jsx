@@ -139,6 +139,7 @@ function TabGDB({ exercise }) {
       steps={exercise.gdbSteps}
       caminos={exercise.gdbCaminos}
       title={`GDB — ${exercise.nombre}`}
+      exerciseConceptos={exercise.conceptos || []}
     />
   )
 }

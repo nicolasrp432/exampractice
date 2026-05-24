@@ -482,6 +482,7 @@ function GdbTraceModal({ open, onClose, exercise, traceState, args, onRerun }) {
   const { status, error, result } = traceState
   const steps = result?.steps ?? []
   const truncated = steps.some((s) => s.title?.startsWith('⚠'))
+  const cached = status === 'cached'
 
   return (
     <AnimatePresence>
@@ -555,14 +556,19 @@ function GdbTraceModal({ open, onClose, exercise, traceState, args, onRerun }) {
                   )}
                 </div>
               )}
-              {status === 'done' && steps.length > 0 && (
+              {(status === 'done' || status === 'cached') && steps.length > 0 && (
                 <>
                   {truncated && (
                     <div className="mb-3 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-800">
                       ⚠ La traza fue truncada a 8000 pasos. El programa siguió ejecutándose pero ya no estamos registrando.
                     </div>
                   )}
-                  <GdbStepper steps={steps} title={`Traza real — ${exercise?.nombre || 'programa'}`} />
+                  <GdbStepper
+                    steps={steps}
+                    title={`Traza real — ${exercise?.nombre || 'programa'}`}
+                    exerciseConceptos={exercise?.conceptos || []}
+                    cached={cached}
+                  />
                 </>
               )}
               {status === 'idle' && (

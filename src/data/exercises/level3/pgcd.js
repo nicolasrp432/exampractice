@@ -5,7 +5,10 @@ export default {
   dificultad: 'medio',
   tipoEntrega: 'funcion',
   archivosEsperados: ['pgcd.c'],
-  funcionesPermitidas: [],
+  // El subject real (programa con argv) permite printf, atoi, malloc, free.
+  // La plataforma redibuja el ejercicio como función pura (sin I/O ni alloc),
+  // pero declaramos las permitidas reales para coherencia con el examen.
+  funcionesPermitidas: ['printf', 'atoi', 'malloc', 'free'],
 
   subject: `Assignment name  : pgcd
 Expected files   : pgcd.c
