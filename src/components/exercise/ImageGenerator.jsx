@@ -1,9 +1,14 @@
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Image as ImageIcon, Sparkles, RefreshCw, Save, Edit3, Check, HelpCircle } from 'lucide-react'
+import { Image as ImageIcon, Sparkles, RefreshCw, Save, Edit3, Check, HelpCircle, Key, Eye, EyeOff } from 'lucide-react'
 import clsx from 'clsx'
 
 export default function ImageGenerator({ exercise, onSaveImage, savedImageUrl = null }) {
+  const [apiKey, setApiKey] = useState(() => {
+    return import.meta.env.VITE_GEMINI_API_KEY || localStorage.getItem('42prep-gemini-api-key') || ''
+  })
+  const [showKeyInput, setShowKeyInput] = useState(!apiKey)
+  const [showKeyText, setShowKeyText] = useState(false)
   const [imageUrl, setImageUrl] = useState(savedImageUrl || localStorage.getItem(`42prep-img-${exercise.id}`) || null)
   const [prompt, setPrompt] = useState('')
   const [customPrompt, setCustomPrompt] = useState('')
@@ -11,6 +16,7 @@ export default function ImageGenerator({ exercise, onSaveImage, savedImageUrl = 
   const [isLoading, setIsLoading] = useState(false)
   const [isSaved, setIsSaved] = useState(!!savedImageUrl)
   const [hasError, setHasError] = useState(false)
+  const [errorMsg, setErrorMsg] = useState('')
 
   // Generate default prompt based on exercise mnemotecnia
   useEffect(() => {
@@ -37,19 +43,71 @@ export default function ImageGenerator({ exercise, onSaveImage, savedImageUrl = 
     }
   }, [savedImageUrl])
 
-  const handleGenerate = () => {
+  const handleSaveApiKey = (key) => {
+    const trimmed = key.trim()
+    setApiKey(trimmed)
+    localStorage.setItem('42prep-gemini-api-key', trimmed)
+  }
+
+  const handleGenerate = async () => {
+    if (!apiKey) {
+      setShowKeyInput(true)
+      setHasError(true)
+      setErrorMsg('Por favor, introduce tu API Key de Google AI Studio para activar el generador.')
+      return
+    }
+
     setIsLoading(true)
     setIsSaved(false)
     setHasError(false)
-    const seed = Math.floor(Math.random() * 1000000)
-    // Generate image from pollinations.ai with random seed to guarantee variation
+    setErrorMsg('')
+
     const finalPrompt = customPrompt.trim() || prompt
-    const encodedPrompt = encodeURIComponent(finalPrompt)
-    const url = `https://image.pollinations.ai/prompt/${encodedPrompt}?width=800&height=800&nologo=true&seed=${seed}`
-    
-    setImageUrl(url)
-    localStorage.setItem(`42prep-img-${exercise.id}`, url)
-    localStorage.setItem(`42prep-prompt-${exercise.id}`, finalPrompt)
+
+    try {
+      const response = await fetch(`https://generativelanguage.googleapis.com/v1/models/gemini-3.1-flash-image:generateContent?key=${apiKey}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          contents: [{
+            parts: [
+              { text: finalPrompt }
+            ]
+          }],
+          generationConfig: {
+            responseModalities: ["TEXT", "IMAGE"]
+          }
+        })
+      })
+
+      if (!response.ok) {
+        const errData = await response.json().catch(() => ({}));
+        throw new Error(errData.error?.message || `HTTP Error ${response.status}`);
+      }
+
+      const data = await response.json()
+      const part = data.candidates?.[0]?.content?.parts?.find(p => p.inlineData)
+      
+      if (!part || !part.inlineData) {
+        throw new Error('No se recibió la imagen en el formato esperado de la API de Gemini.')
+      }
+
+      const mimeType = part.inlineData.mimeType || 'image/jpeg'
+      const base64Data = part.inlineData.data
+      const dataUrl = `data:${mimeType};base64,${base64Data}`
+
+      setImageUrl(dataUrl)
+      localStorage.setItem(`42prep-img-${exercise.id}`, dataUrl)
+      localStorage.setItem(`42prep-prompt-${exercise.id}`, finalPrompt)
+      setIsLoading(false)
+    } catch (err) {
+      console.error(err)
+      setIsLoading(false)
+      setHasError(true)
+      setErrorMsg(err.message || 'Error al generar la imagen con Gemini. Revisa tu clave o conexión.')
+    }
   }
 
   const handleSave = () => {
@@ -71,12 +129,66 @@ export default function ImageGenerator({ exercise, onSaveImage, savedImageUrl = 
           <ImageIcon size={18} className="text-purple-500" />
           <h3 className="font-bold text-zinc-900 text-sm">Asociación Visual (IA Generativa)</h3>
         </div>
-        {imageUrl && (
-          <span className="text-xs bg-purple-50 text-purple-600 px-2 py-0.5 rounded-full font-semibold flex items-center gap-1">
-            <Sparkles size={10} /> Nano Banana Style
-          </span>
-        )}
+        <div className="flex items-center gap-1.5">
+          {apiKey && (
+            <button
+              onClick={() => setShowKeyInput(o => !o)}
+              className="text-[10px] text-zinc-500 hover:text-zinc-800 underline font-semibold flex items-center gap-0.5"
+            >
+              <Key size={10} />
+              {showKeyInput ? 'Ocultar ajuste' : 'Ajustar API Key'}
+            </button>
+          )}
+          {imageUrl && (
+            <span className="text-xs bg-purple-50 text-purple-600 px-2 py-0.5 rounded-full font-semibold flex items-center gap-1">
+              <Sparkles size={10} /> Gemini Imagen 3
+            </span>
+          )}
+        </div>
       </div>
+
+      {/* API Key Configuration Panel */}
+      {showKeyInput && (
+        <div className="rounded-2xl border border-amber-200 bg-amber-50/50 p-4 space-y-2 text-xs">
+          <p className="font-bold text-amber-800 flex items-center gap-1.5">
+            <Key size={13} className="text-amber-600" />
+            Configura tu API Key de Google AI Studio
+          </p>
+          <p className="text-[11px] text-amber-700 leading-normal">
+            Esta plataforma utiliza el modelo <strong>gemini-3.1-flash-image</strong> (Imagen 3) de Google para crear ilustraciones personalizadas. La clave es gratuita y se almacena únicamente en tu navegador.
+          </p>
+          <ol className="list-decimal list-inside text-[10px] text-amber-600 space-y-0.5">
+            <li>Consigue tu clave gratis en <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener noreferrer" className="underline font-semibold text-amber-900">Google AI Studio</a>.</li>
+            <li>Pégala abajo o añádela en tu <code>.env</code> como <code>VITE_GEMINI_API_KEY</code>.</li>
+          </ol>
+          <div className="flex gap-1.5 mt-2">
+            <div className="relative flex-1">
+              <input
+                type={showKeyText ? "text" : "password"}
+                placeholder="Pega tu clave AIzaSy..."
+                value={apiKey}
+                onChange={(e) => handleSaveApiKey(e.target.value)}
+                className="w-full pl-2.5 pr-8 py-1.5 border border-amber-200 rounded-lg text-xs bg-white focus:outline-none focus:ring-1 focus:ring-amber-500 font-mono"
+              />
+              <button
+                type="button"
+                onClick={() => setShowKeyText(o => !o)}
+                className="absolute right-2 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-600"
+              >
+                {showKeyText ? <EyeOff size={13} /> : <Eye size={13} />}
+              </button>
+            </div>
+            {apiKey && (
+              <button
+                onClick={() => setShowKeyInput(false)}
+                className="px-3 py-1.5 bg-amber-600 hover:bg-amber-700 text-white rounded-lg text-[10px] font-bold transition-all shadow"
+              >
+                Guardar
+              </button>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* Image Preview Container */}
       <div className="relative aspect-square w-full rounded-2xl bg-zinc-50 border border-zinc-100 overflow-hidden flex items-center justify-center">
@@ -100,16 +212,10 @@ export default function ImageGenerator({ exercise, onSaveImage, savedImageUrl = 
               <div className="h-10 w-10 rounded-full bg-red-100 flex items-center justify-center text-red-500 mb-2 shrink-0">
                 <HelpCircle size={20} />
               </div>
-              <p className="text-xs font-bold text-red-800 mb-1">No se pudo cargar la imagen de la IA</p>
-              <p className="text-[10px] text-red-700 leading-normal max-w-xs mb-2">
-                Esto suele ocurrir si tu **bloqueador de anuncios (AdBlock, Brave Shields)** bloquea el dominio <code>pollinations.ai</code> o si hay saturación temporal en sus servidores.
+              <p className="text-xs font-bold text-red-800 mb-1">No se pudo generar la imagen</p>
+              <p className="text-[10px] text-red-700 leading-normal max-w-xs mb-3">
+                {errorMsg}
               </p>
-              <div className="text-[9px] text-zinc-500 leading-normal max-w-xs mb-3 text-left border-l-2 border-red-300 pl-2">
-                💡 **Recomendaciones:**
-                <br />1. Desactiva tu AdBlocker o Brave Shields para este sitio.
-                <br />2. Desconecta tu VPN temporalmente.
-                <br />3. Intenta de nuevo en unos segundos.
-              </div>
               <button
                 onClick={handleGenerate}
                 className="px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white rounded-lg text-[10px] font-bold transition-all shadow"
@@ -121,7 +227,7 @@ export default function ImageGenerator({ exercise, onSaveImage, savedImageUrl = 
 
           {imageUrl && !hasError ? (
             <motion.img
-              key={imageUrl} // Use imageUrl as key to trigger animations and loader on changes
+              key={imageUrl}
               src={imageUrl}
               alt={`Mnemotecnia para ${exercise.nombre}`}
               initial={{ scale: 1.05, opacity: 0 }}
@@ -133,6 +239,7 @@ export default function ImageGenerator({ exercise, onSaveImage, savedImageUrl = 
               onError={() => {
                 setIsLoading(false)
                 setHasError(true)
+                setErrorMsg('Error al renderizar los bytes de la imagen generada.')
               }}
               className="h-full w-full object-cover transition-transform duration-300 hover:scale-105"
             />
