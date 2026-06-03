@@ -65,7 +65,7 @@ export default function ImageGenerator({ exercise, onSaveImage, savedImageUrl = 
     const finalPrompt = customPrompt.trim() || prompt
 
     try {
-      const response = await fetch(`https://generativelanguage.googleapis.com/v1/models/gemini-3.1-flash-image:generateContent?key=${apiKey}`, {
+      const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-image:generateContent?key=${apiKey}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
