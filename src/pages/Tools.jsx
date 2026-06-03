@@ -1,8 +1,8 @@
-﻿import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import Editor from '@monaco-editor/react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { ChevronDown, ChevronUp, Cpu, Sparkles, Trophy, CheckCircle2, XCircle, RotateCcw, Wand2, Flame } from 'lucide-react'
+import { ChevronDown, ChevronUp, Cpu, Sparkles, Trophy, CheckCircle2, XCircle, RotateCcw, Wand2, Flame, Copy, Check } from 'lucide-react'
 import clsx from 'clsx'
 import { buildQuizQuestions, decodeSubject, getToolById, getToolTrainingExercises, getUniversalTools } from '@/utils/tools'
 import { useProgressStore } from '@/store/progressStore'
@@ -90,6 +90,15 @@ function ToolCard({ tool, open, onToggle }) {
 function DecoderPanel() {
   const [subject, setSubject] = useState('Write a program that trims duplicate spaces from argv and prints the first word')
   const decoded = useMemo(() => decodeSubject(subject), [subject])
+  const [copied, setCopied] = useState(false)
+
+  const handleCopy = () => {
+    if (!decoded.skeleton) return
+    navigator.clipboard.writeText(decoded.skeleton).then(() => {
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2000)
+    })
+  }
 
   return (
     <div className="grid gap-6 xl:grid-cols-[1.05fr_0.95fr]">
@@ -133,21 +142,33 @@ function DecoderPanel() {
         </div>
       </div>
 
-      <div className="rounded-3xl border border-zinc-200 bg-white shadow-sm overflow-hidden">
+      <div className="rounded-3xl border border-zinc-200 bg-white shadow-sm overflow-hidden flex flex-col">
         <div className="border-b border-zinc-200 px-5 py-4 flex items-center justify-between">
           <div>
             <p className="text-xs font-semibold uppercase tracking-wide text-zinc-400">Skeleton sugerido</p>
             <p className="text-sm text-zinc-600">Pega esto en el editor y ajusta la lógica.</p>
           </div>
-          <Sparkles className="text-sky-500" size={18} />
+          <div className="flex items-center gap-2">
+            <button
+              onClick={handleCopy}
+              className="flex items-center gap-1 text-xs text-zinc-600 hover:text-zinc-950 bg-zinc-50 border border-zinc-200 px-2.5 py-1 rounded-lg transition-colors"
+              title="Copiar código"
+            >
+              {copied ? <Check size={12} className="text-green-600" /> : <Copy size={12} />}
+              <span>{copied ? 'Copiado' : 'Copiar'}</span>
+            </button>
+            <Sparkles className="text-sky-500 shrink-0" size={18} />
+          </div>
         </div>
-        <Editor
-          height="420px"
-          defaultLanguage="c"
-          value={decoded.skeleton}
-          options={{ readOnly: true, minimap: { enabled: false }, fontSize: 13, scrollBeyondLastLine: false, lineNumbers: 'on', wordWrap: 'on' }}
-          theme="vs-light"
-        />
+        <div className="flex-1 min-h-[420px]">
+          <Editor
+            height="100%"
+            defaultLanguage="c"
+            value={decoded.skeleton}
+            options={{ readOnly: true, minimap: { enabled: false }, fontSize: 13, scrollBeyondLastLine: false, lineNumbers: 'on', wordWrap: 'on' }}
+            theme="vs-light"
+          />
+        </div>
         <div className="p-5 border-t border-zinc-200 bg-zinc-50">
           <p className="text-xs font-semibold uppercase tracking-wide text-zinc-400">Ejercicios similares</p>
           <div className="mt-3 flex flex-wrap gap-2">

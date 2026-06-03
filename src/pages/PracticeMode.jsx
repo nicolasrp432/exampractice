@@ -2,7 +2,10 @@ import { useState, useEffect, useRef, useCallback } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import Editor from '@monaco-editor/react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { ArrowLeft, Play, Trash2, Sparkles, ChevronDown, ChevronUp, Eye, Timer, CheckCircle2, XCircle, Circle, Trophy, RotateCcw, Save, X } from 'lucide-react'
+import {
+  ArrowLeft, Play, Trash2, Sparkles, ChevronDown, ChevronUp, Eye, Timer,
+  CheckCircle2, XCircle, Circle, Trophy, RotateCcw, Save, X, ClipboardList, BookOpen
+} from 'lucide-react'
 import clsx from 'clsx'
 import { getExercise } from '@/data/index'
 import { compileAndRun } from '@/utils/compiler'
@@ -10,6 +13,8 @@ import { buildFullCode } from '@/utils/testHarnesses'
 import { useProgressStore } from '@/store/progressStore'
 import { useUserVariants } from '@/hooks/useUserVariants'
 import LevelBadge from '@/components/layout/LevelBadge'
+import SubjectViewer from '@/components/exercise/SubjectViewer'
+import ImageGenerator from '@/components/exercise/ImageGenerator'
 
 // ─── Default placeholder code ────────────────────────────────────────────────
 function getPlaceholder(exercise) {
@@ -427,6 +432,9 @@ export default function PracticeMode() {
   const [compileError, setCompileError] = useState(null)
   const [showSaveModal, setShowSaveModal] = useState(false)
 
+  const [activeTab, setActiveTab] = useState('enunciado') // 'enunciado' | 'moulinette' | 'mnemotecnia'
+  const [compileMode, setCompileMode] = useState(null)
+
   // Track whether all passed using a ref to avoid stale closure in async handleCompile
   const allPassedRef = useRef(false)
 
@@ -456,6 +464,7 @@ export default function PracticeMode() {
     setIsRunning(true)
     setCompileError(null)
     setIntentos(i => i + 1)
+    setActiveTab('moulinette') // Switch to Moulinette tab to see run details
 
     // Reset all tests to pending
     setTests(exercise.tests.map(t => ({ ...t, status: 'pending', output: null })))
@@ -473,7 +482,10 @@ export default function PracticeMode() {
 
       let result
       try {
-        result = await compileAndRun(fullCode, test.entrada)
+        result = await compileAndRun(fullCode, test.entrada, exercise.id)
+        if (result && result.mode) {
+          setCompileMode(result.mode)
+        }
       } catch (err) {
         hadError = true
         passedAll = false
@@ -694,83 +706,192 @@ export default function PracticeMode() {
           </div>
         </div>
 
-        {/* ── RIGHT: Results panel ── */}
-        <div className="w-96 xl:w-[420px] shrink-0 flex flex-col bg-white overflow-hidden">
-          <div className="flex-1 overflow-y-auto p-4 space-y-4">
+        {/* ── RIGHT: Tabbed Sidebar Panel ── */}
+        <div className="w-96 xl:w-[420px] shrink-0 flex flex-col bg-white border-l border-zinc-200 overflow-hidden">
+          
+          {/* Tab Navigation Headers */}
+          <div className="flex border-b border-zinc-200 bg-zinc-50 shrink-0 select-none">
+            <button
+              onClick={() => setActiveTab('enunciado')}
+              className={clsx(
+                'flex-1 py-3 text-xs font-semibold flex items-center justify-center gap-1.5 border-b-2 transition-all duration-200 focus:outline-none',
+                activeTab === 'enunciado'
+                  ? 'border-zinc-900 text-zinc-900 bg-white font-bold'
+                  : 'border-transparent text-zinc-500 hover:text-zinc-800 hover:bg-zinc-100/50'
+              )}
+            >
+              <ClipboardList size={14} />
+              Enunciado
+            </button>
+            <button
+              onClick={() => setActiveTab('moulinette')}
+              className={clsx(
+                'flex-1 py-3 text-xs font-semibold flex items-center justify-center gap-1.5 border-b-2 transition-all duration-200 focus:outline-none',
+                activeTab === 'moulinette'
+                  ? 'border-zinc-900 text-zinc-900 bg-white font-bold'
+                  : 'border-transparent text-zinc-500 hover:text-zinc-800 hover:bg-zinc-100/50'
+              )}
+            >
+              <Trophy size={14} />
+              Moulinette
+            </button>
+            <button
+              onClick={() => setActiveTab('mnemotecnia')}
+              className={clsx(
+                'flex-1 py-3 text-xs font-semibold flex items-center justify-center gap-1.5 border-b-2 transition-all duration-200 focus:outline-none',
+                activeTab === 'mnemotecnia'
+                  ? 'border-zinc-900 text-zinc-900 bg-white font-bold'
+                  : 'border-transparent text-zinc-500 hover:text-zinc-800 hover:bg-zinc-100/50'
+              )}
+            >
+              <BookOpen size={14} />
+              Mnemotecnia
+            </button>
+          </div>
 
-            {/* Tests header */}
-            <div className="flex items-center justify-between">
-              <h2 className="font-semibold text-zinc-800 flex items-center gap-2">
-                <Trophy size={16} className="text-amber-500" />
-                Tests de la Moulinette
-              </h2>
-              <div className="flex items-center gap-2">
-                <span className={clsx(
-                  'text-sm font-bold tabular-nums',
-                  allPassed ? 'text-green-600' : 'text-zinc-500'
-                )}>
-                  {passedCount}/{tests.length}
-                </span>
-              </div>
-            </div>
-
-            {/* Progress bar */}
-            <div className="h-2 bg-zinc-100 rounded-full overflow-hidden">
+          {/* Active Tab Panel Content */}
+          <div className="flex-1 overflow-y-auto p-4">
+            <AnimatePresence mode="wait">
               <motion.div
-                className={clsx('h-full rounded-full', allPassed ? 'bg-green-500' : 'bg-blue-500')}
-                animate={{ width: tests.length ? `${(passedCount / tests.length) * 100}%` : '0%' }}
-                transition={{ type: 'spring', stiffness: 200, damping: 25 }}
-              />
-            </div>
+                key={activeTab}
+                initial={{ opacity: 0, y: 5 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -5 }}
+                transition={{ duration: 0.15 }}
+                className="space-y-4 h-full"
+              >
+                {/* --- TAB: ENUNCIADO --- */}
+                {activeTab === 'enunciado' && (
+                  <div className="space-y-4">
+                    <div className="flex items-center gap-2">
+                      <ClipboardList size={16} className="text-zinc-500" />
+                      <h2 className="font-bold text-sm text-zinc-800">Enunciado del Ejercicio</h2>
+                    </div>
+                    <SubjectViewer
+                      subject={exercise.subject}
+                      funcionesPermitidas={exercise.funcionesPermitidas}
+                      archivosEsperados={exercise.archivosEsperados}
+                    />
+                  </div>
+                )}
 
-            {/* Compilation mode indicator */}
-            <div className="flex items-center gap-1.5 text-xs text-zinc-400">
-              <span className="w-1.5 h-1.5 rounded-full bg-green-400 inline-block"></span>
-              Verificación real con gcc (Wandbox)
-            </div>
+                {/* --- TAB: MOULINETTE --- */}
+                {activeTab === 'moulinette' && (
+                  <div className="space-y-4">
+                    {/* Tests header */}
+                    <div className="flex items-center justify-between">
+                      <h2 className="font-semibold text-zinc-800 flex items-center gap-2 text-sm">
+                        <Trophy size={16} className="text-amber-500" />
+                        Tests de la Moulinette
+                      </h2>
+                      <span className={clsx(
+                        'text-sm font-bold tabular-nums',
+                        allPassed ? 'text-green-600' : 'text-zinc-500'
+                      )}>
+                        {passedCount}/{tests.length}
+                      </span>
+                    </div>
 
-            {/* Test list */}
-            {tests.length === 0 ? (
-              <p className="text-sm text-zinc-400 text-center py-6">Sin tests definidos aún para este ejercicio.</p>
-            ) : (
-              <div className="space-y-2">
-                {tests.map((test, i) => (
-                  <TestRow key={test.id || i} test={test} index={i} />
-                ))}
-              </div>
-            )}
+                    {/* Progress bar */}
+                    <div className="h-2 bg-zinc-100 rounded-full overflow-hidden">
+                      <motion.div
+                        className={clsx('h-full rounded-full', allPassed ? 'bg-green-500' : 'bg-blue-500')}
+                        animate={{ width: tests.length ? `${(passedCount / tests.length) * 100}%` : '0%' }}
+                        transition={{ type: 'spring', stiffness: 200, damping: 25 }}
+                      />
+                    </div>
 
-            {/* Separator */}
-            <div className="h-px bg-zinc-100" />
+                    {/* Compilation mode indicator */}
+                    <div className="flex items-center gap-2 text-xs text-zinc-500 bg-zinc-50 border border-zinc-100 p-2 rounded-xl">
+                      <span className={clsx(
+                        'w-2 h-2 rounded-full inline-block shrink-0',
+                        compileMode === 'local' ? 'bg-green-500 animate-pulse' :
+                        compileMode === 'wandbox' ? 'bg-blue-500' :
+                        compileMode === 'mock' ? 'bg-orange-500 animate-pulse' :
+                        'bg-zinc-300'
+                      )}></span>
+                      <span>
+                        {compileMode === 'local' ? 'Verificación local en tu entorno con gcc' :
+                         compileMode === 'wandbox' ? 'Verificación remota (Wandbox API)' :
+                         compileMode === 'mock' ? 'Modo de simulación offline (Fallbacks activos)' :
+                         'Listo para compilar tu solución'}
+                      </span>
+                    </div>
 
-            {/* Hint system */}
-            <HintSystem exercise={exercise} intentos={intentos} />
+                    {/* Test list */}
+                    {tests.length === 0 ? (
+                      <p className="text-sm text-zinc-400 text-center py-6">Sin tests definidos aún para este ejercicio.</p>
+                    ) : (
+                      <div className="space-y-2">
+                        {tests.map((test, i) => (
+                          <TestRow key={test.id || i} test={test} index={i} />
+                        ))}
+                      </div>
+                    )}
 
-            {/* Solution reveal (after 3 failed attempts) */}
-            {intentos >= 3 && !allPassed && (
-              <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}>
-                <SolutionReveal exercise={exercise} onUse={handleUseSolution} />
+                    {/* Session stats */}
+                    <div className="rounded-2xl border border-zinc-100 bg-zinc-50/50 p-4 mt-6">
+                      <h3 className="text-xs font-bold text-zinc-400 uppercase tracking-wider mb-3">Estadísticas de la sesión</h3>
+                      <div className="grid grid-cols-3 gap-2 text-center">
+                        <div>
+                          <p className="text-lg font-black text-zinc-800">{intentos}</p>
+                          <p className="text-[10px] font-semibold text-zinc-500">Intentos</p>
+                        </div>
+                        <div>
+                          <p className="text-lg font-black text-zinc-800">{timer.fmt}</p>
+                          <p className="text-[10px] font-semibold text-zinc-500">Tiempo</p>
+                        </div>
+                        <div>
+                          <p className="text-lg font-black text-green-600">{passedCount}</p>
+                          <p className="text-[10px] font-semibold text-zinc-500">Tests ✓</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* --- TAB: MNEMOTECNIA --- */}
+                {activeTab === 'mnemotecnia' && (
+                  <div className="space-y-4">
+                    {/* Story card */}
+                    <div className="border-l-4 border-purple-500 bg-purple-50 rounded-r-2xl px-4 py-3.5 text-xs leading-relaxed text-purple-950">
+                      <div className="font-bold mb-1.5 flex items-center gap-1.5 text-purple-900">
+                        <span className="text-base">{exercise.palacio?.emoji}</span>
+                        <span>{exercise.palacio?.personaje}</span>
+                      </div>
+                      <p>{exercise.palacio?.historia}</p>
+                    </div>
+                    
+                    {/* Anchors chips */}
+                    <div className="space-y-2">
+                      <h4 className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider">Anclas de Memoria</h4>
+                      <div className="flex flex-wrap gap-1.5">
+                        {exercise.palacio?.anclas?.map((anchor, i) => (
+                          <span key={i} className="px-2.5 py-1 bg-purple-100 text-purple-700 rounded-lg text-xs font-mono">
+                            {anchor}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* AI image generator card */}
+                    <ImageGenerator exercise={exercise} />
+
+                    <div className="h-px bg-zinc-100 my-4" />
+
+                    {/* Hint system */}
+                    <HintSystem exercise={exercise} intentos={intentos} />
+
+                    {/* Solution reveal */}
+                    {intentos >= 3 && !allPassed && (
+                      <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="mt-4">
+                        <SolutionReveal exercise={exercise} onUse={handleUseSolution} />
+                      </motion.div>
+                    )}
+                  </div>
+                )}
               </motion.div>
-            )}
-
-            {/* Session stats */}
-            <div className="rounded-xl border border-zinc-100 bg-zinc-50 p-4">
-              <h3 className="text-xs font-semibold text-zinc-500 uppercase tracking-wide mb-3">Estadísticas de la sesión</h3>
-              <div className="grid grid-cols-3 gap-3 text-center">
-                <div>
-                  <p className="text-xl font-bold text-zinc-800">{intentos}</p>
-                  <p className="text-xs text-zinc-500">Intentos</p>
-                </div>
-                <div>
-                  <p className="text-xl font-bold text-zinc-800">{timer.fmt}</p>
-                  <p className="text-xs text-zinc-500">Tiempo</p>
-                </div>
-                <div>
-                  <p className="text-xl font-bold text-green-600">{passedCount}</p>
-                  <p className="text-xs text-zinc-500">Tests ✓</p>
-                </div>
-              </div>
-            </div>
+            </AnimatePresence>
           </div>
         </div>
       </div>

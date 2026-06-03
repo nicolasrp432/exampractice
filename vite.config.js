@@ -3,12 +3,19 @@ import react from '@vitejs/plugin-react'
 import path from 'path'
 import { fileURLToPath } from 'url'
 import { VitePWA } from 'vite-plugin-pwa'
+import { setupLocalCompiler } from './vite.compiler.js'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
 export default defineConfig({
   plugins: [
     react(),
+    {
+      name: 'c-compiler-local',
+      configureServer(server) {
+        setupLocalCompiler(server)
+      }
+    },
     VitePWA({
       registerType: 'autoUpdate',
       includeAssets: ['favicon.svg', 'icon-192.png', 'icon-512.png', 'apple-touch-icon.png'],

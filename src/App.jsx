@@ -1,3 +1,4 @@
+import { useEffect } from 'react'
 import { Routes, Route, Navigate } from 'react-router-dom'
 import Layout from '@/components/layout/Layout'
 import Home from '@/pages/Home'
@@ -8,8 +9,30 @@ import ExamSimulator from '@/pages/ExamSimulator'
 import Tools from '@/pages/Tools'
 import ProgressPage from '@/pages/ProgressPage'
 import MemoryPalace from '@/pages/MemoryPalace'
+import { auth, isConfigured } from '@/utils/firebase'
+import { onAuthStateChanged } from 'firebase/auth'
+import { useProgressStore } from '@/store/progressStore'
 
 export default function App() {
+  const setUser = useProgressStore(s => s.setUser)
+  const syncWithCloud = useProgressStore(s => s.syncWithCloud)
+
+  useEffect(() => {
+    if (!isConfigured || !auth) return
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (user) {
+        setUser({
+          uid: user.uid,
+          email: user.email,
+          isAnonymous: user.isAnonymous
+        })
+        syncWithCloud()
+      } else {
+        setUser(null)
+      }
+    })
+    return () => unsubscribe()
+  }, [setUser, syncWithCloud])
   return (
     <Routes>
       <Route element={<Layout />}>

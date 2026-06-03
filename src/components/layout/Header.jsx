@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react'
 import { useLocation, useNavigate, Link } from 'react-router-dom'
-import { Flame, ChevronRight, Shuffle, Download } from 'lucide-react'
+import { Flame, ChevronRight, Shuffle, Download, Cloud, CloudOff } from 'lucide-react'
 import clsx from 'clsx'
 import { useProgressStore } from '@/store/progressStore'
+import AuthModal from './AuthModal'
 
 const TOTAL_EXERCISES = 30
 
@@ -61,7 +62,10 @@ export default function Header() {
   const navigate = useNavigate()
   const ejercicios = useProgressStore(s => s.ejercicios)
   const racha = useProgressStore(s => s.racha)
-
+  const user = useProgressStore(s => s.user)
+  const logout = useProgressStore(s => s.logout)
+  
+  const [isAuthOpen, setIsAuthOpen] = useState(false)
   const [installPrompt, setInstallPrompt] = useState(null)
 
   useEffect(() => {
@@ -135,6 +139,31 @@ export default function Header() {
         )}
       </div>
 
+      {/* Sincronización en la Nube */}
+      {user ? (
+        <button
+          onClick={logout}
+          className="shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-lg
+                     border border-green-200 bg-green-50 text-green-700 text-xs font-semibold
+                     hover:bg-green-100 hover:text-green-800 transition-colors duration-150"
+          title={`Conectado como ${user.email || 'Invitado'}. Haz clic para cerrar sesión.`}
+        >
+          <Cloud size={13} className="text-green-600" />
+          <span className="hidden sm:inline">{user.email ? user.email.split('@')[0] : 'Invitado'}</span>
+        </button>
+      ) : (
+        <button
+          onClick={() => setIsAuthOpen(true)}
+          className="shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-lg
+                     border border-zinc-200 text-zinc-500 text-xs font-medium
+                     hover:bg-zinc-50 hover:text-zinc-700 transition-colors duration-150"
+          title="Sincronizar progreso en la nube"
+        >
+          <CloudOff size={13} />
+          <span className="hidden sm:inline">Nube</span>
+        </button>
+      )}
+
       {/* Install PWA — solo visible antes de instalar */}
       {installPrompt && (
         <button
@@ -160,6 +189,9 @@ export default function Header() {
         <span className="hidden sm:inline">Examen aleatorio</span>
         <span className="sm:hidden">Aleatorio</span>
       </button>
+
+      {/* Auth Modal Container */}
+      <AuthModal isOpen={isAuthOpen} onClose={() => setIsAuthOpen(false)} />
     </header>
   )
 }

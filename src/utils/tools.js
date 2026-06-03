@@ -127,34 +127,80 @@ function unique(items) {
   return [...new Set(items)]
 }
 
-function buildSkeleton(toolIds) {
+function buildSkeleton(toolIds, parsedInfo = {}) {
+  const isFunction = parsedInfo.isFunction;
+  const prototype = parsedInfo.prototype;
+  const hasMalloc = toolIds.includes('malloc') || (prototype && prototype.includes('malloc'));
+
   const lines = [
     '#include <unistd.h>',
-    toolIds.includes('malloc') ? '#include <stdlib.h>' : null,
-    '',
-    'int main(int ac, char **av)',
-    '{',
-    '\t(void)ac;',
-    '\t(void)av;',
-  ]
+    hasMalloc ? '#include <stdlib.h>' : null,
+    ''
+  ];
 
-  if (toolIds.includes('strings')) {
-    lines.push('\twhile (str[i])', '\t\twrite(1, &str[i], 1);')
+  if (isFunction && prototype) {
+    // Limpiar prototipo y quitar el punto y coma final
+    const cleanProto = prototype.replace(';', '').trim();
+    lines.push(cleanProto, '{');
+    
+    // Inicialización inteligente basada en parámetros
+    if (prototype.includes('char *') || prototype.includes('char*')) {
+      const paramMatch = prototype.match(/char\s*\*+\s*([a-zA-Z0-9_]+)/);
+      const paramName = paramMatch ? paramMatch[1] : 'str';
+      lines.push(
+        '\tint\ti = 0;',
+        '',
+        `\twhile (${paramName}[i])`,
+        '\t{',
+        `\t\t// Recorrer caracteres: ${paramName}[i]`,
+        '\t\ti++;',
+        '\t}'
+      );
+      if (cleanProto.startsWith('int ')) {
+        lines.push('\treturn (i);');
+      } else if (cleanProto.startsWith('char *') || cleanProto.startsWith('char*')) {
+        lines.push(`\treturn (${paramName});`);
+      }
+    } else if (prototype.includes('int *') || prototype.includes('int*')) {
+      lines.push(
+        '\t// Operación con punteros enteros',
+        '\t// Ejemplo: int tmp = *a; *a = *b; *b = tmp;'
+      );
+    } else {
+      lines.push('\t// Tu lógica de la función aquí');
+    }
+    
+    lines.push('}');
+  } else {
+    // Es un programa con main
+    lines.push('int\tmain(int ac, char **av)', '{');
+    
+    if (toolIds.includes('argc')) {
+      lines.push(
+        '\tif (ac == 2)',
+        '\t{',
+        '\t\tint\ti = 0;',
+        '',
+        '\t\twhile (av[1][i])',
+        '\t\t{',
+        '\t\t\t// Escribe tu lógica de recorrido aquí',
+        '\t\t\twrite(1, &av[1][i], 1);',
+        '\t\t\ti++;',
+        '\t\t}',
+        '\t}',
+        '\twrite(1, "\\n", 1);'
+      );
+    } else {
+      lines.push(
+        '\t(void)ac;',
+        '\t(void)av;',
+        '\twrite(1, "\\n", 1);'
+      );
+    }
+    lines.push('\treturn (0);', '}');
   }
-  if (toolIds.includes('ascii')) {
-    lines.push("\tif (c >= 'a' && c <= 'z') c = c - 'a' + 1;")
-  }
-  if (toolIds.includes('bandera')) {
-    lines.push('\tint k = 0;')
-  }
-  if (toolIds.includes('bits')) {
-    lines.push('\tvalue = (value >> 1) | (value << 1);')
-  }
-  if (toolIds.includes('malloc')) {
-    lines.push('\tresult = malloc(sizeof(char) * (len + 1));', '\tresult[i] = NULL;')
-  }
-  lines.push('\treturn (0);', '}', '')
-  return lines.filter(Boolean).join('\n')
+
+  return lines.filter(Boolean).join('\n');
 }
 
 export function getUniversalTools() {
@@ -192,10 +238,31 @@ export function decodeSubject(subject) {
   if (toolIds.includes('ascii') && !toolIds.includes('strings')) {
     toolIds.unshift('strings')
   }
+
+  // --- Extracción de Prototipo C ---
+  const protoRegex = /(?:void|int|char|unsigned\s+char)\s*\*?\s*[a-zA-Z0-9_]+\s*\([^)]*\)\s*;/;
+  const protoMatch = subject.match(protoRegex);
+  const prototype = protoMatch ? protoMatch[0].replace(/\s+/g, ' ').trim() : null;
+
+  // Determinar si es función o programa completo
+  const isFunction = !!prototype || (subject.toLowerCase().includes('expected files') && !subject.toLowerCase().includes('program that'));
+
+  let functionName = null;
+  if (prototype) {
+    const nameMatch = prototype.match(/(?:void|int|char|unsigned\s+char)\s*\*?\s*([a-zA-Z0-9_]+)/);
+    if (nameMatch) functionName = nameMatch[1];
+  }
+
+  const parsedInfo = {
+    isFunction,
+    prototype,
+    functionName
+  };
+
   return {
     toolIds,
     keywords: unique(keywords),
-    skeleton: buildSkeleton(toolIds),
+    skeleton: buildSkeleton(toolIds, parsedInfo),
     similarExercises: allExercises.filter((exercise) => toolIds.some((toolId) => getToolById(toolId)?.trainingExercises.includes(exercise.id))).slice(0, 6),
   }
 }

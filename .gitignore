@@ -22,3 +22,10 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Env keys
+.env
+
+# Local C compiler builds
+.c_builds/
+

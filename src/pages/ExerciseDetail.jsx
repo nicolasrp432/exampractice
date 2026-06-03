@@ -16,6 +16,7 @@ import StoryCard        from '@/components/exercise/StoryCard'
 import FormulaVisualizer from '@/components/exercise/FormulaVisualizer'
 import CodeViewer       from '@/components/exercise/CodeViewer'
 import TrapsList        from '@/components/exercise/TrapsList'
+import ImageGenerator   from '@/components/exercise/ImageGenerator'
 // PROMPT 7 — Simuladores
 import InputPlayground  from '@/components/simulator/InputPlayground'
 import StepTracer       from '@/components/simulator/StepTracer'
@@ -70,7 +71,12 @@ function TabSubject({ exercise }) {
 }
 
 function TabHistoria({ exercise }) {
-  return <StoryCard palacio={exercise.palacio} relacionados={exercise.relacionados} />
+  return (
+    <div className="grid gap-6 md:grid-cols-2">
+      <StoryCard palacio={exercise.palacio} relacionados={exercise.relacionados} />
+      <ImageGenerator exercise={exercise} />
+    </div>
+  )
 }
 
 function TabFormula({ exercise }) {
