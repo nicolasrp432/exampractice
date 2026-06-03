@@ -19,6 +19,21 @@ char\t*ft_strrev(char *str);
 Example:
 ft_strrev("hello") → returns str modified to "olleh"`,
 
+  // Subject literal del repo rank02 (sub.txt). Útil para comparar con
+  // el subject didáctico activo y para la pestaña "Examen real".
+  subjectReal: `Assignment name  : ft_strrev
+Expected files   : ft_strrev.c
+Allowed functions:
+--------------------------------------------------------------------------------
+
+Write a function that reverses (in-place) a string.
+
+It must return its parameter.
+
+Your function must be declared as follows:
+
+char    *ft_strrev(char *str);`,
+
   descripcion: 'Función que invierte un string in-place (dentro del mismo array) y lo devuelve. Usa dos índices que se acercan desde los extremos intercambiando chars.',
 
   palacio: {
@@ -51,6 +66,205 @@ SIEMPRE devuelve el mismo puntero (str) — modifica in-place, sin malloc.`,
       resultado: '"olleh"',
     },
   },
+
+  // Tester oficial copiado literalmente desde rank02 (tester.sh).
+  testerReal: `#!/bin/bash
+source ../../../main/colors.sh
+file1=ft_strrev.c
+file2=../../../../rendu/ft_strrev/ft_strrev.c
+
+
+# 1. test
+    gcc -Werror -Wall -Wextra -o out1 "$file1" main.c
+    gcc -Werror -Wall -Wextra -o out2 "$file2" main.c
+
+    ./out1 "zaz" > out1.txt 2>/dev/null
+    ./out2 "zaz" > out2.txt 2>/dev/null
+
+    if ! diff -q out1.txt out2.txt >/dev/null ; then
+        out1=$(cat out1.txt)
+        out2=$(cat out2.txt)
+        echo "$(tput setaf 1)$(tput bold)FAIL$(tput sgr 0)"
+        echo "\${GREEN}Expected Output:\${RESET} \\"$out1\\""
+        echo "\${RED}Your Output:\${RESET}     \\"$out2\\""
+        rm out1 out2 out1.txt out2.txt 2>/dev/null
+        exit 1
+    fi
+
+
+# 2. test
+    gcc -w -o out1 "$file1" main.c
+    gcc -w -o out2 "$file2" main.c
+
+    ./out1 "dub0 a POIL" > out1.txt 2>/dev/null
+    ./out2 "dub0 a POIL" > out2.txt 2>/dev/null
+
+    if ! diff -q out1.txt out2.txt >/dev/null ; then
+        out1=$(cat out1.txt)
+        out2=$(cat out2.txt)
+        echo "$(tput setaf 1)$(tput bold)FAIL$(tput sgr 0)"
+        echo "\${GREEN}Expected Output:\${RESET} \\"$out1\\""
+        echo "\${RED}Your Output:\${RESET}     \\"$out2\\""
+        rm out1 out2 out1.txt out2.txt 2>/dev/null
+        exit 1
+    fi
+
+# 3. test
+    gcc -w -o out1 "$file1" main.c
+    gcc -w -o out2 "$file2" main.c
+
+    ./out1 "3:21 Ba  tOut  moUn ki Ka di KE m'en Ka fe fot" > out1.txt 2>/dev/null
+    ./out2 "3:21 Ba  tOut  moUn ki Ka di KE m'en Ka fe fot" > out2.txt 2>/dev/null
+
+    if ! diff -q out1.txt out2.txt >/dev/null ; then
+        out1=$(cat out1.txt)
+        out2=$(cat out2.txt)
+        echo "$(tput setaf 1)$(tput bold)FAIL$(tput sgr 0)"
+        echo "\${GREEN}Expected Output:\${RESET} \\"$out1\\""
+        echo "\${RED}Your Output:\${RESET}     \\"$out2\\""
+        rm out1 out2 out1.txt out2.txt 2>/dev/null
+        exit 1
+    fi
+
+# 10. test
+    gcc -w -o out1 "$file1" main.c
+    gcc -w -o out2 "$file2" main.c
+
+    ./out1 "AkjhZ zLKIJz , 23y " > out1.txt 2>/dev/null
+    ./out2 "AkjhZ zLKIJz , 23y " > out2.txt 2>/dev/null
+
+    if ! diff -q out1.txt out2.txt >/dev/null ; then
+        out1=$(cat out1.txt)
+        out2=$(cat out2.txt)
+        echo "$(tput setaf 1)$(tput bold)FAIL$(tput sgr 0)"
+        echo "\${GREEN}Expected Output:\${RESET} \\"$out1\\""
+        echo "\${RED}Your Output:\${RESET}     \\"$out2\\""
+        rm out1 out2 out1.txt out2.txt 2>/dev/null
+        exit 1
+    fi
+
+    # 11. test
+    gcc -w -o out1 "$file1" main.c
+    gcc -w -o out2 "$file2" main.c
+
+    ./out1 "FOR PONY" > out1.txt 2>/dev/null
+    ./out2 "FOR PONY" > out2.txt 2>/dev/null
+
+    if ! diff -q out1.txt out2.txt >/dev/null ; then
+        out1=$(cat out1.txt)
+        out2=$(cat out2.txt)
+        echo "$(tput setaf 1)$(tput bold)FAIL$(tput sgr 0)"
+        echo "\${GREEN}Expected Output:\${RESET} \\"$out1\\""
+        echo "\${RED}Your Output:\${RESET}     \\"$out2\\""
+        rm out1 out2 out1.txt out2.txt 2>/dev/null
+        exit 1
+    fi
+
+    # 12. test
+    gcc -w -o out1 "$file1" main.c
+    gcc -w -o out2 "$file2" main.c
+
+    ./out1 "this        ...       is sparta, then again, maybe    not" > out1.txt 2>/dev/null
+    ./out2 "this        ...       is sparta, then again, maybe    not" > out2.txt 2>/dev/null
+
+    if ! diff -q out1.txt out2.txt >/dev/null ; then
+        out1=$(cat out1.txt)
+        out2=$(cat out2.txt)
+        echo "$(tput setaf 1)$(tput bold)FAIL$(tput sgr 0)"
+        echo "\${GREEN}Expected Output:\${RESET} \\"$out1\\""
+        echo "\${RED}Your Output:\${RESET}     \\"$out2\\""
+        rm out1 out2 out1.txt out2.txt 2>/dev/null
+        exit 1
+    fi
+
+    # 13. test
+    gcc -w -o out1 "$file1" main.c
+    gcc -w -o out2 "$file2" main.c
+
+    ./out1 "   " > out1.txt 2>/dev/null
+    ./out2 "   " > out2.txt 2>/dev/null
+
+    if ! diff -q out1.txt out2.txt >/dev/null ; then
+        out1=$(cat out1.txt)
+        out2=$(cat out2.txt)
+        echo "$(tput setaf 1)$(tput bold)FAIL$(tput sgr 0)"
+        echo "\${GREEN}Expected Output:\${RESET} \\"$out1\\""
+        echo "\${RED}Your Output:\${RESET}     \\"$out2\\""
+        rm out1 out2 out1.txt out2.txt 2>/dev/null
+        exit 1
+    fi
+
+    # 15. test
+    gcc -w -o out1 "$file1" main.c
+    gcc -w -o out2 "$file2" main.c
+
+    ./out1 "  lorem,ipsum  " > out1.txt 2>/dev/null
+    ./out2 "  lorem,ipsum  " > out2.txt 2>/dev/null
+
+    if ! diff -q out1.txt out2.txt >/dev/null ; then
+        out1=$(cat out1.txt)
+        out2=$(cat out2.txt)
+        echo "$(tput setaf 1)$(tput bold)FAIL$(tput sgr 0)"
+        echo "\${GREEN}Expected Output:\${RESET} \\"$out1\\""
+        echo "\${RED}Your Output:\${RESET}     \\"$out2\\""
+        rm out1 out2 out1.txt out2.txt 2>/dev/null
+        exit 1
+    fi
+
+    # 16. test
+    gcc -w -o out1 "$file1" main.c
+    gcc -w -o out2 "$file2" main.c
+
+    ./out1 "" > out1.txt 2>/dev/null
+    ./out2 "" > out2.txt 2>/dev/null
+
+    if ! diff -q out1.txt out2.txt >/dev/null ; then
+        out1=$(cat out1.txt)
+        out2=$(cat out2.txt)
+        echo "$(tput setaf 1)$(tput bold)FAIL$(tput sgr 0)"
+        echo "\${GREEN}Expected Output:\${RESET} \\"$out1\\""
+        echo "\${RED}Your Output:\${RESET}     \\"$out2\\""
+        rm out1 out2 out1.txt out2.txt 2>/dev/null
+        exit 1
+    fi
+
+    
+     # 17. test
+    gcc -w -o out1 "$file1" main.c
+    gcc -w -o out2 "$file2" main.c
+
+    ./out1 > out1.txt 2>/dev/null
+    ./out2 > out2.txt 2>/dev/null
+
+    if ! diff -q out1.txt out2.txt >/dev/null ; then
+        out1=$(cat out1.txt)
+        out2=$(cat out2.txt)
+        echo "$(tput setaf 1)$(tput bold)FAIL$(tput sgr 0)"
+        echo "\${GREEN}Expected Output:\${RESET} \\"$out1\\""
+        echo "\${RED}Your Output:\${RESET}     \\"$out2\\""
+        rm out1 out2 out1.txt out2.txt 2>/dev/null
+        exit 1
+    fi
+
+
+    rm out1 out2 out1.txt out2.txt 2>/dev/null
+    echo "$(tput setaf 2)$(tput bold)PASSED 🎉$(tput sgr 0)"
+    exit 1`,
+
+  // Tests derivados del tester.sh real. Las salidas se obtuvieron
+  // compilando la solución de rank02 con gcc -w y ejecutándola.
+  testsRank02: [
+    { id: 'tester_1', entrada: ["zaz"], salida: "zaz", fuente: 'tester.sh' },
+    { id: 'tester_2', entrada: ["dub0 a POIL"], salida: "LIOP a 0bud", fuente: 'tester.sh' },
+    { id: 'tester_3', entrada: ["3:21 Ba  tOut  moUn ki Ka di KE m'en Ka fe fot"], salida: "tof ef aK ne'm EK id aK ik nUom  tuOt  aB 12:3", fuente: 'tester.sh' },
+    { id: 'tester_4', entrada: ["AkjhZ zLKIJz , 23y "], salida: " y32 , zJIKLz ZhjkA", fuente: 'tester.sh' },
+    { id: 'tester_5', entrada: ["FOR PONY"], salida: "YNOP ROF", fuente: 'tester.sh' },
+    { id: 'tester_6', entrada: ["this        ...       is sparta, then again, maybe    not"], salida: "ton    ebyam ,niaga neht ,atraps si       ...        siht", fuente: 'tester.sh' },
+    { id: 'tester_7', entrada: ["   "], salida: "   ", fuente: 'tester.sh' },
+    { id: 'tester_8', entrada: ["  lorem,ipsum  "], salida: "  muspi,merol  ", fuente: 'tester.sh' },
+    { id: 'tester_9', entrada: [""], salida: "", fuente: 'tester.sh' },
+    { id: 'tester_10', entrada: [], salida: "", fuente: 'tester.sh' },
+  ],
 
   versiones: [
     {
@@ -103,6 +317,30 @@ SIEMPRE devuelve el mismo puntero (str) — modifica in-place, sin malloc.`,
 \t\tj--;
 \t}
 \treturn (str);
+}`,
+    },
+  
+    {
+      id: 'rank02',
+      nombre: 'Versión rank02 (solución de referencia)',
+      descripcion: 'Solución tal y como aparece en el repo de referencia rank02. Útil para comparar estilo, validaciones y constraints reales del examen.',
+      recomendada: false,
+      origen: 'rank02',
+      codigo: `char *ft_strrev(char *str)
+{
+	int i = -1;
+	int length = 0;
+	char temporary;
+
+	while (str[length])
+		length++;
+	while (++i < length / 2)
+	{
+		temporary = str[i];
+		str[i] = str[length - 1 - i];
+		str[length - 1 - i] = temporary;
+	}
+	return (str);
 }`,
     },
   ],

@@ -23,6 +23,22 @@ The function should behave like the standard atoi(3) function:
 - Read digits until non-digit.
 - Return the resulting integer.`,
 
+  // Subject literal del repo rank02 (sub.txt). Útil para comparar con
+  // el subject didáctico activo y para la pestaña "Examen real".
+  subjectReal: `Assignment name  : ft_atoi
+Expected files   : ft_atoi.c
+Allowed functions: None
+--------------------------------------------------------------------------------
+
+Write a function that converts the string argument str to an integer (type int)
+and returns it.
+
+It works much like the standard atoi(const char *str) function, see the man.
+
+Your function must be declared as follows:
+
+int	ft_atoi(const char *str);`,
+
   descripcion: 'Función que convierte un string a int: salta espacios blancos, lee signo opcional, acumula dígitos. Replica el comportamiento de atoi(3).',
 
   palacio: {
@@ -55,6 +71,114 @@ Cuando llega a un carácter no-dígito, para y devuelve el número.`,
       resultado: '-42',
     },
   },
+
+  // Tester oficial copiado literalmente desde rank02 (tester.sh).
+  testerReal: `#!/bin/bash
+source ../../../main/colors.sh
+file1=ft_atoi.c
+file2=../../../../rendu/ft_atoi/ft_atoi.c
+
+
+# 1. test
+    gcc -Werror -Wall -Wextra -o out1 "$file1" main.c
+    gcc -Werror -Wall -Wextra -o out2 "$file2" main.c
+
+    ./out1 "Ceci permet de decouvrir le fonctionnement de ton ft_atoi." > out1.txt 2>/dev/null
+    ./out2 "Ceci permet de decouvrir le fonctionnement de ton ft_atoi." > out2.txt 2>/dev/null
+
+    if ! diff -q out1.txt out2.txt >/dev/null ; then
+        out1=$(cat out1.txt)
+        out2=$(cat out2.txt)
+        echo "$(tput setaf 1)$(tput bold)FAIL$(tput sgr 0)"
+        echo "\${GREEN}Expected Output:\${RESET} \\"$out1\\""
+        echo "\${RED}Your Output:\${RESET}     \\"$out2\\""
+        rm out1 out2 out1.txt out2.txt 2>/dev/null
+        exit 1
+    fi
+
+# 2. test
+    gcc -w -o out1 "$file1" main.c
+    gcc -w -o out2 "$file2" main.c
+
+    ./out1 "OH ! 13268!" > out1.txt 2>/dev/null
+    ./out2 "OH ! 13268!" > out2.txt 2>/dev/null
+
+    if ! diff -q out1.txt out2.txt >/dev/null ; then
+        out1=$(cat out1.txt)
+        out2=$(cat out2.txt)
+        echo "$(tput setaf 1)$(tput bold)FAIL$(tput sgr 0)"
+        echo "\${GREEN}Expected Output:\${RESET} \\"$out1\\""
+        echo "\${RED}Your Output:\${RESET}     \\"$out2\\""
+        rm out1 out2 out1.txt out2.txt 2>/dev/null
+        exit 1
+    fi
+
+# 3. test
+    gcc -w -o out1 "$file1" main.c
+    gcc -w -o out2 "$file2" main.c
+
+    ./out1 "13268!" > out1.txt 2>/dev/null
+    ./out2 "13268!" > out2.txt 2>/dev/null
+
+    if ! diff -q out1.txt out2.txt >/dev/null ; then
+        out1=$(cat out1.txt)
+        out2=$(cat out2.txt)
+        echo "$(tput setaf 1)$(tput bold)FAIL$(tput sgr 0)"
+        echo "\${GREEN}Expected Output:\${RESET} \\"$out1\\""
+        echo "\${RED}Your Output:\${RESET}     \\"$out2\\""
+        rm out1 out2 out1.txt out2.txt 2>/dev/null
+        exit 1
+    fi
+
+# 4. test
+    gcc -w -o out1 "$file1" main.c
+    gcc -w -o out2 "$file2" main.c
+
+    ./out1 "-13268!" > out1.txt 2>/dev/null
+    ./out2 "-13268!" > out2.txt 2>/dev/null
+
+    if ! diff -q out1.txt out2.txt >/dev/null ; then
+        out1=$(cat out1.txt)
+        out2=$(cat out2.txt)
+        echo "$(tput setaf 1)$(tput bold)FAIL$(tput sgr 0)"
+        echo "\${GREEN}Expected Output:\${RESET} \\"$out1\\""
+        echo "\${RED}Your Output:\${RESET}     \\"$out2\\""
+        rm out1 out2 out1.txt out2.txt 2>/dev/null
+        exit 1
+    fi
+
+# 5. test 
+    gcc -w -o out1 "$file1" main.c
+    gcc -w -o out2 "$file2" main.c
+
+    ./out1 "+13268!" > out1.txt 2>/dev/null
+    ./out2 "+13268!" > out2.txt 2>/dev/null
+
+    if ! diff -q out1.txt out2.txt >/dev/null ; then
+        out1=$(cat out1.txt)
+        out2=$(cat out2.txt)
+        echo "$(tput setaf 1)$(tput bold)FAIL$(tput sgr 0)"
+        echo "\${GREEN}Expected Output:\${RESET} \\"$out1\\""
+        echo "\${RED}Your Output:\${RESET}     \\"$out2\\""
+        rm out1 out2 out1.txt out2.txt 2>/dev/null
+        exit 1
+    fi
+
+
+    rm out1 out2 out1.txt out2.txt 2>/dev/null
+    echo "$(tput setaf 2)$(tput bold)PASSED 🎉$(tput sgr 0)"
+    exit 1
+`,
+
+  // Tests derivados del tester.sh real. Las salidas se obtuvieron
+  // compilando la solución de rank02 con gcc -w y ejecutándola.
+  testsRank02: [
+    { id: 'tester_1', entrada: ["Ceci permet de decouvrir le fonctionnement de ton ft_atoi."], salida: "ft_atoi(\"Ceci permet de decouvrir le fonctionnement de ton ft_atoi.\") = 0\n", fuente: 'tester.sh' },
+    { id: 'tester_2', entrada: ["OH ! 13268!"], salida: "ft_atoi(\"OH ! 13268!\") = 0\n", fuente: 'tester.sh' },
+    { id: 'tester_3', entrada: ["13268!"], salida: "ft_atoi(\"13268!\") = 13268\n", fuente: 'tester.sh' },
+    { id: 'tester_4', entrada: ["-13268!"], salida: "ft_atoi(\"-13268!\") = -13268\n", fuente: 'tester.sh' },
+    { id: 'tester_5', entrada: ["+13268!"], salida: "ft_atoi(\"+13268!\") = 13268\n", fuente: 'tester.sh' },
+  ],
 
   versiones: [
     {
@@ -113,6 +237,68 @@ Cuando llega a un carácter no-dígito, para y devuelve el número.`,
 \t\ti++;
 \t}
 \treturn (result * sign);
+}`,
+    },
+    {
+      id: 'puntero_y_estado',
+      nombre: 'Con puntero y función auxiliar para whitespace',
+      descripcion: 'Separa el salto de espacios y el parseo numérico en pasos fáciles de seguir.',
+      recomendada: false,
+      codigo: `static int\tis_ws(char c)
+{
+\treturn (c == ' ' || (c >= '\\t' && c <= '\\r'));
+}
+
+int\tft_atoi(const char *str)
+{
+\tint\tresult;
+\tint\tsign;
+
+\tresult = 0;
+\tsign = 1;
+\twhile (is_ws(*str))
+\t\tstr++;
+\tif (*str == '+' || *str == '-')
+\t{
+\t\tif (*str == '-')
+\t\t\tsign = -1;
+\t\tstr++;
+\t}
+\twhile (*str >= '0' && *str <= '9')
+\t{
+\t\tresult = result * 10 + (*str - '0');
+\t\tstr++;
+\t}
+\treturn (result * sign);
+}`,
+    },
+  
+    {
+      id: 'rank02',
+      nombre: 'Versión rank02 (solución de referencia)',
+      descripcion: 'Solución tal y como aparece en el repo de referencia rank02. Útil para comparar estilo, validaciones y constraints reales del examen.',
+      recomendada: false,
+      origen: 'rank02',
+      codigo: `#include <stdio.h>
+
+int     ft_atoi(const char *str)
+{
+	int	nbr;
+	int sig;
+	int	i;
+
+	nbr = 0;
+	sig = 1;
+	i = 0;
+	if (str[0] == '-' || str[0] == '+')
+	{
+		if (str[0] == '-')
+			sig = -1;
+		i += 1;
+	}
+	while (str[i] && str[i] >= '0' && str[i] <= '9')
+		nbr = (nbr * 10) + (str[i++] - '0');
+	return (nbr * sig);
 }`,
     },
   ],

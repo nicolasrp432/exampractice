@@ -465,4 +465,96 @@ Estos son los ejercicios que le costaron el 50/100 en el examen real al usuario.
 
 ---
 
+## 🔁 Integración rank02 (subjects, soluciones y testers reales)
+
+La carpeta `rank02/level{0..3}/<id>/` contiene material de referencia
+para 55 ejercicios:
+
+- `sub.txt`   — subject literal del examen real
+- `<id>.c`    — solución de referencia
+- `main.c`    — main de prueba (cuando aplica, ejercicios `funcion`)
+- `tester.sh` — script de tests bash que compila la solución y ejecuta
+  varios `./out args > out.txt`
+
+Mapeo: `rank02/level0 ↔ src/data/exercises/level1`, level1↔level2, etc.
+
+### Campos opcionales añadidos al schema (v1.1)
+
+En `src/data/exerciseSchema.js`. Validados por `validateOptionalRank02`
+sólo si están presentes. Ningún ejercicio los exige.
+
+| Campo (root) | Origen |
+|---|---|
+| `subjectReal`        | `sub.txt` literal |
+| `subjectAlternativo` | subject didáctico previo (para los críticos donde ya sustituimos `subject`) |
+| `testerReal`         | `tester.sh` literal |
+| `testsRank02`        | tests `{id, entrada, salida, fuente:'tester.sh'}` derivados compilando la solución del rank02 con gcc y ejecutando cada caso |
+| `mainReal`           | (futuro) — actualmente vive en `realMains` de `testHarnesses.js` |
+
+Campos opcionales en `versiones[i]`:
+- `origen: 'plataforma' | 'rank02' | 'didactica'`
+
+Campos opcionales en `gdbSteps[i]` y `gdbCaminos`:
+- `gdbSteps[i].fuente: 'didactica' | 'real'`, `linea: number`
+- `gdbCaminos: [{ id, nombre, descripcion?, pasos: [...] }]` (alternativa
+  multi-camino a `gdbSteps`; `GdbStepper` los muestra con selector si hay
+  más de uno).
+
+### Test harnesses con main real
+
+`src/utils/testHarnesses.js` exporta dos extras:
+
+- `realMains` — para ejercicios `funcion` cuyos `main.c` existen en
+  rank02. Cada entrada lleva `{ main, requiereWarningsRelajados }`.
+  Sólo `ft_swap` tiene el flag `true` (su `main.c` usa `%u` con `int*`
+  y no compila con `-Werror`).
+- `buildFullCodeWithRealMain(id, tipoEntrega, userCode)` → `{ code,
+  requiereWarningsRelajados }`. Permite que PracticeMode ofrezca un
+  toggle "usar el main real del examen" sin romper el harness por defecto.
+
+### Diagnóstico en PracticeMode (heurísticas)
+
+`src/utils/diagnostics/heuristics.js` define `classifyFailure({ test,
+result, exercise })` que clasifica fallos por patrón:
+
+- crashes: segfault, sigabrt, sigfpe, timeout
+- compilación: compile-error
+- output: missing-newline, extra-newline, truncated-tail, extra-prefix,
+  first-byte-differs, mid-divergence, empty-output
+- programa sin guarda argc: no-argc-guard
+
+`src/components/practice/PracticeDiagnostics.jsx` muestra el primer test
+fallido con su diagnóstico + acción sugerida, y un botón "Inspeccionar"
+que carga los args en el RunPanel. Sólo se renderiza si hay fallos.
+
+### Scripts de mantenimiento (en `scripts/`)
+
+| Script | Qué hace |
+|---|---|
+| `audit-rank02.mjs` | Compara cada ejercicio plataforma vs rank02. Emite `audit-report.json`. Opción `--check` para CI. |
+| `inject-subject-real.mjs <rankLevel/id> [...]` | Inyecta `subjectReal` desde el `sub.txt` literal. Idempotente. Cuidado: usa función como segundo arg de `String.replace` (los `sub.txt` contienen `$>` que activaría `$\``). |
+| `inject-rank02-version.mjs [target...]` | Añade entrada `id:'rank02', origen:'rank02'` al final de `versiones[]`. Sin argumentos opera sobre los 55. |
+| `inject-tests-rank02.mjs [target...]` | Compila la solución `.c` (con `main.c` si existe), ejecuta cada caso del `tester.sh` y guarda `testerReal` + `testsRank02` con la salida obtenida. |
+| `inject-real-mains.mjs` | Imprime en stdout el bloque `realMains + buildFullCodeWithRealMain` listo para anexar a `testHarnesses.js`. |
+
+### Fases ejecutadas
+
+1. **Fase 0** — audit + schema extendido + `rank02Integration.test.js`.
+2. **Fase 1** — subjects alineados (críticos: search_and_replace, do_op,
+   camel_to_snake, add_prime_sum, pgcd, fprime). `subjectReal` en los 55.
+3. **Fase 2** — versión `id:'rank02'` añadida en los 55 ejercicios.
+4. **Fase 3.1** — `realMains` para 26 ejercicios.
+5. **Fase 3.2/3.3** — `testerReal` + `testsRank02` (422 casos).
+6. **Fase 4** — `gdbCaminos` opcional en GdbStepper.
+7. **Fase 5** — PracticeDiagnostics con heurísticas.
+8. **Fase 6** — toggle subject vigente/real/didáctico + badge rank02 en
+   versiones.
+
+Todo aditivo: ningún ejercicio existente se rompe sin esos campos. El
+único cambio sustantivo de `subject` se hizo en `search_and_replace` y
+`do_op` (donde la divergencia era crítica) — la versión previa se
+conserva en `subjectAlternativo`.
+
+---
+
 *Este contexto fue generado a partir de sesiones intensivas de estudio para el examen 42 School. Todos los personajes, historias y patrones han sido validados por el usuario estudiante.*

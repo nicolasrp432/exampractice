@@ -5,7 +5,9 @@ export default {
   dificultad: 'medio',
   tipoEntrega: 'programa',
   archivosEsperados: ['add_prime_sum.c'],
-  funcionesPermitidas: ['write'],
+  // El subject real permite además `exit`. La plataforma solo había
+  // declarado `write` — ampliamos sin romper soluciones existentes.
+  funcionesPermitidas: ['write', 'exit'],
 
   subject: `Assignment name  : add_prime_sum
 Expected files   : add_prime_sum.c
@@ -25,6 +27,31 @@ $> ./add_prime_sum 7 | cat -e
 17$
 $> ./add_prime_sum 1 | cat -e
 0$`,
+
+  // Subject literal del repo rank02 (sub.txt). Útil para comparar con
+  // el subject didáctico activo y para la pestaña "Examen real".
+  subjectReal: `Assignment name  : add_prime_sum
+Expected files   : add_prime_sum.c
+Allowed functions: write, exit
+--------------------------------------------------------------------------------
+
+Write a program that takes a positive integer as argument and displays the sum
+of all prime numbers inferior or equal to it followed by a newline.
+
+If the number of arguments is not 1, or the argument is not a positive number,
+just display 0 followed by a newline.
+
+Yes, the examples are right.
+
+Examples:
+
+$>./add_prime_sum 5
+10
+$>./add_prime_sum 7 | cat -e
+17$
+$>./add_prime_sum | cat -e
+0$
+$>`,
 
   descripcion: 'Programa que suma todos los números primos hasta N (inclusive). Requiere is_prime() con verificación hasta sqrt(n), y put_nbr para imprimir el resultado.',
 
@@ -58,6 +85,94 @@ El 1 no es primo. El 2 sí es primo (el único par primo). Resultado: put_nbr(su
       resultado: '10',
     },
   },
+
+  // Tester oficial copiado literalmente desde rank02 (tester.sh).
+  testerReal: `#!/bin/bash
+source ../../../main/colors.sh
+file1=add_prime_sum.c
+file2=../../../../rendu/add_prime_sum/add_prime_sum.c
+
+# 1. test
+    gcc -Werror -Wall -Wextra -o out1 "$file1"
+    gcc -Werror -Wall -Wextra -o out2 "$file2"
+
+    ./out1 > out1.txt 2>/dev/null
+    ./out2 > out2.txt 2>/dev/null
+
+    if ! diff -q out1.txt out2.txt >/dev/null ; then
+        out1=$(cat out1.txt)
+        out2=$(cat out2.txt)
+        echo "$(tput setaf 1)$(tput bold)FAIL$(tput sgr 0)"
+        echo "\${GREEN}Expected Output:\${RESET} \\"$out1\\""
+        echo "\${RED}Your Output:\${RESET}     \\"$out2\\""
+        rm out1 out2 out1.txt out2.txt 2>/dev/null
+        exit 1
+    fi
+
+# 2. test
+    gcc -w -o out1 "$file1"
+    gcc -w -o out2 "$file2"
+
+    ./out1 "5" > out1.txt 2>/dev/null
+    ./out2 "5" > out2.txt 2>/dev/null
+
+    if ! diff -q out1.txt out2.txt >/dev/null ; then
+        out1=$(cat out1.txt)
+        out2=$(cat out2.txt)
+        echo "$(tput setaf 1)$(tput bold)FAIL$(tput sgr 0)"
+        echo "\${GREEN}Expected Output:\${RESET} \\"$out1\\""
+        echo "\${RED}Your Output:\${RESET}     \\"$out2\\""
+        rm out1 out2 out1.txt out2.txt 2>/dev/null
+        exit 1
+    fi
+
+# 3. test
+    gcc -w -o out1 "$file1"
+    gcc -w -o out2 "$file2"
+
+    ./out1 "Too" "Many" "Arguments" > out1.txt 2>/dev/null
+    ./out2 "Too" "Many" "Arguments" > out2.txt 2>/dev/null
+
+    if ! diff -q out1.txt out2.txt >/dev/null ; then
+        out1=$(cat out1.txt)
+        out2=$(cat out2.txt)
+        echo "$(tput setaf 1)$(tput bold)FAIL$(tput sgr 0)"
+        echo "\${GREEN}Expected Output:\${RESET} \\"$out1\\""
+        echo "\${RED}Your Output:\${RESET}     \\"$out2\\""
+        rm out1 out2 out1.txt out2.txt 2>/dev/null
+        exit 1
+    fi
+
+# 4. test
+    gcc -w -o out1 "$file1"
+    gcc -w -o out2 "$file2"
+
+    ./out1 "7" > out1.txt 2>/dev/null
+    ./out2 "7" > out2.txt 2>/dev/null
+
+    if ! diff -q out1.txt out2.txt >/dev/null ; then
+        out1=$(cat out1.txt)
+        out2=$(cat out2.txt)
+        echo "$(tput setaf 1)$(tput bold)FAIL$(tput sgr 0)"
+        echo "\${GREEN}Expected Output:\${RESET} \\"$out1\\""
+        echo "\${RED}Your Output:\${RESET}     \\"$out2\\""
+        rm out1 out2 out1.txt out2.txt 2>/dev/null
+        exit 1
+    fi
+
+
+    rm out1 out2 out1.txt out2.txt 2>/dev/null
+    echo "$(tput setaf 2)$(tput bold)PASSED 🎉$(tput sgr 0)"
+    exit 1`,
+
+  // Tests derivados del tester.sh real. Las salidas se obtuvieron
+  // compilando la solución de rank02 con gcc -w y ejecutándola.
+  testsRank02: [
+    { id: 'tester_1', entrada: [], salida: "0\n", fuente: 'tester.sh' },
+    { id: 'tester_2', entrada: ["5"], salida: "10\n", fuente: 'tester.sh' },
+    { id: 'tester_3', entrada: ["Too","Many","Arguments"], salida: "0\n", fuente: 'tester.sh' },
+    { id: 'tester_4', entrada: ["7"], salida: "17\n", fuente: 'tester.sh' },
+  ],
 
   versiones: [
     {
@@ -108,6 +223,11 @@ int\tmain(int argc, char **argv)
 \ti = 0;
 \twhile (argv[1][i] >= '0' && argv[1][i] <= '9')
 \t\tn = n * 10 + (argv[1][i++] - '0');
+\tif (argv[1][i] != '\\0' || n == 0)
+\t{
+\t\twrite(1, "0\\n", 2);
+\t\treturn (0);
+\t}
 \tsum = 0;
 \ti = 2;
 \twhile (i <= n)
@@ -119,6 +239,147 @@ int\tmain(int argc, char **argv)
 \tput_nbr(sum);
 \twrite(1, "\\n", 1);
 \treturn (0);
+}`,
+    },
+    {
+      id: 'impar_optimizado',
+      nombre: 'Con salto de pares',
+      descripcion: 'Comprueba el 2 aparte y luego prueba solo divisores impares. Más simple para ver el patrón.',
+      recomendada: false,
+      codigo: `#include <unistd.h>
+
+static int\tis_prime(int n)
+{
+\tint\td;
+
+\tif (n < 2)
+\t\treturn (0);
+\tif (n == 2)
+\t\treturn (1);
+\tif (n % 2 == 0)
+\t\treturn (0);
+\td = 3;
+\twhile (d * d <= n)
+\t{
+\t\tif (n % d == 0)
+\t\t\treturn (0);
+\t\td += 2;
+\t}
+\treturn (1);
+}
+
+static void\tput_nbr(unsigned long n)
+{
+\tchar\tc;
+
+\tif (n >= 10)
+\t\tput_nbr(n / 10);
+\tc = '0' + n % 10;
+\twrite(1, &c, 1);
+}
+
+int\tmain(int argc, char **argv)
+{
+\tunsigned long\tsum;
+\tint\t\t\tn;
+\tint\t\t\ti;
+
+\tif (argc != 2)
+\t{
+\t\twrite(1, "0\\n", 2);
+\t\treturn (0);
+\t}
+\tn = 0;
+\ti = 0;
+\twhile (argv[1][i] >= '0' && argv[1][i] <= '9')
+\t\tn = n * 10 + (argv[1][i++] - '0');
+\tif (argv[1][i] != '\\0' || n == 0)
+\t{
+\t\twrite(1, "0\\n", 2);
+\t\treturn (0);
+\t}
+\tsum = 0;
+\ti = 2;
+\twhile (i <= n)
+\t{
+\t\tif (is_prime(i))
+\t\t\tsum += i;
+\t\ti++;
+\t}
+\tput_nbr(sum);
+\twrite(1, "\\n", 1);
+\treturn (0);
+}`,
+    },
+  
+    {
+      id: 'rank02',
+      nombre: 'Versión rank02 (solución de referencia)',
+      descripcion: 'Solución tal y como aparece en el repo de referencia rank02. Útil para comparar estilo, validaciones y constraints reales del examen.',
+      recomendada: false,
+      origen: 'rank02',
+      codigo: `
+
+#include <unistd.h>
+
+int		ft_atoi(char *str)
+{
+	int n = 0;
+
+	while (*str >= '0' && *str <= '9')
+	{
+		n *= 10;
+		n += *str - '0';
+		++str;
+	}
+	return (n);
+}
+
+void	ft_putnbr(int n)
+{
+	if (n >= 10)
+		ft_putnbr(n / 10);
+	char c = (n % 10) + '0';
+	write(1, &c, 1);
+}
+
+int		is_prime(int n)
+{
+	int i = 2;
+
+	while (i < n)
+	{
+		if (n % i == 0)
+			return (0);
+		++i;
+	}
+	return (1);
+}
+
+int		add_prime_sum(int n)
+{
+	int sum = 0;
+	int i = 2;
+
+	while (i <= n)
+	{
+		if (is_prime(i) == 1)
+			sum += i;
+		++i;
+	}
+	return (sum);
+}
+
+int		main(int argc, char **argv)
+{
+	int n;
+
+	if (argc == 2 && (n = ft_atoi(argv[1])))
+		ft_putnbr(add_prime_sum(n));
+	else
+		ft_putnbr(0);
+	write(1, "\\n", 1);
+	return (0);
 }`,
     },
   ],
@@ -172,6 +433,19 @@ Salida: "10\\n"`,
   ],
 
   trampas: [
+    {
+      severidad: 'info',
+      titulo: 'Diferencia plataforma vs examen real',
+      descripcion: 'El subject real permite también la función `exit` (útil para salir limpiamente si el argumento no es un entero positivo). Las soluciones write-only de la plataforma siguen siendo válidas.',
+      codigoMal: `// La versión didáctica forzaba return 0 con guardas anidadas:
+if (argc != 2) { write(1, "0\\n", 2); return 0; }
+if (!is_positive_int(argv[1])) { write(1, "0\\n", 2); return 0; }`,
+      codigoBien: `// Con exit puedes simplificar la salida temprana:
+if (argc != 2 || !is_positive_int(argv[1])) {
+\twrite(1, "0\\n", 2);
+\texit(0);
+}`,
+    },
     {
       severidad: 'mortal',
       titulo: 'is_prime: probar hasta n/2 en vez de sqrt(n)',

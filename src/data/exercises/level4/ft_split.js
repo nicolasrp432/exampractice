@@ -28,6 +28,23 @@ ft_split("hello world foo", ' ')  → {"hello", "world", "foo", NULL}
 ft_split("hello::world", ':')     → {"hello", "world", NULL}
 ft_split("  spaces  ", ' ')       → {"spaces", NULL}`,
 
+  // Subject literal del repo rank02 (sub.txt). Útil para comparar con
+  // el subject didáctico activo y para la pestaña "Examen real".
+  subjectReal: `Assignment name  : ft_split
+Expected files   : ft_split.c
+Allowed functions: malloc
+--------------------------------------------------------------------------------
+
+Write a function that takes a string, splits it into words, and returns them as
+a NULL-terminated array of strings.
+
+A "word" is defined as a part of a string delimited either by spaces/tabs/new
+lines, or by the start/end of the string.
+
+Your function must be declared as follows:
+
+char    **ft_split(char *str);`,
+
   descripcion: 'Función que divide un string por un delimitador y devuelve un array de strings (terminado en NULL). Requiere malloc para el array de punteros y para cada substring. Sin strings vacíos en el resultado.',
 
   palacio: {
@@ -61,6 +78,132 @@ La Sierra ignora los separadores múltiples — sin strings vacíos.`,
       resultado: '{"hello","world","foo",NULL}',
     },
   },
+
+  // Tester oficial copiado literalmente desde rank02 (tester.sh).
+  testerReal: `#!/bin/bash
+source ../../../main/colors.sh
+file1=ft_split.c
+file2=../../../../rendu/ft_split/ft_split.c
+
+
+# 1. test
+    gcc -Werror -Wall -Wextra -o out1 "$file1" main.c
+    gcc -Werror -Wall -Wextra -o out2 "$file2" main.c
+
+    ./out1 "three words apart" > out1.txt 2>/dev/null
+    ./out2 "three words apart" > out2.txt 2>/dev/null
+
+    if ! diff -q out1.txt out2.txt >/dev/null ; then
+        out1=$(cat out1.txt)
+        out2=$(cat out2.txt)
+        echo "$(tput setaf 1)$(tput bold)FAIL$(tput sgr 0)"
+        echo "\${GREEN}Expected Output:\${RESET} \\"$out1\\""
+        echo "\${RED}Your Output:\${RESET}     \\"$out2\\""
+        rm out1 out2 out1.txt out2.txt 2>/dev/null
+        exit 1
+    fi
+
+# 2. test
+    gcc -w -o out1 "$file1" main.c
+    gcc -w -o out2 "$file2" main.c
+
+    ./out1 "  starting and ending   " > out1.txt 2>/dev/null
+    ./out2 "  starting and ending   " > out2.txt 2>/dev/null
+
+    if ! diff -q out1.txt out2.txt >/dev/null ; then
+        out1=$(cat out1.txt)
+        out2=$(cat out2.txt)
+        echo "$(tput setaf 1)$(tput bold)FAIL$(tput sgr 0)"
+        echo "\${GREEN}Expected Output:\${RESET} \\"$out1\\""
+        echo "\${RED}Your Output:\${RESET}     \\"$out2\\""
+        rm out1 out2 out1.txt out2.txt 2>/dev/null
+        exit 1
+    fi
+
+# 3. test
+    gcc -w -o out1 "$file1" main.c
+    gcc -w -o out2 "$file2" main.c
+
+    ./out1 "t a b c " > out1.txt 2>/dev/null
+    ./out2 "t a b c " > out2.txt 2>/dev/null
+
+    if ! diff -q out1.txt out2.txt >/dev/null ; then
+        out1=$(cat out1.txt)
+        out2=$(cat out2.txt)
+        echo "$(tput setaf 1)$(tput bold)FAIL$(tput sgr 0)"
+        echo "\${GREEN}Expected Output:\${RESET} \\"$out1\\""
+        echo "\${RED}Your Output:\${RESET}     \\"$out2\\""
+        rm out1 out2 out1.txt out2.txt 2>/dev/null
+        exit 1
+    fi
+
+# 4. test
+    gcc -w -o out1 "$file1" main.c
+    gcc -w -o out2 "$file2" main.c
+
+    ./out1 "    " > out1.txt 2>/dev/null
+    ./out2 "    " > out2.txt 2>/dev/null
+
+    if ! diff -q out1.txt out2.txt >/dev/null ; then
+        out1=$(cat out1.txt)
+        out2=$(cat out2.txt)
+        echo "$(tput setaf 1)$(tput bold)FAIL$(tput sgr 0)"
+        echo "\${GREEN}Expected Output:\${RESET} \\"$out1\\""
+        echo "\${RED}Your Output:\${RESET}     \\"$out2\\""
+        rm out1 out2 out1.txt out2.txt 2>/dev/null
+        exit 1
+    fi
+
+# 5. test 
+    gcc -w -o out1 "$file1" main.c
+    gcc -w -o out2 "$file2" main.c
+
+    ./out1 "    a  " > out1.txt 2>/dev/null
+    ./out2 "    a  " > out2.txt 2>/dev/null
+
+    if ! diff -q out1.txt out2.txt >/dev/null ; then
+        out1=$(cat out1.txt)
+        out2=$(cat out2.txt)
+        echo "$(tput setaf 1)$(tput bold)FAIL$(tput sgr 0)"
+        echo "\${GREEN}Expected Output:\${RESET} \\"$out1\\""
+        echo "\${RED}Your Output:\${RESET}     \\"$out2\\""
+        rm out1 out2 out1.txt out2.txt 2>/dev/null
+        exit 1
+    fi
+
+# 6. test
+    gcc -w -o out1 "$file1" main.c
+    gcc -w -o out2 "$file2" main.c
+
+    ./out1 "    b" > out1.txt 2>/dev/null
+    ./out2 "    b" > out2.txt 2>/dev/null
+
+    if ! diff -q out1.txt out2.txt >/dev/null ; then
+        out1=$(cat out1.txt)
+        out2=$(cat out2.txt)
+        echo "$(tput setaf 1)$(tput bold)FAIL$(tput sgr 0)"
+        echo "\${GREEN}Expected Output:\${RESET} \\"$out1\\""
+        echo "\${RED}Your Output:\${RESET}     \\"$out2\\""
+        rm out1 out2 out1.txt out2.txt 2>/dev/null
+        exit 1
+    fi
+
+
+    rm out1 out2 out1.txt out2.txt 2>/dev/null
+    echo "$(tput setaf 2)$(tput bold)PASSED 🎉$(tput sgr 0)"
+    exit 1
+`,
+
+  // Tests derivados del tester.sh real. Las salidas se obtuvieron
+  // compilando la solución de rank02 con gcc -w y ejecutándola.
+  testsRank02: [
+    { id: 'tester_1', entrada: ["three words apart"], salida: "three words apart (null)\n", fuente: 'tester.sh' },
+    { id: 'tester_2', entrada: ["  starting and ending   "], salida: "starting and ending (null)\n", fuente: 'tester.sh' },
+    { id: 'tester_3', entrada: ["t a b c "], salida: "t a b c (null)\n", fuente: 'tester.sh' },
+    { id: 'tester_4', entrada: ["    "], salida: "(null) (null)\n", fuente: 'tester.sh' },
+    { id: 'tester_5', entrada: ["    a  "], salida: "a (null)\n", fuente: 'tester.sh' },
+    { id: 'tester_6', entrada: ["    b"], salida: "b (null)\n", fuente: 'tester.sh' },
+  ],
 
   versiones: [
     {
@@ -145,6 +288,170 @@ char\t**ft_split(char *str, char c)
 \t}
 \tresult[j] = NULL;
 \treturn (result);
+}`,
+    },
+    {
+      id: 'punteros',
+      nombre: 'Con punteros y helpers pequeños',
+      descripcion: 'Usa punteros para contar y copiar palabras con una estructura un poco más lineal.',
+      recomendada: false,
+      codigo: `#include <stdlib.h>
+
+static int\tcount_words(char *str, char c)
+{
+\tint\tcount;
+\tint\tin_word;
+
+\tcount = 0;
+\tin_word = 0;
+\twhile (*str)
+\t{
+\t\tif (*str == c)
+\t\t\tin_word = 0;
+\t\telse if (!in_word)
+\t\t{
+\t\t\tcount++;
+\t\t\tin_word = 1;
+\t\t}
+\t\tstr++;
+\t}
+\treturn (count);
+}
+
+static char\t*copy_word(char *str, char c, int *index)
+{
+\tchar\t*word;
+\tint\t\tlen;
+\tint\t\tj;
+
+\twhile (str[*index] == c)
+\t\t(*index)++;
+\tlen = 0;
+\twhile (str[*index + len] && str[*index + len] != c)
+\t\tlen++;
+\tword = (char *)malloc(len + 1);
+\tif (!word)
+\t\treturn (NULL);
+\tj = 0;
+\twhile (j < len)
+\t{
+\t\tword[j] = str[*index + j];
+\t\tj++;
+\t}
+\tword[j] = '\\0';
+\t*index += len;
+\treturn (word);
+}
+
+char\t**ft_split(char *str, char c)
+{
+\tchar\t**result;
+\tint\t\twords;
+\tint\t\tindex;
+\tint\t\tj;
+
+\tif (!str)
+\t\treturn (NULL);
+\twords = count_words(str, c);
+\tresult = (char **)malloc((words + 1) * sizeof(char *));
+\tif (!result)
+\t\treturn (NULL);
+\tindex = 0;
+\tj = 0;
+\twhile (j < words)
+\t{
+\t\tresult[j] = copy_word(str, c, &index);
+\t\tif (!result[j])
+\t\t{
+\t\t\twhile (j > 0)
+\t\t\t\tfree(result[--j]);
+\t\t\tfree(result);
+\t\t\treturn (NULL);
+\t\t}
+\t\tj++;
+\t}
+\tresult[j] = NULL;
+\treturn (result);
+}`,
+    },
+  
+    {
+      id: 'rank02',
+      nombre: 'Versión rank02 (solución de referencia)',
+      descripcion: 'Solución tal y como aparece en el repo de referencia rank02. Útil para comparar estilo, validaciones y constraints reales del examen.',
+      recomendada: false,
+      origen: 'rank02',
+      codigo: `#include <stdlib.h>
+
+int	ft_wordlen(char *str)
+{
+	int i = 0;
+
+	while (str[i] != '\\0' && str[i] != ' ' && str[i] != '\\t' && str[i] != '\\n')
+		++i;
+	return (i);
+}
+
+char	*word_dupe(char *str)
+{
+	int i = 0;
+	int len = ft_wordlen(str);
+	char *word = malloc(sizeof(char) * (len + 1));
+	
+	word[len] = '\\0';
+	while (i < len)
+	{
+		word[i] = str[i];
+		++i;
+	}
+	return (word);
+}
+
+void	fill_words(char **array, char *str)
+{
+	int word_index = 0;
+	
+	while (*str == ' ' || *str == '\\t' || *str == '\\n')
+		++str;
+	while (*str != '\\0')
+	{
+		array[word_index] = word_dupe(str);
+		++word_index;
+		while (*str != '\\0' && *str != ' ' && *str != '\\t' && *str != '\\n')
+			++str;
+		while (*str == ' ' || *str == '\\t' || *str == '\\n')
+			++str;
+	}
+}
+
+int		count_words(char *str)
+{
+	int num_words = 0;
+	
+	while (*str == ' ' || *str == '\\t' || *str == '\\n')
+		++str;
+	while (*str != '\\0')
+	{
+		++num_words;
+		while (*str != '\\0' && *str != ' ' && *str != '\\t' && *str != '\\n')
+			++str;
+		while (*str == ' ' || *str == '\\t' || *str == '\\n')
+			++str;
+	}
+	return (num_words);
+}
+
+char	**ft_split(char *str)
+{
+	int		num_words;
+	char	**array;
+	
+	num_words = count_words(str);
+	array = malloc(sizeof(char *) * (num_words + 1));
+	
+	array[num_words] = 0;
+	fill_words(array, str);
+	return (array);
 }`,
     },
   ],

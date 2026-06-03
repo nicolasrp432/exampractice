@@ -17,6 +17,20 @@ are given as parameters.
 
 void\tft_swap(int *a, int *b);`,
 
+  // Subject literal del repo rank02 (sub.txt). Útil para comparar con
+  // el subject didáctico activo y para la pestaña "Examen real".
+  subjectReal: `Assignment name  : ft_swap
+Expected files   : ft_swap.c
+Allowed functions:
+--------------------------------------------------------------------------------
+
+Write a function that swaps the contents of two integers the adresses of which
+are passed as parameters.
+
+Your function must be declared as follows:
+
+void	ft_swap(int *a, int *b);`,
+
   descripcion: 'Función que intercambia los valores de dos enteros usando sus direcciones de memoria. Requiere una variable temporal.',
 
   palacio: {
@@ -50,6 +64,41 @@ Ritual: 1) Vierte A en tmp. 2) Vierte B en A. 3) Vierte tmp en B.
     },
   },
 
+  // Tester oficial copiado literalmente desde rank02 (tester.sh).
+  testerReal: `#!/bin/bash
+source ../../../main/colors.sh
+file1=ft_swap.c
+file2=../../../../rendu/ft_swap/ft_swap.c
+
+
+# 1. test
+    gcc -Werror -Wall -Wextra -o out1 "$file1" main.c
+    gcc -Werror -Wall -Wextra -o out2 "$file2" main.c
+
+    ./out1 > out1.txt 2>/dev/null
+    ./out2 > out2.txt 2>/dev/null
+
+    if ! diff -q out1.txt out2.txt >/dev/null ; then
+        out1=$(cat out1.txt)
+        out2=$(cat out2.txt)
+        echo "$(tput setaf 1)$(tput bold)FAIL$(tput sgr 0)"
+        echo "\${GREEN}Expected Output:\${RESET} \\"$out1\\""
+        echo "\${RED}Your Output:\${RESET}     \\"$out2\\""
+        rm out1 out2 out1.txt out2.txt 2>/dev/null
+        exit 1
+    fi
+
+
+    rm out1 out2 out1.txt out2.txt 2>/dev/null
+    echo "$(tput setaf 2)$(tput bold)PASSED 🎉$(tput sgr 0)"
+    exit 1`,
+
+  // Tests derivados del tester.sh real. Las salidas se obtuvieron
+  // compilando la solución de rank02 con gcc -w y ejecutándola.
+  testsRank02: [
+    { id: 'tester_1', entrada: [], salida: "Value of n1 is: 9 and the value of n2 is: 6.\nNow the value of n1 is: 6 and the value of n2 is: 9.\n", fuente: 'tester.sh' },
+  ],
+
   versiones: [
     {
       id: 'clasica',
@@ -76,6 +125,25 @@ void\tft_swap(int *a, int *b)
 \t*a ^= *b;
 \t*b ^= *a;
 \t*a ^= *b;
+}`,
+    },
+  
+    {
+      id: 'rank02',
+      nombre: 'Versión rank02 (solución de referencia)',
+      descripcion: 'Solución tal y como aparece en el repo de referencia rank02. Útil para comparar estilo, validaciones y constraints reales del examen.',
+      recomendada: false,
+      origen: 'rank02',
+      codigo: `#include <unistd.h>
+#include <stdio.h>
+
+void    ft_swap(int *a, int *b)
+{
+	int	temp;
+
+	temp = *a;
+	*a = *b;
+	*b = temp;
 }`,
     },
   ],
@@ -178,6 +246,18 @@ $2 = 3`,
   ],
 
   trampas: [
+    {
+      severidad: 'info',
+      titulo: 'Diferencia plataforma vs examen real',
+      descripcion: 'Tu función ft_swap del repo rank02 está bien, pero el `main.c` que la acompaña imprime los enteros con `printf("%u", *a)` — `%u` es para `unsigned int`, no `int`. Con `-Wall -Wextra -Werror` ese main NO compila. El subject real no obliga a usar ese main: la Moulinette enlaza tu .c con uno propio. La plataforma usa su propio harness limpio (ver Practica), así que no te encontrarás ese warning aquí.',
+      codigoMal: `// ❌ main.c real del rank02 (no compila con -Werror)
+printf("Value of n1 is: %u and the value of n2 is: %u.", *a, *b);
+// warning: format '%u' expects 'unsigned int', argument has type 'int'`,
+      codigoBien: `// ✅ Lo que hace la plataforma: %d para int
+printf("Antes:  a = %d, b = %d\\n", *a, *b);
+ft_swap(&a, &b);
+printf("Después: a = %d, b = %d\\n", *a, *b);`,
+    },
     {
       severidad: 'mortal',
       titulo: 'int *tmp en vez de int tmp → segfault',

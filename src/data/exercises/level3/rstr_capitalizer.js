@@ -28,6 +28,36 @@ hellO worlD$
 $> ./rstr_capitalizer "a b c" | cat -e
 A B C$`,
 
+  // Subject literal del repo rank02 (sub.txt). Útil para comparar con
+  // el subject didáctico activo y para la pestaña "Examen real".
+  subjectReal: `Assignment name  : rstr_capitalizer
+Expected files   : rstr_capitalizer.c
+Allowed functions: write
+--------------------------------------------------------------------------------
+
+Write a program that takes one or more strings and, for each argument, puts 
+the last character that is a letter of each word in uppercase and the rest
+in lowercase, then displays the result followed by a \\n.
+
+A word is a section of string delimited by spaces/tabs or the start/end of the
+string. If a word has a single letter, it must be capitalized.
+
+A letter is a character in the set [a-zA-Z]
+
+If there are no parameters, display \\n.
+
+Examples:
+
+$> ./rstr_capitalizer | cat -e
+$
+$> ./rstr_capitalizer "a FiRSt LiTTlE TESt" | cat -e
+A firsT littlE tesT$
+$> ./rstr_capitalizer "SecONd teST A LITtle BiT   Moar comPLEX" "   But... This iS not THAT COMPLEX" "     Okay, this is the last 1239809147801 but not    the least    t" | cat -e
+seconD tesT A littlE biT   moaR compleX$
+   but... thiS iS noT thaT compleX$
+     okay, thiS iS thE lasT 1239809147801 buT noT    thE leasT    T$
+$>`,
+
   descripcion: "Como str_capitalizer pero al revés: la ÚLTIMA letra de cada palabra en mayúscula, el resto en minúsculas. Para detectar la última letra de una palabra: str[i+1]==' ' o str[i+1]='\\0'.",
 
   palacio: {
@@ -60,6 +90,113 @@ Es el "reverso" de str_capitalizer.`,
       resultado: '"hellO worlD"',
     },
   },
+
+  // Tester oficial copiado literalmente desde rank02 (tester.sh).
+  testerReal: `#!/bin/bash
+source ../../../main/colors.sh
+file1=rstr_capitalizer.c
+file2=../../../../rendu/rstr_capitalizer/rstr_capitalizer.c
+
+
+# 1. test
+    gcc -Werror -Wall -Wextra -o out1 "$file1"
+    gcc -Werror -Wall -Wextra -o out2 "$file2"
+
+    ./out1 > out1.txt 2>/dev/null
+    ./out2 > out2.txt 2>/dev/null
+
+    if ! diff -q out1.txt out2.txt >/dev/null ; then
+        out1=$(cat out1.txt)
+        out2=$(cat out2.txt)
+        echo "$(tput setaf 1)$(tput bold)FAIL$(tput sgr 0)"
+        echo "\${GREEN}Expected Output:\${RESET} \\"$out1\\""
+        echo "\${RED}Your Output:\${RESET}     \\"$out2\\""
+        rm out1 out2 out1.txt out2.txt 2>/dev/null
+        exit 1
+    fi
+
+# 2. test
+    gcc -w -o out1 "$file1"
+    gcc -w -o out2 "$file2"
+
+    ./out1 "a FiRSt LiTTlE TESt" > out1.txt 2>/dev/null
+    ./out2 "a FiRSt LiTTlE TESt" > out2.txt 2>/dev/null
+
+    if ! diff -q out1.txt out2.txt >/dev/null ; then
+        out1=$(cat out1.txt)
+        out2=$(cat out2.txt)
+        echo "$(tput setaf 1)$(tput bold)FAIL$(tput sgr 0)"
+        echo "\${GREEN}Expected Output:\${RESET} \\"$out1\\""
+        echo "\${RED}Your Output:\${RESET}     \\"$out2\\""
+        rm out1 out2 out1.txt out2.txt 2>/dev/null
+        exit 1
+    fi
+
+# 3. test
+    gcc -w -o out1 "$file1"
+    gcc -w -o out2 "$file2"
+
+    ./out1 "SecONd teST A LITtle BiT   Moar comPLEX" "   But... This iS not THAT COMPLEX" "     Okay, this is the last 1239809147801 but not    the least    t" > out1.txt 2>/dev/null
+    ./out2 "SecONd teST A LITtle BiT   Moar comPLEX" "   But... This iS not THAT COMPLEX" "     Okay, this is the last 1239809147801 but not    the least    t" > out2.txt 2>/dev/null
+
+    if ! diff -q out1.txt out2.txt >/dev/null ; then
+        out1=$(cat out1.txt)
+        out2=$(cat out2.txt)
+        echo "$(tput setaf 1)$(tput bold)FAIL$(tput sgr 0)"
+        echo "\${GREEN}Expected Output:\${RESET} \\"$out1\\""
+        echo "\${RED}Your Output:\${RESET}     \\"$out2\\""
+        rm out1 out2 out1.txt out2.txt 2>/dev/null
+        exit 1
+    fi
+
+# 4. test
+    gcc -w -o out1 "$file1"
+    gcc -w -o out2 "$file2"
+
+    ./out1 "Okay i thing you got it!!! " > out1.txt 2>/dev/null
+    ./out2 "Okay i thing you got it!!! " > out2.txt 2>/dev/null
+
+    if ! diff -q out1.txt out2.txt >/dev/null ; then
+        out1=$(cat out1.txt)
+        out2=$(cat out2.txt)
+        echo "$(tput setaf 1)$(tput bold)FAIL$(tput sgr 0)"
+        echo "\${GREEN}Expected Output:\${RESET} \\"$out1\\""
+        echo "\${RED}Your Output:\${RESET}     \\"$out2\\""
+        rm out1 out2 out1.txt out2.txt 2>/dev/null
+        exit 1
+    fi
+
+# 5. test 
+    gcc -w -o out1 "$file1"
+    gcc -w -o out2 "$file2"
+
+    ./out1 "10" > out1.txt 2>/dev/null
+    ./out2 "10" > out2.txt 2>/dev/null
+
+    if ! diff -q out1.txt out2.txt >/dev/null ; then
+        out1=$(cat out1.txt)
+        out2=$(cat out2.txt)
+        echo "$(tput setaf 1)$(tput bold)FAIL$(tput sgr 0)"
+        echo "\${GREEN}Expected Output:\${RESET} \\"$out1\\""
+        echo "\${RED}Your Output:\${RESET}     \\"$out2\\""
+        rm out1 out2 out1.txt out2.txt 2>/dev/null
+        exit 1
+    fi
+
+
+    rm out1 out2 out1.txt out2.txt 2>/dev/null
+    echo "$(tput setaf 2)$(tput bold)PASSED 🎉$(tput sgr 0)"
+    exit 1`,
+
+  // Tests derivados del tester.sh real. Las salidas se obtuvieron
+  // compilando la solución de rank02 con gcc -w y ejecutándola.
+  testsRank02: [
+    { id: 'tester_1', entrada: [], salida: "\n", fuente: 'tester.sh' },
+    { id: 'tester_2', entrada: ["a FiRSt LiTTlE TESt"], salida: "A firsT littlE tesT\n", fuente: 'tester.sh' },
+    { id: 'tester_3', entrada: ["SecONd teST A LITtle BiT   Moar comPLEX","   But... This iS not THAT COMPLEX","     Okay, this is the last 1239809147801 but not    the least    t"], salida: "seconD tesT A littlE biT   moaR compleX\n   but... thiS iS noT thaT compleX\n     okay, thiS iS thE lasT 1239809147801 buT noT    thE leasT    T\n", fuente: 'tester.sh' },
+    { id: 'tester_4', entrada: ["Okay i thing you got it!!! "], salida: "okaY I thinG yoU goT it!!! \n", fuente: 'tester.sh' },
+    { id: 'tester_5', entrada: ["10"], salida: "10\n", fuente: 'tester.sh' },
+  ],
 
   versiones: [
     {
@@ -107,6 +244,113 @@ int\tmain(int argc, char **argv)
 \t\ti++;
 \t}
 \treturn (0);
+}`,
+    },
+    {
+      id: 'por_palabras',
+      nombre: 'Por palabras completas',
+      descripcion: 'Busca el final de cada palabra y solo capitaliza su último carácter.',
+      recomendada: false,
+      codigo: `#include <unistd.h>
+
+int\tmain(int argc, char **argv)
+{
+\tint\ti;
+\tint\tj;
+\tint\tk;
+\tchar\tc;
+
+\tif (argc == 1)
+\t{
+\t\twrite(1, "\\n", 1);
+\t\treturn (0);
+\t}
+\ti = 1;
+\twhile (i < argc)
+\t{
+\t\tj = 0;
+\t\twhile (argv[i][j])
+\t\t{
+\t\t\tif (argv[i][j] == ' ')
+\t\t\t{
+\t\t\t\twrite(1, " ", 1);
+\t\t\t\tj++;
+\t\t\t\tcontinue ;
+\t\t\t}
+\t\t\tk = j;
+\t\t\twhile (argv[i][k] && argv[i][k] != ' ')
+\t\t\t\tk++;
+\t\t\twhile (j < k)
+\t\t\t{
+\t\t\t\tc = argv[i][j];
+\t\t\t\tif (j == k - 1)
+\t\t\t\t{
+\t\t\t\t\tif (c >= 'a' && c <= 'z')
+\t\t\t\t\t\tc -= 32;
+\t\t\t\t}
+\t\t\t\telse if (c >= 'A' && c <= 'Z')
+\t\t\t\t\tc += 32;
+\t\t\t\twrite(1, &c, 1);
+\t\t\t\tj++;
+\t\t\t}
+\t\t}
+\t\twrite(1, "\\n", 1);
+\t\ti++;
+\t}
+\treturn (0);
+}`,
+    },
+  
+    {
+      id: 'rank02',
+      nombre: 'Versión rank02 (solución de referencia)',
+      descripcion: 'Solución tal y como aparece en el repo de referencia rank02. Útil para comparar estilo, validaciones y constraints reales del examen.',
+      recomendada: false,
+      origen: 'rank02',
+      codigo: `
+
+#include <unistd.h>
+
+void	str_capitalizer(char *str)
+{
+	while (*str != '\\0')
+	{
+		while (*str != '\\0' && (*str == ' ' || *str == '\\t'))
+		{
+			write(1, str, 1);
+			++str;
+		}
+
+		while (*str != '\\0' && *str != ' ' && *str != '\\t')
+		{
+			if (*str >= 'a' && *str <= 'z'
+			&& (*(str + 1) == '\\0' || *(str + 1) == ' ' || *(str + 1) == '\\t'))
+				*str = *str - ('a' - 'A');
+			else if (*str >= 'A' && *str <= 'Z' && *(str + 1) != '\\0'
+			&& *(str + 1) != ' ' && *(str + 1) != '\\t')
+				*str = *str + ('a' - 'A');
+			write(1, str, 1);
+			++str;
+		}
+	}
+	write(1, "\\n", 1);
+}
+
+int		main(int argc, char **argv)
+{
+	if (argc == 1)
+		write(1, "\\n", 1);
+	else
+	{
+		int i = 1;
+		while (i < argc)
+		{
+			str_capitalizer(argv[i]);
+			++i;
+		}
+	}
+
+	return (0);
 }`,
     },
   ],

@@ -21,6 +21,20 @@ Example:
 ft_strcspn("hello", "lo")  → 2 (h and e are not in "lo", l is)
 ft_strcspn("hello", "xyz") → 5 (no chars from s2 in s1)`,
 
+  // Subject literal del repo rank02 (sub.txt). Útil para comparar con
+  // el subject didáctico activo y para la pestaña "Examen real".
+  subjectReal: `Assignment name	: ft_strcspn
+Expected files	: ft_strcspn.c
+Allowed functions: None
+---------------------------------------------------------------
+
+Reproduce exactly the behavior of the function strcspn
+(man strcspn).
+
+The function should be prototyped as follows:
+
+size_t	ft_strcspn(const char *s, const char *reject);`,
+
   descripcion: 'Función que devuelve la longitud del segmento inicial de s1 que NO contiene ningún carácter de s2. Es el índice del primer char de s1 que aparece en s2.',
 
   palacio: {
@@ -53,6 +67,96 @@ Si ningún char de s1 está en s2, devuelve la longitud total de s1.`,
       resultado: '2',
     },
   },
+
+  // Tester oficial copiado literalmente desde rank02 (tester.sh).
+  testerReal: `#!/bin/bash
+source ../../../main/colors.sh
+file1=ft_strcspn.c
+file2=../../../../rendu/ft_strcspn/ft_strcspn.c
+
+
+# 1. test
+    gcc -Werror -Wall -Wextra -o out1 "$file1" main.c
+    gcc -Werror -Wall -Wextra -o out2 "$file2" main.c
+
+    ./out1 "hello World" "hello world" > out1.txt 2>/dev/null
+    ./out2 "hello World" "hello world" > out2.txt 2>/dev/null
+
+    if ! diff -q out1.txt out2.txt >/dev/null ; then
+        out1=$(cat out1.txt)
+        out2=$(cat out2.txt)
+        echo "$(tput setaf 1)$(tput bold)FAIL$(tput sgr 0)"
+        echo "\${GREEN}Expected Output:\${RESET} \\"$out1\\""
+        echo "\${RED}Your Output:\${RESET}     \\"$out2\\""
+        rm out1 out2 out1.txt out2.txt 2>/dev/null
+        exit 1
+    fi
+
+# 2. test
+    gcc -w -o out1 "$file1" main.c
+    gcc -w -o out2 "$file2" main.c
+
+    ./out1 "test" "es" > out1.txt 2>/dev/null
+    ./out2 "test" "es" > out2.txt 2>/dev/null
+
+    if ! diff -q out1.txt out2.txt >/dev/null ; then
+        out1=$(cat out1.txt)
+        out2=$(cat out2.txt)
+        echo "$(tput setaf 1)$(tput bold)FAIL$(tput sgr 0)"
+        echo "\${GREEN}Expected Output:\${RESET} \\"$out1\\""
+        echo "\${RED}Your Output:\${RESET}     \\"$out2\\""
+        rm out1 out2 out1.txt out2.txt 2>/dev/null
+        exit 1
+    fi
+
+# 3. test
+    gcc -w -o out1 "$file1" main.c
+    gcc -w -o out2 "$file2" main.c
+
+    ./out1 "test" "f" > out1.txt 2>/dev/null
+    ./out2 "test" "f" > out2.txt 2>/dev/null
+
+    if ! diff -q out1.txt out2.txt >/dev/null ; then
+        out1=$(cat out1.txt)
+        out2=$(cat out2.txt)
+        echo "$(tput setaf 1)$(tput bold)FAIL$(tput sgr 0)"
+        echo "\${GREEN}Expected Output:\${RESET} \\"$out1\\""
+        echo "\${RED}Your Output:\${RESET}     \\"$out2\\""
+        rm out1 out2 out1.txt out2.txt 2>/dev/null
+        exit 1
+    fi
+
+# 4. test
+    gcc -w -o out1 "$file1" main.c
+    gcc -w -o out2 "$file2" main.c
+
+    ./out1 > out1.txt 2>/dev/null
+    ./out2 > out2.txt 2>/dev/null
+
+    if ! diff -q out1.txt out2.txt >/dev/null ; then
+        out1=$(cat out1.txt)
+        out2=$(cat out2.txt)
+        echo "$(tput setaf 1)$(tput bold)FAIL$(tput sgr 0)"
+        echo "\${GREEN}Expected Output:\${RESET} \\"$out1\\""
+        echo "\${RED}Your Output:\${RESET}     \\"$out2\\""
+        rm out1 out2 out1.txt out2.txt 2>/dev/null
+        exit 1
+    fi
+
+
+    rm out1 out2 out1.txt out2.txt 2>/dev/null
+    echo "$(tput setaf 2)$(tput bold)PASSED 🎉$(tput sgr 0)"
+    exit 1
+`,
+
+  // Tests derivados del tester.sh real. Las salidas se obtuvieron
+  // compilando la solución de rank02 con gcc -w y ejecutándola.
+  testsRank02: [
+    { id: 'tester_1', entrada: ["hello World","hello world"], salida: "ft_strcspn(\"hello World\", \"hello world\") = 0\n", fuente: 'tester.sh' },
+    { id: 'tester_2', entrada: ["test","es"], salida: "ft_strcspn(\"test\", \"es\") = 1\n", fuente: 'tester.sh' },
+    { id: 'tester_3', entrada: ["test","f"], salida: "ft_strcspn(\"test\", \"f\") = 4\n", fuente: 'tester.sh' },
+    { id: 'tester_4', entrada: [], salida: "", fuente: 'tester.sh' },
+  ],
 
   versiones: [
     {
@@ -107,6 +211,39 @@ int\tft_strcspn(char *s1, char *s2)
 \t\ti++;
 \t}
 \treturn (i);
+}`,
+    },
+  
+    {
+      id: 'rank02',
+      nombre: 'Versión rank02 (solución de referencia)',
+      descripcion: 'Solución tal y como aparece en el repo de referencia rank02. Útil para comparar estilo, validaciones y constraints reales del examen.',
+      recomendada: false,
+      origen: 'rank02',
+      codigo: `
+#include <unistd.h>
+#include <stdio.h>
+#include <string.h>
+
+size_t  ft_strcspn(const char *s, const char *reject)
+{
+	size_t	i;
+	size_t	k;
+
+	i = 0;
+	k = 0;
+	while (s[i] != '\\0')
+	{
+		while (reject[k] != '\\0')
+		{
+			if (reject[k] == s[i])
+				return (i);
+			k++;
+		}
+		k = 0;
+		i++;
+	}
+	return (i);
 }`,
     },
   ],

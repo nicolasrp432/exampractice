@@ -30,6 +30,48 @@ The cmp function returns a negative value if a < b, 0 if equal, positive if a > 
 The function must not create new nodes or allocate memory.
 It must sort by swapping the DATA (not the nodes).`,
 
+  // Subject literal del repo rank02 (sub.txt). Útil para comparar con
+  // el subject didáctico activo y para la pestaña "Examen real".
+  subjectReal: `Assignment name  : sort_list
+Expected files   : sort_list.c
+Allowed functions: 
+--------------------------------------------------------------------------------
+Write the following functions:
+
+t_list	*sort_list(t_list* lst, int (*cmp)(int, int));
+
+This function must sort the list given as a parameter, using the function 
+pointer cmp to select the order to apply, and returns a pointer to the 
+first element of the sorted list.
+
+Duplications must remain.
+Inputs will always be consistent.
+
+You must use the type t_list described in the file list.h 
+that is provided to you. You must include that file 
+(#include "list.h"), but you must not turn it in. We will use our own 
+to compile your assignment.
+
+Functions passed as cmp will always return a value different from 
+0 if a and b are in the right order, 0 otherwise.
+
+For example, the following function used as cmp will sort the list 
+in ascending order:
+
+int ascending(int a, int b)
+{
+	return (a <= b);
+}
+LIST.H FILE:
+
+typedef struct s_list t_list;
+
+struct s_list {
+    int data;
+    t_list *next;
+};
+YOU MUST TEST WITH YOUR LIST.H FILE JUST FOR THIS SHELL.`,
+
   descripcion: 'Ordena una lista enlazada usando bubble sort intercambiando los DATA de los nodos (no los nodos en sí). Requiere comprender estructuras enlazadas y punteros a función.',
 
   palacio: {
@@ -62,6 +104,41 @@ Clave: solo se intercambia data, los punteros next permanecen igual.`,
       resultado: '[1]->[2]->[3]->NULL',
     },
   },
+
+  // Tester oficial copiado literalmente desde rank02 (tester.sh).
+  testerReal: `#!/bin/bash
+source ../../../main/colors.sh
+file1=sort_list.c
+file2=../../../../rendu/sort_list/sort_list.c
+
+
+# 1. test
+    gcc -Werror -Wall -Wextra -o out1 "$file1" main.c
+    gcc -Werror -Wall -Wextra -o out2 "$file2" main.c
+
+    ./out1 > out1.txt 2>/dev/null
+    ./out2 > out2.txt 2>/dev/null
+
+    if ! diff -q out1.txt out2.txt >/dev/null ; then
+        out1=$(cat out1.txt)
+        out2=$(cat out2.txt)
+        echo "$(tput setaf 1)$(tput bold)FAIL$(tput sgr 0)"
+        echo "\${GREEN}Expected Output:\${RESET} \\"$out1\\""
+        echo "\${RED}Your Output:\${RESET}     \\"$out2\\""
+        rm out1 out2 out1.txt out2.txt 2>/dev/null
+        exit 1
+    fi
+
+
+    rm out1 out2 out1.txt out2.txt 2>/dev/null
+    echo "$(tput setaf 2)$(tput bold)PASSED 🎉$(tput sgr 0)"
+    exit 1`,
+
+  // Tests derivados del tester.sh real. Las salidas se obtuvieron
+  // compilando la solución de rank02 con gcc -w y ejecutándola.
+  testsRank02: [
+    { id: 'tester_1', entrada: [], salida: "0\n10\n20\n", fuente: 'tester.sh' },
+  ],
 
   versiones: [
     {
@@ -101,6 +178,77 @@ t_list\t*sort_list(t_list *lst, int (*cmp)(void *, void *))
 \t\t}
 \t}
 \treturn (lst);
+}`,
+    },
+    {
+      id: 'dowhile',
+      nombre: 'Con do/while y puntero auxiliar',
+      descripcion: 'La misma burbuja, pero escrita con do/while para que la primera pasada se vea más natural.',
+      recomendada: false,
+      codigo: `typedef struct s_list
+{
+\tstruct s_list\t*next;
+\tvoid\t\t\t*data;
+}\tt_list;
+
+t_list\t*sort_list(t_list *lst, int (*cmp)(void *, void *))
+{
+\tt_list\t*ptr;
+\tvoid\t*tmp;
+\tint\t\tswapped;
+
+\tif (!lst)
+\t\treturn (NULL);
+\tswapped = 1;
+\twhile (swapped)
+\t{
+\t\tswapped = 0;
+\t\tptr = lst;
+\t\tdo
+\t\t{
+\t\t\tif (ptr->next && cmp(ptr->data, ptr->next->data) > 0)
+\t\t\t{
+\t\t\t\ttmp = ptr->data;
+\t\t\t\tptr->data = ptr->next->data;
+\t\t\t\tptr->next->data = tmp;
+\t\t\t\tswapped = 1;
+\t\t\t}
+\t\t\tptr = ptr->next;
+\t\t}
+\t\twhile (ptr && ptr->next);
+\t}
+\treturn (lst);
+}`,
+    },
+  
+    {
+      id: 'rank02',
+      nombre: 'Versión rank02 (solución de referencia)',
+      descripcion: 'Solución tal y como aparece en el repo de referencia rank02. Útil para comparar estilo, validaciones y constraints reales del examen.',
+      recomendada: false,
+      origen: 'rank02',
+      codigo: `#include "ft_list.h"
+
+t_list	*sort_list(t_list *lst, int (*cmp)(int, int))
+{
+	int	swap;
+	t_list	*tmp;
+
+	tmp = lst;
+	while(lst->next != NULL)
+	{
+		if (((*cmp)(lst->data, lst->next->data)) == 0)
+		{
+			swap = lst->data;
+			lst->data = lst->next->data;
+			lst->next->data = swap;
+			lst = tmp;
+		}
+		else
+			lst = lst->next;
+	}
+	lst = tmp;
+	return (lst);
 }`,
     },
   ],

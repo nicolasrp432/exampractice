@@ -14,6 +14,7 @@ import ulstr            from './exercises/level1/ulstr.js'
 import alphaMirror   from './exercises/level2/alpha_mirror.js'
 import camelToSnake  from './exercises/level2/camel_to_snake.js'
 import doOp          from './exercises/level2/do_op.js'
+import max           from './exercises/level2/max.js'
 import ftAtoi        from './exercises/level2/ft_atoi.js'
 import ftStrcmp      from './exercises/level2/ft_strcmp.js'
 import ftStrcspn     from './exercises/level2/ft_strcspn.js'
@@ -28,6 +29,7 @@ import reverseBits   from './exercises/level2/reverse_bits.js'
 import swapBits      from './exercises/level2/swap_bits.js'
 import union         from './exercises/level2/union.js'
 import wdmatch       from './exercises/level2/wdmatch.js'
+import snakeToCamel  from './exercises/level2/snake_to_camel.js'
 
 import paramsum        from './exercises/level3/paramsum.js'
 import tabMult         from './exercises/level3/tab_mult.js'
@@ -42,12 +44,19 @@ import lcm             from './exercises/level3/lcm.js'
 import pgcd            from './exercises/level3/pgcd.js'
 import printHex        from './exercises/level3/print_hex.js'
 import ftAtoiBase      from './exercises/level3/ft_atoi_base.js'
+import ftItoa          from './exercises/level4/ft_itoa.js'
 import strCapitalizer  from './exercises/level3/str_capitalizer.js'
 import rstrCapitalizer from './exercises/level3/rstr_capitalizer.js'
 
 import fprime    from './exercises/level4/fprime.js'
 import ftSplit   from './exercises/level4/ft_split.js'
 import sortList  from './exercises/level4/sort_list.js'
+import revWstr   from './exercises/level4/rev_wstr.js'
+import rostring  from './exercises/level4/rostring.js'
+import sortIntTab from './exercises/level4/sort_int_tab.js'
+import ftListForeach from './exercises/level4/ft_list_foreach.js'
+import ftListRemoveIf from './exercises/level4/ft_list_remove_if.js'
+import floodFill from './exercises/level4/flood_fill.js'
 
 // ─── Nivel 1 — Cocina ────────────────────────────────────────────────────────
 const nivel1 = [
@@ -70,6 +79,7 @@ const nivel2 = [
   alphaMirror,
   camelToSnake,
   doOp,
+  max,
   ftAtoi,
   ftStrcmp,
   ftStrcspn,
@@ -84,6 +94,7 @@ const nivel2 = [
   swapBits,
   union,
   wdmatch,
+  snakeToCamel,
 ]
 
 // ─── Nivel 3 — Dormitorio ────────────────────────────────────────────────────
@@ -101,6 +112,7 @@ const nivel3 = [
   pgcd,
   printHex,
   ftAtoiBase,
+  ftItoa,
   strCapitalizer,
   rstrCapitalizer,
 ]
@@ -110,6 +122,12 @@ const nivel4 = [
   fprime,
   ftSplit,
   sortList,
+  revWstr,
+  rostring,
+  sortIntTab,
+  ftListForeach,
+  ftListRemoveIf,
+  floodFill,
 ]
 
 // ─── Exports ─────────────────────────────────────────────────────────────────

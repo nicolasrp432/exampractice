@@ -26,6 +26,45 @@ $> ./expand_str "  " | cat -e
 $
 $>`,
 
+  // Subject literal del repo rank02 (sub.txt). Útil para comparar con
+  // el subject didáctico activo y para la pestaña "Examen real".
+  subjectReal: `Assignment name  : expand_str
+Expected files   : expand_str.c
+Allowed functions: write
+--------------------------------------------------------------------------------
+
+Write a program that takes a string and displays it with exactly three spaces
+between each word, with no spaces or tabs either at the beginning or the end,
+followed by a newline.
+
+A word is a section of string delimited either by spaces/tabs, or by the
+start/end of the string.
+
+If the number of parameters is not 1, or if there are no words, simply display
+a newline.
+
+Examples:
+
+$> ./expand_str "See? It's easy to print the same thing" | cat -e
+See?   It's   easy   to   print   the   same   thing$
+$> ./expand_str " this        time it      will     be    more complex  " | cat -e
+this   time   it   will   be   more   complex$
+$> ./expand_str "No S*** Sherlock..." "nAw S*** ShErLaWQ..." | cat -e
+$
+$> ./expand_str "" | cat -e
+$
+$>
+
+$> ./expand_str "vous   voyez   c'est   facile   d'afficher   la   meme   chose" | cat -e
+vous   voyez   c'est   facile   d'afficher   la   meme   chose$
+$> ./expand_str " seulement          la c'est      plus dur " | cat -e
+seulement   la   c'est   plus   dur$
+$> ./expand_str "comme c'est cocasse" "vous avez entendu, Mathilde ?" | cat -e
+$
+$> ./expand_str "" | cat -e
+$
+$>`,
+
   descripcion: 'Programa que expande los espacios: cualquier grupo de espacios consecutivos se reemplaza por exactamente 3 espacios. Los espacios finales se eliminan. Similar a epur_str pero con 3 espacios en vez de 1.',
 
   palacio: {
@@ -58,6 +97,167 @@ El algoritmo es idéntico a epur_str pero escribe "   " en vez de " ".`,
       resultado: '"hello   world"',
     },
   },
+
+  // Tester oficial copiado literalmente desde rank02 (tester.sh).
+  testerReal: `#!/bin/bash
+source ../../../main/colors.sh
+file1=expand_str.c
+file2=../../../../rendu/expand_str/expand_str.c
+
+
+# 1. test
+    gcc -Werror -Wall -Wextra -o out1 "$file1"
+    gcc -Werror -Wall -Wextra -o out2 "$file2"
+
+    ./out1 > out1.txt 2>/dev/null
+    ./out2 > out2.txt 2>/dev/null
+
+    if ! diff -q out1.txt out2.txt >/dev/null ; then
+        out1=$(cat out1.txt)
+        out2=$(cat out2.txt)
+        echo "$(tput setaf 1)$(tput bold)FAIL$(tput sgr 0)"
+        echo "\${GREEN}Expected Output:\${RESET} \\"$out1\\""
+        echo "\${RED}Your Output:\${RESET}     \\"$out2\\""
+        rm out1 out2 out1.txt out2.txt 2>/dev/null
+        exit 1
+    fi
+
+# 2. test
+    gcc -w -o out1 "$file1"
+    gcc -w -o out2 "$file2"
+
+    ./out1 "See? It's easy to print the same thing" > out1.txt 2>/dev/null
+    ./out2 "See? It's easy to print the same thing" > out2.txt 2>/dev/null
+
+    if ! diff -q out1.txt out2.txt >/dev/null ; then
+        out1=$(cat out1.txt)
+        out2=$(cat out2.txt)
+        echo "$(tput setaf 1)$(tput bold)FAIL$(tput sgr 0)"
+        echo "\${GREEN}Expected Output:\${RESET} \\"$out1\\""
+        echo "\${RED}Your Output:\${RESET}     \\"$out2\\""
+        rm out1 out2 out1.txt out2.txt 2>/dev/null
+        exit 1
+    fi
+
+# 3. test
+    gcc -w -o out1 "$file1"
+    gcc -w -o out2 "$file2"
+
+    ./out1 " this        time it      will     be    more complex  . " > out1.txt 2>/dev/null
+    ./out2 " this        time it      will     be    more complex  . " > out2.txt 2>/dev/null
+
+    if ! diff -q out1.txt out2.txt >/dev/null ; then
+        out1=$(cat out1.txt)
+        out2=$(cat out2.txt)
+        echo "$(tput setaf 1)$(tput bold)FAIL$(tput sgr 0)"
+        echo "\${GREEN}Expected Output:\${RESET} \\"$out1\\""
+        echo "\${RED}Your Output:\${RESET}     \\"$out2\\""
+        rm out1 out2 out1.txt out2.txt 2>/dev/null
+        exit 1
+    fi
+
+# 4. test
+    gcc -w -o out1 "$file1"
+    gcc -w -o out2 "$file2"
+
+    ./out1 "No S*** Sherlock..." "nAw S*** ShErLaWQ..." > out1.txt 2>/dev/null
+    ./out2 "No S*** Sherlock..." "nAw S*** ShErLaWQ..." > out2.txt 2>/dev/null
+
+    if ! diff -q out1.txt out2.txt >/dev/null ; then
+        out1=$(cat out1.txt)
+        out2=$(cat out2.txt)
+        echo "$(tput setaf 1)$(tput bold)FAIL$(tput sgr 0)"
+        echo "\${GREEN}Expected Output:\${RESET} \\"$out1\\""
+        echo "\${RED}Your Output:\${RESET}     \\"$out2\\""
+        rm out1 out2 out1.txt out2.txt 2>/dev/null
+        exit 1
+    fi
+
+# 5. test 
+    gcc -w -o out1 "$file1"
+    gcc -w -o out2 "$file2"
+
+    ./out1 "comme c'est cocasse" "vous avez entendu, Mathilde ?" > out1.txt 2>/dev/null
+    ./out2 "comme c'est cocasse" "vous avez entendu, Mathilde ?" > out2.txt 2>/dev/null
+
+    if ! diff -q out1.txt out2.txt >/dev/null ; then
+        out1=$(cat out1.txt)
+        out2=$(cat out2.txt)
+        echo "$(tput setaf 1)$(tput bold)FAIL$(tput sgr 0)"
+        echo "\${GREEN}Expected Output:\${RESET} \\"$out1\\""
+        echo "\${RED}Your Output:\${RESET}     \\"$out2\\""
+        rm out1 out2 out1.txt out2.txt 2>/dev/null
+        exit 1
+    fi
+
+# 6. test
+    gcc -w -o out1 "$file1"
+    gcc -w -o out2 "$file2"
+
+    ./out1 "5" > out1.txt 2>/dev/null
+    ./out2 "5"> out2.txt 2>/dev/null
+
+    if ! diff -q out1.txt out2.txt >/dev/null ; then
+        out1=$(cat out1.txt)
+        out2=$(cat out2.txt)
+        echo "$(tput setaf 1)$(tput bold)FAIL$(tput sgr 0)"
+        echo "\${GREEN}Expected Output:\${RESET} \\"$out1\\""
+        echo "\${RED}Your Output:\${RESET}     \\"$out2\\""
+        rm out1 out2 out1.txt out2.txt 2>/dev/null
+        exit 1
+    fi
+
+# 7. test
+    gcc -w -o out1 "$file1"
+    gcc -w -o out2 "$file2"
+
+    ./out1 "Too" "Many" "Arguments" > out1.txt 2>/dev/null
+    ./out2 "Too" "Many" "Arguments" > out2.txt 2>/dev/null
+
+    if ! diff -q out1.txt out2.txt >/dev/null ; then
+        out1=$(cat out1.txt)
+        out2=$(cat out2.txt)
+        echo "$(tput setaf 1)$(tput bold)FAIL$(tput sgr 0)"
+        echo "\${GREEN}Expected Output:\${RESET} \\"$out1\\""
+        echo "\${RED}Your Output:\${RESET}     \\"$out2\\""
+        rm out1 out2 out1.txt out2.txt 2>/dev/null
+        exit 1
+    fi
+
+# 8. test
+    gcc -w -o out1 "$file1"
+    gcc -w -o out2 "$file2"
+
+    ./out1 "7" > out1.txt 2>/dev/null
+    ./out2 "7" > out2.txt 2>/dev/null
+
+    if ! diff -q out1.txt out2.txt >/dev/null ; then
+        out1=$(cat out1.txt)
+        out2=$(cat out2.txt)
+        echo "$(tput setaf 1)$(tput bold)FAIL$(tput sgr 0)"
+        echo "\${GREEN}Expected Output:\${RESET} \\"$out1\\""
+        echo "\${RED}Your Output:\${RESET}     \\"$out2\\""
+        rm out1 out2 out1.txt out2.txt 2>/dev/null
+        exit 1
+    fi
+
+
+    rm out1 out2 out1.txt out2.txt 2>/dev/null
+    echo "$(tput setaf 2)$(tput bold)PASSED 🎉$(tput sgr 0)"
+    exit 1`,
+
+  // Tests derivados del tester.sh real. Las salidas se obtuvieron
+  // compilando la solución de rank02 con gcc -w y ejecutándola.
+  testsRank02: [
+    { id: 'tester_1', entrada: [], salida: "\n", fuente: 'tester.sh' },
+    { id: 'tester_2', entrada: ["See? It's easy to print the same thing"], salida: "See?   It's   easy   to   print   the   same   thing\n", fuente: 'tester.sh' },
+    { id: 'tester_3', entrada: [" this        time it      will     be    more complex  . "], salida: "this   time   it   will   be   more   complex   .\n", fuente: 'tester.sh' },
+    { id: 'tester_4', entrada: ["No S*** Sherlock...","nAw S*** ShErLaWQ..."], salida: "\n", fuente: 'tester.sh' },
+    { id: 'tester_5', entrada: ["comme c'est cocasse","vous avez entendu, Mathilde ?"], salida: "\n", fuente: 'tester.sh' },
+    { id: 'tester_6', entrada: ["5"], salida: "5\n", fuente: 'tester.sh' },
+    { id: 'tester_7', entrada: ["Too","Many","Arguments"], salida: "\n", fuente: 'tester.sh' },
+    { id: 'tester_8', entrada: ["7"], salida: "7\n", fuente: 'tester.sh' },
+  ],
 
   versiones: [
     {
@@ -94,6 +294,88 @@ int\tmain(int argc, char **argv)
 \t}
 \twrite(1, "\\n", 1);
 \treturn (0);
+}`,
+    },
+    {
+      id: 'pendiente',
+      nombre: 'Con bandera pending_spaces',
+      descripcion: 'Usa una bandera más descriptiva: hay espacios pendientes antes del siguiente carácter.',
+      recomendada: false,
+      codigo: `#include <unistd.h>
+
+int\tmain(int argc, char **argv)
+{
+\tint\ti;
+\tint\tpending_spaces;
+
+\tif (argc == 2)
+\t{
+\t\ti = 0;
+\t\tpending_spaces = 0;
+\t\twhile (argv[1][i])
+\t\t{
+\t\t\tif (argv[1][i] == ' ')
+\t\t\t\tpending_spaces = 1;
+\t\t\telse
+\t\t\t{
+\t\t\t\tif (pending_spaces)
+\t\t\t\t{
+\t\t\t\t\twrite(1, "   ", 3);
+\t\t\t\t\tpending_spaces = 0;
+\t\t\t\t}
+\t\t\t\twrite(1, &argv[1][i], 1);
+\t\t\t}
+\t\t\ti++;
+\t\t}
+\t}
+\twrite(1, "\\n", 1);
+\treturn (0);
+}`,
+    },
+  
+    {
+      id: 'rank02',
+      nombre: 'Versión rank02 (solución de referencia)',
+      descripcion: 'Solución tal y como aparece en el repo de referencia rank02. Útil para comparar estilo, validaciones y constraints reales del examen.',
+      recomendada: false,
+      origen: 'rank02',
+      codigo: `
+
+#include <unistd.h>
+
+int		word_len(char *str)
+{
+	int i = 0;
+	while (str[i] != '\\0' && str[i] != ' ' && str[i] != '\\t')
+		++i;
+	return (i);
+}
+
+void	expand_str(char *str)
+{
+	int len;
+	int first_word = 1;
+
+	while (*str != '\\0')
+	{
+		while (*str == ' ' || *str == '\\t')
+			++str;
+		len = word_len(str);
+		if (len > 0 && first_word == 0)
+			write(1, "   ", 3);
+		first_word = 0;
+		write(1, str, len);
+		str = str + len;
+	}
+}
+
+int		main(int argc, char **argv)
+{
+	if (argc == 2)
+		expand_str(argv[1]);
+
+	write(1, "\\n", 1);
+	return (0);
 }`,
     },
   ],

@@ -5,9 +5,70 @@ export default {
   dificultad: 'fácil',
   tipoEntrega: 'programa',
   archivosEsperados: ['do_op.c'],
-  funcionesPermitidas: ['write'],
+  funcionesPermitidas: ['atoi', 'printf', 'write'],
 
+  // ── Subject real (rank02/level1/do_op/sub.txt) ──
   subject: `Assignment name  : do_op
+Expected files   : do_op.c
+Allowed functions: atoi, printf, write
+--------------------------------------------------------------------------------
+
+Write a program that takes three strings:
+- The first and the third one are representations of base-10 signed integers
+  that fit in an int.
+- The second one is an arithmetic operator chosen from: + - * / %
+
+The program must display the result of the requested arithmetic operation,
+followed by a newline. If the number of parameters is not 3, the program
+just displays a newline.
+
+You can assume the string have no mistakes or extraneous characters. Negative
+numbers, in input or output, will have one and only one leading '-'. The
+result of the operation fits in an int.
+
+Examples:
+
+$> ./do_op "123" "*" 456 | cat -e
+56088$
+$> ./do_op "9828" "/" 234 | cat -e
+42$
+$> ./do_op "1" "+" "-43" | cat -e
+-42$
+$> ./do_op | cat -e
+$`,
+
+  subjectReal: `Assignment name  : do_op
+Expected files   : do_op.c
+Allowed functions: atoi, printf, write
+--------------------------------------------------------------------------------
+
+Write a program that takes three strings:
+- The first and the third one are representations of base-10 signed integers
+  that fit in an int.
+- The second one is an arithmetic operator chosen from: + - * / %
+
+The program must display the result of the requested arithmetic operation,
+followed by a newline. If the number of parameters is not 3, the program
+just displays a newline.
+
+You can assume the string have no mistakes or extraneous characters. Negative
+numbers, in input or output, will have one and only one leading '-'. The
+result of the operation fits in an int.
+
+Examples:
+
+$> ./do_op "123" "*" 456 | cat -e
+56088$
+$> ./do_op "9828" "/" 234 | cat -e
+42$
+$> ./do_op "1" "+" "-43" | cat -e
+-42$
+$> ./do_op | cat -e
+$`,
+
+  // Subject didáctico previo (más estricto: exige "Error" en bad-argc, valida
+  // operador y división por cero). Conservado por si quieres practicarlo así.
+  subjectAlternativo: `Assignment name  : do_op
 Expected files   : do_op.c
 Allowed functions: write
 --------------------------------------------------------------------------------
@@ -65,6 +126,134 @@ Si algo está mal (mal argc, operador desconocido, /0), grita "Error".
       resultado: '84',
     },
   },
+
+  // Tester oficial copiado literalmente desde rank02 (tester.sh).
+  testerReal: `#!/bin/bash
+source ../../../main/colors.sh
+file1=do_op.c
+file2=../../../../rendu/do_op/do_op.c
+
+
+# 1. test
+    gcc -Werror -Wall -Wextra -o out1 "$file1"
+    gcc -Werror -Wall -Wextra -o out2 "$file2"
+
+    ./out1 "123" "*" "456" > out1.txt 2>/dev/null
+    ./out2 "123" "*" "456" > out2.txt 2>/dev/null
+
+    if ! diff -q out1.txt out2.txt >/dev/null ; then
+        out1=$(cat out1.txt)
+        out2=$(cat out2.txt)
+        echo "$(tput setaf 1)$(tput bold)FAIL$(tput sgr 0)"
+        echo "\${GREEN}Expected Output:\${RESET} \\"$out1\\""
+        echo "\${RED}Your Output:\${RESET}     \\"$out2\\""
+        rm out1 out2 out1.txt out2.txt 2>/dev/null
+        exit 1
+    fi
+
+
+# 2. test
+    gcc -w -o out1 "$file1"
+    gcc -w -o out2 "$file2"
+
+    ./out1 "9828" "/" "234" > out1.txt 2>/dev/null
+    ./out2 "9828" "/" "234" > out2.txt 2>/dev/null
+
+    if ! diff -q out1.txt out2.txt >/dev/null ; then
+        out1=$(cat out1.txt)
+        out2=$(cat out2.txt)
+        echo "$(tput setaf 1)$(tput bold)FAIL$(tput sgr 0)"
+        echo "\${GREEN}Expected Output:\${RESET} \\"$out1\\""
+        echo "\${RED}Your Output:\${RESET}     \\"$out2\\""
+        rm out1 out2 out1.txt out2.txt 2>/dev/null
+        exit 1
+    fi
+
+# 3. test
+    gcc -w -o out1 "$file1"
+    gcc -w -o out2 "$file2"
+
+    ./out1 "9828" "%" "234" > out1.txt 2>/dev/null
+    ./out2 "9828" "%" "234" > out2.txt 2>/dev/null
+
+    if ! diff -q out1.txt out2.txt >/dev/null ; then
+        out1=$(cat out1.txt)
+        out2=$(cat out2.txt)
+        echo "$(tput setaf 1)$(tput bold)FAIL$(tput sgr 0)"
+        echo "\${GREEN}Expected Output:\${RESET} \\"$out1\\""
+        echo "\${RED}Your Output:\${RESET}     \\"$out2\\""
+        rm out1 out2 out1.txt out2.txt 2>/dev/null
+        exit 1
+    fi
+
+# 4. test
+    gcc -w -o out1 "$file1"
+    gcc -w -o out2 "$file2"
+
+    ./out1 "9828" "/" "2" > out1.txt 2>/dev/null
+    ./out2 "9828" "/" "2" > out2.txt 2>/dev/null
+
+    if ! diff -q out1.txt out2.txt >/dev/null ; then
+        out1=$(cat out1.txt)
+        out2=$(cat out2.txt)
+        echo "$(tput setaf 1)$(tput bold)FAIL$(tput sgr 0)"
+        echo "\${GREEN}Expected Output:\${RESET} \\"$out1\\""
+        echo "\${RED}Your Output:\${RESET}     \\"$out2\\""
+        rm out1 out2 out1.txt out2.txt 2>/dev/null
+        exit 1
+    fi
+
+
+# 5. test 
+    gcc -w -o out1 "$file1"
+    gcc -w -o out2 "$file2"
+
+    ./out1 "1" "+" "-43" > out1.txt 2>/dev/null
+    ./out2 "1" "+" "-43" > out2.txt 2>/dev/null
+
+    if ! diff -q out1.txt out2.txt >/dev/null ; then
+        out1=$(cat out1.txt)
+        out2=$(cat out2.txt)
+        echo "$(tput setaf 1)$(tput bold)FAIL$(tput sgr 0)"
+        echo "\${GREEN}Expected Output:\${RESET} \\"$out1\\""
+        echo "\${RED}Your Output:\${RESET}     \\"$out2\\""
+        rm out1 out2 out1.txt out2.txt 2>/dev/null
+        exit 1
+    fi
+
+    rm out1 out2 out1.txt out2.txt 2>/dev/null
+# 6. test
+    gcc -w -o out1 "$file1"
+    gcc -w -o out2 "$file2"
+
+    ./out1 > out1.txt 2>/dev/null
+    ./out2 > out2.txt 2>/dev/null
+
+    if ! diff -q out1.txt out2.txt >/dev/null ; then
+        out1=$(cat out1.txt)
+        out2=$(cat out2.txt)
+        echo "$(tput setaf 1)$(tput bold)FAIL$(tput sgr 0)"
+        echo "\${GREEN}Expected Output:\${RESET} \\"$out1\\""
+        echo "\${RED}Your Output:\${RESET}     \\"$out2\\""
+        rm out1 out2 out1.txt out2.txt 2>/dev/null
+        exit 1
+    fi
+
+
+    rm out1 out2 out1.txt out2.txt 2>/dev/null
+    echo "$(tput setaf 2)$(tput bold)PASSED 🎉$(tput sgr 0)"
+    exit 1`,
+
+  // Tests derivados del tester.sh real. Las salidas se obtuvieron
+  // compilando la solución de rank02 con gcc -w y ejecutándola.
+  testsRank02: [
+    { id: 'tester_1', entrada: ["123","*","456"], salida: "56088\n", fuente: 'tester.sh' },
+    { id: 'tester_2', entrada: ["9828","/","234"], salida: "42\n", fuente: 'tester.sh' },
+    { id: 'tester_3', entrada: ["9828","%","234"], salida: "0\n", fuente: 'tester.sh' },
+    { id: 'tester_4', entrada: ["9828","/","2"], salida: "4914\n", fuente: 'tester.sh' },
+    { id: 'tester_5', entrada: ["1","+","-43"], salida: "-42\n", fuente: 'tester.sh' },
+    { id: 'tester_6', entrada: [], salida: "\n", fuente: 'tester.sh' },
+  ],
 
   versiones: [
     {
@@ -144,6 +333,136 @@ int\tmain(int argc, char **argv)
 \treturn (0);
 }`,
     },
+    {
+      id: 'switch',
+      nombre: 'Con switch sobre el operador',
+      descripcion: 'Agrupa las operaciones en un switch para que la lógica del examen sea más fácil de seguir.',
+      recomendada: false,
+      codigo: `#include <unistd.h>
+
+static int\tft_atoi(char *str)
+{
+\tint\tresult;
+\tint\tsign;
+
+\tresult = 0;
+\tsign = 1;
+\twhile (*str == ' ' || (*str >= '\\t' && *str <= '\\r'))
+\t\tstr++;
+\tif (*str == '-' || *str == '+')
+\t{
+\t\tif (*str == '-')
+\t\t\tsign = -1;
+\t\tstr++;
+\t}
+\twhile (*str >= '0' && *str <= '9')
+\t\tresult = result * 10 + (*str++ - '0');
+\treturn (result * sign);
+}
+
+static void\tft_putnbr(int n)
+{
+\tchar\tc;
+
+\tif (n < 0)
+\t{
+\t\twrite(1, "-", 1);
+\t\tn = -n;
+\t}
+\tif (n >= 10)
+\t\tft_putnbr(n / 10);
+\tc = '0' + (n % 10);
+\twrite(1, &c, 1);
+}
+
+int\tmain(int argc, char **argv)
+{
+\tint\ta;
+\tint\tb;
+\tchar\top;
+\tint\tresult;
+
+\tif (argc != 4)
+\t{
+\t\twrite(1, "Error\\n", 6);
+\t\treturn (0);
+\t}
+\ta = ft_atoi(argv[1]);
+\top = argv[2][0];
+\tb = ft_atoi(argv[3]);
+\tswitch (op)
+\t{
+\t\tcase '+':
+\t\t\tresult = a + b;
+\t\t\tbreak ;
+\t\tcase '-':
+\t\t\tresult = a - b;
+\t\t\tbreak ;
+\t\tcase '*':
+\t\t\tresult = a * b;
+\t\t\tbreak ;
+\t\tcase '/':
+\t\t\tif (b == 0)
+\t\t\t{
+\t\t\t\twrite(1, "Error\\n", 6);
+\t\t\t\treturn (0);
+\t\t\t}
+\t\t\tresult = a / b;
+\t\t\tbreak ;
+\t\tcase '%':
+\t\t\tif (b == 0)
+\t\t\t{
+\t\t\t\twrite(1, "Error\\n", 6);
+\t\t\t\treturn (0);
+\t\t\t}
+\t\t\tresult = a % b;
+\t\t\tbreak ;
+\t\tdefault:
+\t\t\twrite(1, "Error\\n", 6);
+\t\t\treturn (0);
+\t}
+\tft_putnbr(result);
+\twrite(1, "\\n", 1);
+\treturn (0);
+}`,
+    },
+  
+    {
+      id: 'rank02',
+      nombre: 'Versión rank02 (solución de referencia)',
+      descripcion: 'Solución tal y como aparece en el repo de referencia rank02. Útil para comparar estilo, validaciones y constraints reales del examen.',
+      recomendada: false,
+      origen: 'rank02',
+      codigo: `#include <stdio.h>
+#include <unistd.h>
+#include <stdlib.h>
+
+int	main(int ac, char **av)
+{
+	int	n1 = 0;
+	int n2 = 0;
+	int	res = 0;
+
+	if (ac == 4)
+	{
+		n1 = atoi(av[1]);
+		n2 = atoi(av[3]);
+		if (av[2][0] == '+')
+			res = n1 + n2;
+		else if (av[2][0] == '-')
+			res = n1 - n2;
+		else if (av[2][0] == '*')
+			res = n1 * n2;
+		else if (av[2][0]== '/')
+			res = n1 / n2;
+		else if (av[2][0] == '%')
+			res = n1 % n2;
+		printf("%d\\n", res);
+	}
+	else
+		write(1, "\\n", 1);
+}`,
+    },
   ],
 
   tests: [
@@ -199,6 +518,19 @@ if (op == '/' && b != 0) → FALSE (b==0)
   ],
 
   trampas: [
+    {
+      severidad: 'info',
+      titulo: 'Diferencia plataforma vs examen real',
+      descripcion: 'El subject real (rank02) permite usar `atoi` y `printf` directamente, y en argc != 4 sólo imprime un newline (NO "Error"). El subject didáctico de la plataforma era más exigente: prohibía `atoi`/`printf` (te obligaba a escribir ft_atoi y ft_putnbr) y exigía la cadena literal "Error" en bad-argc / operador inválido / división por cero. El didáctico queda en `subjectAlternativo` por si quieres practicarlo. Los `tests` actuales aún siguen la versión didáctica (se actualizarán cuando se añadan `testsRank02`).',
+      codigoMal: `// Versión didáctica antigua: implementabas ft_atoi/ft_putnbr a mano
+// y escribías "Error\\n" en bad-argc. Pasa la moulinette didáctica pero
+// duplica trabajo respecto al examen real.`,
+      codigoBien: `// Subject real: puedes apoyarte en atoi y printf
+int a = atoi(argv[1]);
+int b = atoi(argv[3]);
+if (argc != 4) { write(1, "\\n", 1); return 0; }
+// ...switch sobre argv[2][0], printf("%d\\n", result);`,
+    },
     {
       severidad: 'mortal',
       titulo: 'argc != 3 en vez de argc != 4',

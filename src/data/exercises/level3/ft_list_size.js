@@ -28,6 +28,28 @@ Example:
 ft_list_size(NULL)         → 0
 ft_list_size(a→b→c→NULL) → 3`,
 
+  // Subject literal del repo rank02 (sub.txt). Útil para comparar con
+  // el subject didáctico activo y para la pestaña "Examen real".
+  subjectReal: `Assignment name  : ft_list_size
+Expected files   : ft_list_size.c
+Allowed functions: 
+--------------------------------------------------------------------------------
+
+Write a function that returns the number of elements in the linked list that's
+passed to it.
+
+It must be declared as follows:
+
+int	ft_list_size(t_list *begin_list);
+
+You must use the following structure in your program ft_list_size.c :
+
+typedef struct    s_list
+{
+    struct s_list *next;
+    void          *data;
+}                 t_list;`,
+
   descripcion: 'Función que cuenta los elementos de una lista enlazada simple. Recorre la lista siguiendo el puntero next hasta llegar a NULL, incrementando el contador en cada nodo.',
 
   palacio: {
@@ -61,6 +83,42 @@ La struct t_list tiene: next (puntero al siguiente) y data (el contenido).`,
     },
   },
 
+  // Tester oficial copiado literalmente desde rank02 (tester.sh).
+  testerReal: `#!/bin/bash
+source ../../../main/colors.sh
+file1=ft_list_size.c
+file2=../../../../rendu/ft_list_size/ft_list_size.c
+
+
+# 1. test
+    gcc -Werror -Wall -Wextra -o out1 "$file1" main.c
+    gcc -Werror -Wall -Wextra -o out2 "$file2" main.c
+
+    ./out1 > out1.txt 2>/dev/null
+    ./out2 > out2.txt 2>/dev/null
+
+    if ! diff -q out1.txt out2.txt >/dev/null ; then
+        out1=$(cat out1.txt)
+        out2=$(cat out2.txt)
+        echo "$(tput setaf 1)$(tput bold)FAIL$(tput sgr 0)"
+        echo "\${GREEN}Expected Output:\${RESET} \\"$out1\\""
+        echo "\${RED}Your Output:\${RESET}     \\"$out2\\""
+        rm out1 out2 out1.txt out2.txt 2>/dev/null
+        exit 1
+    fi
+    
+    
+    rm out1 out2 out1.txt out2.txt 2>/dev/null
+    echo "$(tput setaf 2)$(tput bold)PASSED 🎉$(tput sgr 0)"
+    exit 1
+    `,
+
+  // Tests derivados del tester.sh real. Las salidas se obtuvieron
+  // compilando la solución de rank02 con gcc -w y ejecutándola.
+  testsRank02: [
+    { id: 'tester_1', entrada: [], salida: "3\n", fuente: 'tester.sh' },
+  ],
+
   versiones: [
     {
       id: 'clasica',
@@ -90,6 +148,23 @@ La struct t_list tiene: next (puntero al siguiente) y data (el contenido).`,
 \tif (!begin_list)
 \t\treturn (0);
 \treturn (1 + ft_list_size(begin_list->next));
+}`,
+    },
+  
+    {
+      id: 'rank02',
+      nombre: 'Versión rank02 (solución de referencia)',
+      descripcion: 'Solución tal y como aparece en el repo de referencia rank02. Útil para comparar estilo, validaciones y constraints reales del examen.',
+      recomendada: false,
+      origen: 'rank02',
+      codigo: `#include "ft_list.h"
+
+int	ft_list_size(t_list *begin_list)
+{
+	if (begin_list == 0)
+		return (0);
+	else
+		return (1 + ft_list_size(begin_list->next));
 }`,
     },
   ],

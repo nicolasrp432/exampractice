@@ -21,6 +21,22 @@ Example:
 print_bits(2)  → 00000010
 print_bits(42) → 00101010`,
 
+  // Subject literal del repo rank02 (sub.txt). Útil para comparar con
+  // el subject didáctico activo y para la pestaña "Examen real".
+  subjectReal: `Assignment name  : print_bits
+Expected files   : print_bits.c
+Allowed functions: write
+--------------------------------------------------------------------------------
+
+Write a function that takes a byte, and prints it in binary WITHOUT A NEWLINE
+AT THE END.
+
+Your function must be declared as follows:
+
+void	print_bits(unsigned char octet);
+
+Example, if you pass 2 to print_bits, it will print "00000010"`,
+
   descripcion: 'Función que imprime los 8 bits de un byte en orden MSB→LSB. Itera desde el bit 7 al bit 0, extrayendo cada bit con (octet >> i) & 1 y escribiendo "0" o "1".',
 
   palacio: {
@@ -53,6 +69,81 @@ SIEMPRE 8 bits, siempre con ceros a la izquierda. SIN newline al final.`,
       resultado: '"00000010"',
     },
   },
+
+  // Tester oficial copiado literalmente desde rank02 (tester.sh).
+  testerReal: `#!/bin/bash
+source ../../../main/colors.sh
+file1=print_bits.c
+file2=../../../../rendu/print_bits/print_bits.c
+
+
+# 1. test
+    gcc -Werror -Wall -Wextra -o out1 "$file1" main.c
+    gcc -Werror -Wall -Wextra -o out2 "$file2" main.c
+
+    ./out1 "a" > out1.txt 2>/dev/null
+    ./out2 "a" > out2.txt 2>/dev/null
+
+    if ! diff -q out1.txt out2.txt >/dev/null ; then
+        out1=$(cat out1.txt)
+        out2=$(cat out2.txt)
+        echo "$(tput setaf 1)$(tput bold)FAIL$(tput sgr 0)"
+        echo "\${GREEN}Expected Output:\${RESET} \\"$out1\\""
+        echo "\${RED}Your Output:\${RESET}     \\"$out2\\""
+        rm out1 out2 out1.txt out2.txt 2>/dev/null
+        exit 1
+    fi
+
+
+# 2. test
+    gcc -w -o out1 "$file1" main.c
+    gcc -w -o out2 "$file2" main.c
+
+    ./out1 "0" > out1.txt 2>/dev/null
+    ./out2 "0" > out2.txt 2>/dev/null
+
+    if ! diff -q out1.txt out2.txt >/dev/null ; then
+        out1=$(cat out1.txt)
+        out2=$(cat out2.txt)
+        echo "$(tput setaf 1)$(tput bold)FAIL$(tput sgr 0)"
+        echo "\${GREEN}Expected Output:\${RESET} \\"$out1\\""
+        echo "\${RED}Your Output:\${RESET}     \\"$out2\\""
+        rm out1 out2 out1.txt out2.txt 2>/dev/null
+        exit 1
+    fi
+
+
+# 3. test
+    gcc -w -o out1 "$file1" main.c
+    gcc -w -o out2 "$file2" main.c
+
+    ./out1 "P" > out1.txt 2>/dev/null
+    ./out2 "P" > out2.txt 2>/dev/null
+
+    if ! diff -q out1.txt out2.txt >/dev/null ; then
+        out1=$(cat out1.txt)
+        out2=$(cat out2.txt)
+        echo "$(tput setaf 1)$(tput bold)FAIL$(tput sgr 0)"
+        echo "\${GREEN}Expected Output:\${RESET} \\"$out1\\""
+        echo "\${RED}Your Output:\${RESET}     \\"$out2\\""
+        rm out1 out2 out1.txt out2.txt 2>/dev/null
+        exit 1
+    fi
+
+
+
+    rm out1 out2 out1.txt out2.txt 2>/dev/null
+    echo "$(tput setaf 2)$(tput bold)PASSED 🎉$(tput sgr 0)"
+    exit 1
+`,
+
+  // Tests derivados del tester.sh real. Las salidas se obtuvieron
+  // compilando la solución de rank02 con gcc -w y ejecutándola.
+  testsRank02: [
+    { id: 'tester_1', entrada: ["a"], salida: "01100001\n", fuente: 'tester.sh' },
+    { id: 'tester_2', entrada: ["0"], salida: "00110000\n", fuente: 'tester.sh' },
+    { id: 'tester_3', entrada: ["P"], salida: "01010000\n", fuente: 'tester.sh' },
+  ],
 
   versiones: [
     {
@@ -95,6 +186,27 @@ void\tprint_bits(unsigned char octet)
 \t\twrite(1, &c, 1);
 \t\tmask >>= 1;
 \t}
+}`,
+    },
+  
+    {
+      id: 'rank02',
+      nombre: 'Versión rank02 (solución de referencia)',
+      descripcion: 'Solución tal y como aparece en el repo de referencia rank02. Útil para comparar estilo, validaciones y constraints reales del examen.',
+      recomendada: false,
+      origen: 'rank02',
+      codigo: `#include <unistd.h>
+
+void print_bits(unsigned char octet)
+{
+	int	i = 8;
+	unsigned char 	bit;
+
+	while (i--)
+	{
+		bit = (octet >> i & 1) + '0';
+		write(1, &bit, 1);
+	}
 }`,
     },
   ],

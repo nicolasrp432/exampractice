@@ -30,6 +30,29 @@ ft_atoi_base("10", "01")              → 2   (binary)
 ft_atoi_base("-f", "0123456789abcdef")→ -15
 ft_atoi_base("z", "abcdefghijklmnopqrstuvwxyz") → 25`,
 
+  // Subject literal del repo rank02 (sub.txt). Útil para comparar con
+  // el subject didáctico activo y para la pestaña "Examen real".
+  subjectReal: `Assignment name  : ft_atoi_base
+Expected files   : ft_atoi_base.c
+Allowed functions: None
+--------------------------------------------------------------------------------
+
+Write a function that converts the string argument str (base N <= 16)
+to an integer (base 10) and returns it.
+
+The characters recognized in the input are: 0123456789abcdef
+Those are, of course, to be trimmed according to the requested base. For
+example, base 4 recognizes "0123" and base 16 recognizes "0123456789abcdef".
+
+Uppercase letters must also be recognized: "12fdb3" is the same as "12FDB3".
+
+Minus signs ('-') are interpreted only if they are the first character of the
+string.
+
+Your function must be declared as follows:
+
+int	ft_atoi_base(const char *str, int str_base);`,
+
   descripcion: 'Generalización de ft_atoi para cualquier base. La base es un string cuyos caracteres son los dígitos. Cada carácter de str se mapea a su índice en base. El índice es el valor numérico.',
 
   palacio: {
@@ -64,6 +87,97 @@ Si el char no está en base: PARA. El índice en base ES el dígito.`,
       resultado: '255',
     },
   },
+
+  // Tester oficial copiado literalmente desde rank02 (tester.sh).
+  testerReal: `#!/bin/bash
+source ../../../main/colors.sh
+file1=ft_atoi_base.c
+file2=../../../../rendu/ft_atoi_base/ft_atoi_base.c
+
+
+# 1. test
+    gcc -Werror -Wall -Wextra -o out1 "$file1" main.c
+    gcc -Werror -Wall -Wextra -o out2 "$file2" main.c
+
+    ./out1 > out1.txt 2>/dev/null
+    ./out2 > out2.txt 2>/dev/null
+
+    if ! diff -q out1.txt out2.txt >/dev/null ; then
+        out1=$(cat out1.txt)
+        out2=$(cat out2.txt)
+        echo "$(tput setaf 1)$(tput bold)FAIL$(tput sgr 0)"
+        echo "\${GREEN}Expected Output:\${RESET} \\"$out1\\""
+        echo "\${RED}Your Output:\${RESET}     \\"$out2\\""
+        rm out1 out2 out1.txt out2.txt 2>/dev/null
+        exit 1
+    fi
+
+# 2. test
+    gcc -w -o out1 "$file1" main.c
+    gcc -w -o out2 "$file2" main.c
+
+    ./out1 "Ceci permet de decouvrir le fonctionnement de ton ft_atoi_base." "16" > out1.txt 2>/dev/null
+    ./out2 "Ceci permet de decouvrir le fonctionnement de ton ft_atoi_base." "16" > out2.txt 2>/dev/null
+
+    if ! diff -q out1.txt out2.txt >/dev/null ; then
+        out1=$(cat out1.txt)
+        out2=$(cat out2.txt)
+        echo "$(tput setaf 1)$(tput bold)FAIL$(tput sgr 0)"
+        echo "\${GREEN}Expected Output:\${RESET} \\"$out1\\""
+        echo "\${RED}Your Output:\${RESET}     \\"$out2\\""
+        rm out1 out2 out1.txt out2.txt 2>/dev/null
+        exit 1
+    fi
+
+
+# 3. test
+    gcc -w -o out1 "$file1" main.c
+    gcc -w -o out2 "$file2" main.c
+
+    ./out1 "13268!" "16" > out1.txt 2>/dev/null
+    ./out2 "13268!" "16" > out2.txt 2>/dev/null
+
+    if ! diff -q out1.txt out2.txt >/dev/null ; then
+        out1=$(cat out1.txt)
+        out2=$(cat out2.txt)
+        echo "$(tput setaf 1)$(tput bold)FAIL$(tput sgr 0)"
+        echo "\${GREEN}Expected Output:\${RESET} \\"$out1\\""
+        echo "\${RED}Your Output:\${RESET}     \\"$out2\\""
+        rm out1 out2 out1.txt out2.txt 2>/dev/null
+        exit 1
+    fi
+
+# 4. test
+    gcc -w -o out1 "$file1" main.c
+    gcc -w -o out2 "$file2" main.c
+
+    ./out1 "-13268!" "10" > out1.txt 2>/dev/null
+    ./out2 "-13268!" "10" > out2.txt 2>/dev/null
+
+    if ! diff -q out1.txt out2.txt >/dev/null ; then
+        out1=$(cat out1.txt)
+        out2=$(cat out2.txt)
+        echo "$(tput setaf 1)$(tput bold)FAIL$(tput sgr 0)"
+        echo "\${GREEN}Expected Output:\${RESET} \\"$out1\\""
+        echo "\${RED}Your Output:\${RESET}     \\"$out2\\""
+        rm out1 out2 out1.txt out2.txt 2>/dev/null
+        exit 1
+    fi
+
+    
+    rm out1 out2 out1.txt out2.txt 2>/dev/null
+    echo "$(tput setaf 2)$(tput bold)PASSED 🎉$(tput sgr 0)"
+    exit 1
+`,
+
+  // Tests derivados del tester.sh real. Las salidas se obtuvieron
+  // compilando la solución de rank02 con gcc -w y ejecutándola.
+  testsRank02: [
+    { id: 'tester_1', entrada: [], salida: "", fuente: 'tester.sh' },
+    { id: 'tester_2', entrada: ["Ceci permet de decouvrir le fonctionnement de ton ft_atoi_base.","16"], salida: "3308\n", fuente: 'tester.sh' },
+    { id: 'tester_3', entrada: ["13268!","16"], salida: "78440\n", fuente: 'tester.sh' },
+    { id: 'tester_4', entrada: ["-13268!","10"], salida: "-13268\n", fuente: 'tester.sh' },
+  ],
 
   versiones: [
     {
@@ -118,6 +232,112 @@ int\tft_atoi_base(const char *str, const char *base)
 \t\tstr++;
 \t}
 \treturn (result * sign);
+}`,
+    },
+    {
+      id: 'punteros',
+      nombre: 'Con búsqueda por punteros',
+      descripcion: 'Recorre la base con un puntero y acumula el resultado sin usar helpers extra.',
+      recomendada: false,
+      codigo: `static int\tft_strlen(const char *s)
+{
+\tint\ti;
+
+\ti = 0;
+\twhile (s[i])
+\t\ti++;
+\treturn (i);
+}
+
+static int\tbase_index(char c, const char *base)
+{
+\tint\ti;
+
+\ti = 0;
+\twhile (base[i])
+\t{
+\t\tif (base[i] == c)
+\t\t\treturn (i);
+\t\ti++;
+\t}
+\treturn (-1);
+}
+
+int\tft_atoi_base(const char *str, const char *base)
+{
+\tint\tbase_len;
+\tint\tsign;
+\tint\tresult;
+\tint\tdigit;
+
+\tbase_len = ft_strlen(base);
+\tsign = 1;
+\tresult = 0;
+\twhile (*str == ' ' || (*str >= '\\t' && *str <= '\\r'))
+\t\tstr++;
+\tif (*str == '+' || *str == '-')
+\t{
+\t\tif (*str == '-')
+\t\t\tsign = -1;
+\t\tstr++;
+\t}
+\twhile ((digit = base_index(*str, base)) >= 0)
+\t{
+\t\tresult = result * base_len + digit;
+\t\tstr++;
+\t}
+\treturn (result * sign);
+}`,
+    },
+  
+    {
+      id: 'rank02',
+      nombre: 'Versión rank02 (solución de referencia)',
+      descripcion: 'Solución tal y como aparece en el repo de referencia rank02. Útil para comparar estilo, validaciones y constraints reales del examen.',
+      recomendada: false,
+      origen: 'rank02',
+      codigo: `char	to_lower(char c)
+{
+	if (c >= 'A' && c <= 'Z')
+		return (c + ('a' - 'A'));
+	return (c);
+}
+
+int get_digit(char c, int digits_in_base)
+{
+	int max_digit;
+	if (digits_in_base <= 10)
+		max_digit = digits_in_base + '0';
+	else
+		max_digit = digits_in_base - 10 + 'a';
+
+	if (c >= '0' && c <= '9' && c <= max_digit)
+		return (c - '0');
+	else if (c >= 'a' && c <= 'f' && c <= max_digit)
+		return (10 + c - 'a');
+	else
+		return (-1);
+}
+
+int ft_atoi_base(const char *str, int str_base)
+{
+	int result = 0;
+	int sign = 1;
+	int digit;
+
+	if (*str == '-')
+	{
+		sign = -1;
+		++str;
+	}
+
+	while ((digit = get_digit(to_lower(*str), str_base)) >= 0)
+	{
+		result = result * str_base;
+		result = result + (digit * sign);
+		++str;
+	}
+	return (result);
 }`,
     },
   ],

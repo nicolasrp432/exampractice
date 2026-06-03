@@ -2,7 +2,63 @@ import { simulators } from './simulators/index.js'
 
 const WANDBOX_URL = 'https://wandbox.org/api/compile.json'
 
-export async function compileAndRun(code, args = [], exerciseId = null) {
+function parseDiagnosticLine(line, sourceLines) {
+  const detailed = line.match(/^(.*?):(\d+):(\d+):\s*(fatal error|error|warning|note):\s*(.*)$/i)
+  const simple = line.match(/^(.*?):(\d+):\s*(fatal error|error|warning|note):\s*(.*)$/i)
+
+  const match = detailed || simple
+  if (!match) return null
+
+  const hasColumn = Boolean(detailed)
+  const lineNumber = Number(match[2])
+  const columnNumber = hasColumn ? Number(match[3]) : null
+  const severity = hasColumn ? match[4] : match[3]
+  const message = hasColumn ? match[5] : match[4]
+
+  return {
+    raw: line,
+    file: match[1],
+    line: lineNumber,
+    column: columnNumber,
+    severity,
+    message,
+    sourceLine: sourceLines[lineNumber - 1] ?? '',
+  }
+}
+
+export function parseCompilerDiagnostics(compilerError, source = '') {
+  if (!compilerError) return []
+
+  const sourceLines = source ? source.split('\n') : []
+  return String(compilerError)
+    .split('\n')
+    .map((line) => line.trimEnd())
+    .filter(Boolean)
+    .map((line) => parseDiagnosticLine(line, sourceLines))
+    .filter(Boolean)
+}
+
+function parseStatus(rawStatus) {
+  if (rawStatus === undefined || rawStatus === null) {
+    return { exitCode: -1, signal: null }
+  }
+  const s = String(rawStatus).trim()
+  const sigMatch = s.match(/signal\s+(\d+)/i)
+  if (sigMatch) {
+    return { exitCode: -1, signal: Number(sigMatch[1]) }
+  }
+  const n = parseInt(s, 10)
+  return { exitCode: Number.isNaN(n) ? -1 : n, signal: null }
+}
+
+export async function compileAndRun(code, args = [], exerciseId = null, options = {}) {
+  const {
+    stdin = '',
+    compilerOptions = '',
+    compilerOptionRaw = '',
+    compiler = 'gcc-head-c',
+  } = options
+
   // --- CAPA 1: Compilador Local ---
   try {
     const localRes = await fetch('/api/compile-local', {
@@ -16,9 +72,11 @@ export async function compileAndRun(code, args = [], exerciseId = null) {
       if (!data.compilerUnavailable) {
         return {
           compileError: data.compileError,
+          compileDiagnostics: parseCompilerDiagnostics(data.compileError, code),
           stdout: data.stdout ?? '',
           stderr: data.stderr ?? '',
           exitCode: data.exitCode ?? 0,
+          signal: null,
           mode: 'local',
         }
       }
@@ -35,10 +93,12 @@ export async function compileAndRun(code, args = [], exerciseId = null) {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         code,
-        compiler: 'gcc-head',
-        options: '',
-        stdin: '',
+        compiler,
+        options: compilerOptions,
+        stdin,
         'runtime-option-raw': args.map(String).join('\n'),
+        'compiler-option-raw': compilerOptionRaw,
+        save: false,
       }),
     })
 
@@ -49,11 +109,16 @@ export async function compileAndRun(code, args = [], exerciseId = null) {
           ? data.compiler_error
           : null
 
+      const { exitCode, signal } = parseStatus(data.status)
+
       return {
         compileError,
+        compileDiagnostics: parseCompilerDiagnostics(compileError, code),
+        compileMessage: data.compiler_message ?? '',
         stdout: data.program_output ?? '',
         stderr: data.program_error ?? '',
-        exitCode: data.status !== undefined ? parseInt(data.status, 10) : -1,
+        exitCode,
+        signal,
         mode: 'wandbox',
       }
     }
@@ -67,18 +132,22 @@ export async function compileAndRun(code, args = [], exerciseId = null) {
       const stdout = simulators[exerciseId](args)
       return {
         compileError: null,
+        compileDiagnostics: [],
         stdout,
         stderr: '',
         exitCode: 0,
+        signal: null,
         mode: 'mock',
         isMock: true,
       }
     } catch (simErr) {
       return {
         compileError: `Error en simulador offline: ${simErr.message}`,
+        compileDiagnostics: [],
         stdout: '',
         stderr: '',
         exitCode: -1,
+        signal: null,
         mode: 'mock',
         isMock: true,
       }
@@ -87,4 +156,3 @@ export async function compileAndRun(code, args = [], exerciseId = null) {
 
   throw new Error('No se pudo compilar el código. Compilador local no disponible, Wandbox fuera de línea y sin simulador JS para este ejercicio.')
 }
-

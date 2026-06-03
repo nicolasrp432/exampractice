@@ -5,7 +5,10 @@ export default {
   dificultad: 'medio',
   tipoEntrega: 'programa',
   archivosEsperados: ['fprime.c'],
-  funcionesPermitidas: ['write'],
+  // Match al subject real del rank02 (sub.txt): solo printf y atoi.
+  // Versiones alternativas con write/ft_putnbr disponibles en `versiones`
+  // para quien quiera practicar el enfoque sin printf.
+  funcionesPermitidas: ['printf', 'atoi'],
 
   subject: `Assignment name  : fprime
 Expected files   : fprime.c
@@ -33,6 +36,42 @@ $> ./fprime | cat -e
 $
 $> ./fprime 42 | cat -e
 2*3*7$`,
+
+  // Subject literal del repo rank02 (sub.txt). Útil para comparar con
+  // el subject didáctico activo y para la pestaña "Examen real".
+  subjectReal: `Assignment name  : fprime
+Expected files   : fprime.c
+Allowed functions: printf, atoi
+--------------------------------------------------------------------------------
+
+Write a program that takes a positive int and displays its prime factors on the
+standard output, followed by a newline.
+
+Factors must be displayed in ascending order and separated by '*', so that
+the expression in the output gives the right result.
+
+If the number of parameters is not 1, simply display a newline.
+
+The input, when there is one, will be valid.
+
+Examples:
+
+$> ./fprime 225225 | cat -e
+3*3*5*5*7*11*13$
+$> ./fprime 8333325 | cat -e
+3*3*5*5*7*11*13*37$
+$> ./fprime 9539 | cat -e
+9539$
+$> ./fprime 804577 | cat -e
+804577$
+$> ./fprime 42 | cat -e
+2*3*7$
+$> ./fprime 1 | cat -e
+1$
+$> ./fprime | cat -e
+$
+$> ./fprime 42 21 | cat -e
+$`,
 
   descripcion: 'Descomposición en factores primos. Divide el número por divisores empezando en 2. Cada vez que el divisor divide exactamente, imprime el factor y continúa con el cociente. Si quedan factores, imprime el número restante.',
 
@@ -67,6 +106,170 @@ Caso especial: n=1 → imprimir "1".`,
       resultado: '"2*2*3"',
     },
   },
+
+  // Tester oficial copiado literalmente desde rank02 (tester.sh).
+  testerReal: `#!/bin/bash
+source ../../../main/colors.sh
+file1=fprime.c
+file2=../../../../rendu/fprime/fprime.c
+
+
+# 1. test
+    gcc -Werror -Wall -Wextra -o out1 "$file1"
+    gcc -Werror -Wall -Wextra -o out2 "$file2"
+
+    ./out1 > out1.txt 2>/dev/null
+    ./out2 > out2.txt 2>/dev/null
+
+    if ! diff -q out1.txt out2.txt >/dev/null ; then
+        out1=$(cat out1.txt)
+        out2=$(cat out2.txt)
+        echo "$(tput setaf 1)$(tput bold)FAIL$(tput sgr 0)"
+        echo "\${GREEN}Expected Output:\${RESET} \\"$out1\\""
+        echo "\${RED}Your Output:\${RESET}     \\"$out2\\""
+        rm out1 out2 out1.txt out2.txt 2>/dev/null
+        exit 1
+    fi
+
+
+# 2. test
+    gcc -w -o out1 "$file1"
+    gcc -w -o out2 "$file2"
+
+    ./out1 "225225" > out1.txt 2>/dev/null
+    ./out2 "225225" > out2.txt 2>/dev/null
+
+    if ! diff -q out1.txt out2.txt >/dev/null ; then
+        out1=$(cat out1.txt)
+        out2=$(cat out2.txt)
+        echo "$(tput setaf 1)$(tput bold)FAIL$(tput sgr 0)"
+        echo "\${GREEN}Expected Output:\${RESET} \\"$out1\\""
+        echo "\${RED}Your Output:\${RESET}     \\"$out2\\""
+        rm out1 out2 out1.txt out2.txt 2>/dev/null
+        exit 1
+    fi
+
+# 3. test
+    gcc -w -o out1 "$file1"
+    gcc -w -o out2 "$file2"
+
+    ./out1 "8333325" > out1.txt 2>/dev/null
+    ./out2 "8333325" > out2.txt 2>/dev/null
+
+    if ! diff -q out1.txt out2.txt >/dev/null ; then
+        out1=$(cat out1.txt)
+        out2=$(cat out2.txt)
+        echo "$(tput setaf 1)$(tput bold)FAIL$(tput sgr 0)"
+        echo "\${GREEN}Expected Output:\${RESET} \\"$out1\\""
+        echo "\${RED}Your Output:\${RESET}     \\"$out2\\""
+        rm out1 out2 out1.txt out2.txt 2>/dev/null
+        exit 1
+    fi
+
+# 4. test
+    gcc -w -o out1 "$file1"
+    gcc -w -o out2 "$file2"
+
+    ./out1 "9539" "btarc" > out1.txt 2>/dev/null
+    ./out2 "9539" "btarc" > out2.txt 2>/dev/null
+
+    if ! diff -q out1.txt out2.txt >/dev/null ; then
+        out1=$(cat out1.txt)
+        out2=$(cat out2.txt)
+        echo "$(tput setaf 1)$(tput bold)FAIL$(tput sgr 0)"
+        echo "\${GREEN}Expected Output:\${RESET} \\"$out1\\""
+        echo "\${RED}Your Output:\${RESET}     \\"$out2\\""
+        rm out1 out2 out1.txt out2.txt 2>/dev/null
+        exit 1
+    fi
+
+
+# 5. test 
+    gcc -w -o out1 "$file1"
+    gcc -w -o out2 "$file2"
+
+    ./out1 "42" > out1.txt 2>/dev/null
+    ./out2 "42" > out2.txt 2>/dev/null
+
+    if ! diff -q out1.txt out2.txt >/dev/null ; then
+        out1=$(cat out1.txt)
+        out2=$(cat out2.txt)
+        echo "$(tput setaf 1)$(tput bold)FAIL$(tput sgr 0)"
+        echo "\${GREEN}Expected Output:\${RESET} \\"$out1\\""
+        echo "\${RED}Your Output:\${RESET}     \\"$out2\\""
+        rm out1 out2 out1.txt out2.txt 2>/dev/null
+        exit 1
+    fi
+
+    rm out1 out2 out1.txt out2.txt 2>/dev/null
+# 6. test
+    gcc -w -o out1 "$file1"
+    gcc -w -o out2 "$file2"
+
+    ./out1 "mais non!" "mais non!" > out1.txt 2>/dev/null
+    ./out2 "mais non!" "mais non!" > out2.txt 2>/dev/null
+
+    if ! diff -q out1.txt out2.txt >/dev/null ; then
+        out1=$(cat out1.txt)
+        out2=$(cat out2.txt)
+        echo "$(tput setaf 1)$(tput bold)FAIL$(tput sgr 0)"
+        echo "\${GREEN}Expected Output:\${RESET} \\"$out1\\""
+        echo "\${RED}Your Output:\${RESET}     \\"$out2\\""
+        rm out1 out2 out1.txt out2.txt 2>/dev/null
+        exit 1
+    fi
+
+# 7. test
+    gcc -w -o out1 "$file1"
+    gcc -w -o out2 "$file2"
+
+    ./out1 "-52" > out1.txt 2>/dev/null
+    ./out2 "-52" > out2.txt 2>/dev/null
+
+    if ! diff -q out1.txt out2.txt >/dev/null ; then
+        out1=$(cat out1.txt)
+        out2=$(cat out2.txt)
+        echo "$(tput setaf 1)$(tput bold)FAIL$(tput sgr 0)"
+        echo "\${GREEN}Expected Output:\${RESET} \\"$out1\\""
+        echo "\${RED}Your Output:\${RESET}     \\"$out2\\""
+        rm out1 out2 out1.txt out2.txt 2>/dev/null
+        exit 1
+    fi
+
+# 8. test
+    gcc -w -o out1 "$file1"
+    gcc -w -o out2 "$file2"
+
+    ./out1 "0" > out1.txt 2>/dev/null
+    ./out2 "0" > out2.txt 2>/dev/null
+
+    if ! diff -q out1.txt out2.txt >/dev/null ; then
+        out1=$(cat out1.txt)
+        out2=$(cat out2.txt)
+        echo "$(tput setaf 1)$(tput bold)FAIL$(tput sgr 0)"
+        echo "\${GREEN}Expected Output:\${RESET} \\"$out1\\""
+        echo "\${RED}Your Output:\${RESET}     \\"$out2\\""
+        rm out1 out2 out1.txt out2.txt 2>/dev/null
+        exit 1
+    fi
+
+
+    rm out1 out2 out1.txt out2.txt 2>/dev/null
+    echo "$(tput setaf 2)$(tput bold)PASSED 🎉$(tput sgr 0)"
+    exit 1`,
+
+  // Tests derivados del tester.sh real. Las salidas se obtuvieron
+  // compilando la solución de rank02 con gcc -w y ejecutándola.
+  testsRank02: [
+    { id: 'tester_1', entrada: [], salida: "\n", fuente: 'tester.sh' },
+    { id: 'tester_2', entrada: ["225225"], salida: "3*3*5*5*7*11*13\n", fuente: 'tester.sh' },
+    { id: 'tester_3', entrada: ["8333325"], salida: "3*3*5*5*7*11*13*37\n", fuente: 'tester.sh' },
+    { id: 'tester_4', entrada: ["9539","btarc"], salida: "\n", fuente: 'tester.sh' },
+    { id: 'tester_5', entrada: ["42"], salida: "2*3*7\n", fuente: 'tester.sh' },
+    { id: 'tester_6', entrada: ["mais non!","mais non!"], salida: "\n", fuente: 'tester.sh' },
+    { id: 'tester_7', entrada: ["-52"], salida: "\n", fuente: 'tester.sh' },
+    { id: 'tester_8', entrada: ["0"], salida: "\n", fuente: 'tester.sh' },
+  ],
 
   versiones: [
     {
@@ -136,6 +339,138 @@ int\tmain(int argc, char **argv)
 \treturn (0);
 }`,
     },
+    {
+      id: 'impares',
+      nombre: 'Con 2 aparte y luego divisores impares',
+      descripcion: 'Hace el caso par explícito y después prueba solo impares, que es más fácil de leer.',
+      recomendada: false,
+      codigo: `#include <unistd.h>
+
+static void\tft_putnbr(unsigned long long n)
+{
+\tchar\tc;
+
+\tif (n >= 10)
+\t\tft_putnbr(n / 10);
+\tc = n % 10 + '0';
+\twrite(1, &c, 1);
+}
+
+int\tmain(int argc, char **argv)
+{
+\tunsigned long long\tn;
+\tunsigned long long\td;
+\tint\t\t\t\ti;
+\tint\t\t\t\tfirst;
+
+\tif (argc != 2)
+\t{
+\t\twrite(1, "\\n", 1);
+\t\treturn (0);
+\t}
+\tn = 0;
+\ti = 0;
+\twhile (argv[1][i] >= '0' && argv[1][i] <= '9')
+\t\tn = n * 10 + (argv[1][i++] - '0');
+\tif (argv[1][i] != '\\0' || n == 0)
+\t{
+\t\twrite(1, "\\n", 1);
+\t\treturn (0);
+\t}
+\tif (n == 1)
+\t{
+\t\twrite(1, "1\\n", 2);
+\t\treturn (0);
+\t}
+\tfirst = 1;
+\twhile (n % 2 == 0)
+\t{
+\t\tif (!first)
+\t\t\twrite(1, "*", 1);
+\t\tft_putnbr(2);
+\t\tn /= 2;
+\t\tfirst = 0;
+\t}
+\td = 3;
+\twhile (d * d <= n)
+\t{
+\t\twhile (n % d == 0)
+\t\t{
+\t\t\tif (!first)
+\t\t\t\twrite(1, "*", 1);
+\t\t\tft_putnbr(d);
+\t\t\tn /= d;
+\t\t\tfirst = 0;
+\t\t}
+\t\td += 2;
+\t}
+\tif (n > 1)
+\t{
+\t\tif (!first)
+\t\t\twrite(1, "*", 1);
+\t\tft_putnbr(n);
+\t}
+\twrite(1, "\\n", 1);
+\treturn (0);
+}`,
+    },
+  
+    {
+      id: 'rank02',
+      nombre: 'Versión rank02 (solución de referencia)',
+      descripcion: 'Solución tal y como aparece en el repo de referencia rank02. Útil para comparar estilo, validaciones y constraints reales del examen.',
+      recomendada: false,
+      origen: 'rank02',
+      codigo: `#include <stdio.h>
+#include <stdlib.h>
+
+int		is_prime(int n)
+{
+	int i = 2;
+
+	while (i < n)
+	{
+		if (n % i == 0)
+			return (0);
+		++i;
+	}
+	return (1);
+}
+
+void	fprime(char *str)
+{
+	int n = atoi(str);
+	int factor = 2;
+	int first = 1;
+
+	if (n == 1)
+		printf("1");
+
+	while (factor <= n)
+	{
+		if (n % factor == 0 && is_prime(factor))
+		{
+			if (first == 1)
+				printf("%d", factor);
+			else
+				printf("*%d", factor);
+			first = 0;
+			n = n / factor;
+		}
+		else
+			++factor;
+	}
+}
+
+int		main(int argc, char **argv)
+{
+	if (argc == 2)
+		fprime(argv[1]);
+
+	printf("\\n");
+	return (0);
+}`,
+    },
   ],
 
   tests: [
@@ -186,6 +521,32 @@ Salida: "2*3*7"`,
   ],
 
   trampas: [
+    {
+      severidad: 'info',
+      titulo: 'Diferencia plataforma vs examen real',
+      descripcion: 'El subject real permite `atoi` y `printf` directamente. Esto simplifica mucho: en lugar de implementar ft_atoi + ft_putnbr a mano, escribes `int n = atoi(argv[1]); printf("%d", factor);`. Las soluciones write-only que ya tienes siguen siendo válidas — pero conviene practicar también la versión simplificada porque es más corta y rápida de escribir bajo presión de tiempo.',
+      codigoMal: `// Versión didáctica: implementabas ft_atoi + ft_putnbr de cero
+static void put_nbr(int n) { /* ... 10 líneas ... */ }
+// y main convertía argv a int byte a byte`,
+      codigoBien: `// Subject real: atoi + printf
+#include <stdio.h>
+#include <stdlib.h>
+int main(int argc, char **argv) {
+\tif (argc != 2) { printf("\\n"); return 0; }
+\tint n = atoi(argv[1]);
+\tif (n == 1) { printf("1\\n"); return 0; }
+\tint d = 2, first = 1;
+\twhile (n > 1) {
+\t\twhile (n % d == 0) {
+\t\t\tprintf("%s%d", first ? "" : "*", d);
+\t\t\tfirst = 0; n /= d;
+\t\t}
+\t\td++;
+\t}
+\tprintf("\\n");
+\treturn 0;
+}`,
+    },
     {
       severidad: 'mortal',
       titulo: 'Olvidar el caso n=1: sin factores, pero hay que imprimir "1"',

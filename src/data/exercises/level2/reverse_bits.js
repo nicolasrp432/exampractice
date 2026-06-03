@@ -22,6 +22,29 @@ reverse_bits(1)   → 128   (00000001 → 10000000)
 reverse_bits(2)   → 64    (00000010 → 01000000)
 reverse_bits(170) → 85    (10101010 → 01010101)`,
 
+  // Subject literal del repo rank02 (sub.txt). Útil para comparar con
+  // el subject didáctico activo y para la pestaña "Examen real".
+  subjectReal: `Assignment name  : reverse_bits
+Expected files   : reverse_bits.c
+Allowed functions:
+--------------------------------------------------------------------------------
+
+Write a function that takes a byte, reverses it, bit by bit (like the
+example) and returns the result.
+
+Your function must be declared as follows:
+
+unsigned char	reverse_bits(unsigned char octet);
+
+Example:
+
+  1 byte
+_____________
+ 0010  0110
+	 ||
+	 \\/
+ 0110  0100`,
+
   descripcion: 'Función que invierte el orden de los bits de un byte. Usa acumulación: bit = bit*2 + octet%2, octet /= 2, repetido 8 veces. Inicializar bit=0.',
 
   palacio: {
@@ -56,6 +79,81 @@ CLAVE: inicializar bit=0 (no 1, no octet).`,
       resultado: '128 (10000000)',
     },
   },
+
+  // Tester oficial copiado literalmente desde rank02 (tester.sh).
+  testerReal: `#!/bin/bash
+source ../../../main/colors.sh
+file1=reverse_bits.c
+file2=../../../../rendu/reverse_bits/reverse_bits.c
+
+
+# 1. test
+    gcc -Werror -Wall -Wextra -o out1 "$file1" main.c
+    gcc -Werror -Wall -Wextra -o out2 "$file2" main.c
+
+    ./out1 "a" > out1.txt 2>/dev/null
+    ./out2 "a" > out2.txt 2>/dev/null
+
+    if ! diff -q out1.txt out2.txt >/dev/null ; then
+        out1=$(cat out1.txt)
+        out2=$(cat out2.txt)
+        echo "$(tput setaf 1)$(tput bold)FAIL$(tput sgr 0)"
+        echo "\${GREEN}Expected Output:\${RESET} \\"$out1\\""
+        echo "\${RED}Your Output:\${RESET}     \\"$out2\\""
+        rm out1 out2 out1.txt out2.txt 2>/dev/null
+        exit 1
+    fi
+
+
+# 2. test
+    gcc -w -o out1 "$file1" main.c
+    gcc -w -o out2 "$file2" main.c
+
+    ./out1 "0" > out1.txt 2>/dev/null
+    ./out2 "0" > out2.txt 2>/dev/null
+
+    if ! diff -q out1.txt out2.txt >/dev/null ; then
+        out1=$(cat out1.txt)
+        out2=$(cat out2.txt)
+        echo "$(tput setaf 1)$(tput bold)FAIL$(tput sgr 0)"
+        echo "\${GREEN}Expected Output:\${RESET} \\"$out1\\""
+        echo "\${RED}Your Output:\${RESET}     \\"$out2\\""
+        rm out1 out2 out1.txt out2.txt 2>/dev/null
+        exit 1
+    fi
+
+
+# 3. test
+    gcc -w -o out1 "$file1" main.c
+    gcc -w -o out2 "$file2" main.c
+
+    ./out1 "P" > out1.txt 2>/dev/null
+    ./out2 "P" > out2.txt 2>/dev/null
+
+    if ! diff -q out1.txt out2.txt >/dev/null ; then
+        out1=$(cat out1.txt)
+        out2=$(cat out2.txt)
+        echo "$(tput setaf 1)$(tput bold)FAIL$(tput sgr 0)"
+        echo "\${GREEN}Expected Output:\${RESET} \\"$out1\\""
+        echo "\${RED}Your Output:\${RESET}     \\"$out2\\""
+        rm out1 out2 out1.txt out2.txt 2>/dev/null
+        exit 1
+    fi
+
+
+
+    rm out1 out2 out1.txt out2.txt 2>/dev/null
+    echo "$(tput setaf 2)$(tput bold)PASSED 🎉$(tput sgr 0)"
+    exit 1
+`,
+
+  // Tests derivados del tester.sh real. Las salidas se obtuvieron
+  // compilando la solución de rank02 con gcc -w y ejecutándola.
+  testsRank02: [
+    { id: 'tester_1', entrada: ["a"], salida: "134", fuente: 'tester.sh' },
+    { id: 'tester_2', entrada: ["0"], salida: "12", fuente: 'tester.sh' },
+    { id: 'tester_3', entrada: ["P"], salida: "10", fuente: 'tester.sh' },
+  ],
 
   versiones: [
     {
@@ -98,6 +196,27 @@ CLAVE: inicializar bit=0 (no 1, no octet).`,
 \t\ti++;
 \t}
 \treturn (bit);
+}`,
+    },
+  
+    {
+      id: 'rank02',
+      nombre: 'Versión rank02 (solución de referencia)',
+      descripcion: 'Solución tal y como aparece en el repo de referencia rank02. Útil para comparar estilo, validaciones y constraints reales del examen.',
+      recomendada: false,
+      origen: 'rank02',
+      codigo: `unsigned char	reverse_bits(unsigned char octet)
+{
+	int		i = 8;
+	unsigned char	res = 0;
+
+	while (i > 0)
+	{
+		res = res * 2 + (octet % 2);
+		octet = octet / 2;
+		i--;
+	}
+	return (res);
 }`,
     },
   ],

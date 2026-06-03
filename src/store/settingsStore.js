@@ -10,11 +10,13 @@ export const useSettingsStore = create(
       nivelesExamen: [1, 2, 3, 4],
       mostrarPistas: true,
       autoReveal: false,
+      strictMoulinette: true,
 
       setTimerExamen: (mins) => set({ timerExamen: mins }),
       setNivelesExamen: (niveles) => set({ nivelesExamen: niveles }),
       togglePistas: () => set(s => ({ mostrarPistas: !s.mostrarPistas })),
       setAutoReveal: (v) => set({ autoReveal: v }),
+      toggleStrictMoulinette: () => set(s => ({ strictMoulinette: !s.strictMoulinette })),
       toggleNivel: (nivel) =>
         set(s => ({
           nivelesExamen: s.nivelesExamen.includes(nivel)

@@ -29,6 +29,35 @@ $> ./hidenp "foobar" "rab" | cat -e
 $> ./hidenp "hello" "heo" | cat -e
 1$`,
 
+  // Subject literal del repo rank02 (sub.txt). Útil para comparar con
+  // el subject didáctico activo y para la pestaña "Examen real".
+  subjectReal: `Assignment name  : hidenp
+Expected files   : hidenp.c
+Allowed functions: write
+--------------------------------------------------------------------------------
+
+Write a program named hidenp that takes two strings and displays 1
+followed by a newline if the first string is hidden in the second one,
+otherwise displays 0 followed by a newline.
+
+Let s1 and s2 be strings. We say that s1 is hidden in s2 if it's possible to
+find each character from s1 in s2, in the same order as they appear in s1.
+Also, the empty string is hidden in any string.
+
+If the number of parameters is not 2, the program displays a newline.
+
+Examples :
+
+$>./hidenp "fgex.;" "tyf34gdgf;'ektufjhgdgex.;.;rtjynur6" | cat -e
+1$
+$>./hidenp "abc" "2altrb53c.sse" | cat -e
+1$
+$>./hidenp "abc" "btarc" | cat -e
+0$
+$>./hidenp | cat -e
+$
+$>`,
+
   descripcion: 'Programa que verifica si s2 es una subsecuencia de s1 (los chars de s2 aparecen en s1 en el mismo orden). Imprime "1\\n" si sí, "0\\n" si no. Similar a wdmatch pero imprime 1/0 en vez de s2/vacío.',
 
   palacio: {
@@ -63,6 +92,113 @@ Si alguno falta o está fuera de orden → imprime '0'.
     },
   },
 
+  // Tester oficial copiado literalmente desde rank02 (tester.sh).
+  testerReal: `#!/bin/bash
+source ../../../main/colors.sh
+file1=hidenp.c
+file2=../../../../rendu/hidenp/hidenp.c
+
+
+# 1. test
+    gcc -Werror -Wall -Wextra -o out1 "$file1"
+    gcc -Werror -Wall -Wextra -o out2 "$file2"
+
+    ./out1 > out1.txt 2>/dev/null
+    ./out2 > out2.txt 2>/dev/null
+
+    if ! diff -q out1.txt out2.txt >/dev/null ; then
+        out1=$(cat out1.txt)
+        out2=$(cat out2.txt)
+        echo "$(tput setaf 1)$(tput bold)FAIL$(tput sgr 0)"
+        echo "\${GREEN}Expected Output:\${RESET} \\"$out1\\""
+        echo "\${RED}Your Output:\${RESET}     \\"$out2\\""
+        rm out1 out2 out1.txt out2.txt 2>/dev/null
+        exit 1
+    fi
+
+# 2. test
+    gcc -w -o out1 "$file1"
+    gcc -w -o out2 "$file2"
+
+    ./out1 "fgex.;" "tyf34gdgf;'ektufjhgdgex.;.;rtjynur6" > out1.txt 2>/dev/null
+    ./out2 "fgex.;" "tyf34gdgf;'ektufjhgdgex.;.;rtjynur6" > out2.txt 2>/dev/null
+
+    if ! diff -q out1.txt out2.txt >/dev/null ; then
+        out1=$(cat out1.txt)
+        out2=$(cat out2.txt)
+        echo "$(tput setaf 1)$(tput bold)FAIL$(tput sgr 0)"
+        echo "\${GREEN}Expected Output:\${RESET} \\"$out1\\""
+        echo "\${RED}Your Output:\${RESET}     \\"$out2\\""
+        rm out1 out2 out1.txt out2.txt 2>/dev/null
+        exit 1
+    fi
+
+# 3. test
+    gcc -w -o out1 "$file1"
+    gcc -w -o out2 "$file2"
+
+    ./out1 "abc" "2altrb53c.sse" > out1.txt 2>/dev/null
+    ./out2 "abc" "2altrb53c.sse" > out2.txt 2>/dev/null
+
+    if ! diff -q out1.txt out2.txt >/dev/null ; then
+        out1=$(cat out1.txt)
+        out2=$(cat out2.txt)
+        echo "$(tput setaf 1)$(tput bold)FAIL$(tput sgr 0)"
+        echo "\${GREEN}Expected Output:\${RESET} \\"$out1\\""
+        echo "\${RED}Your Output:\${RESET}     \\"$out2\\""
+        rm out1 out2 out1.txt out2.txt 2>/dev/null
+        exit 1
+    fi
+
+# 4. test
+    gcc -w -o out1 "$file1"
+    gcc -w -o out2 "$file2"
+
+    ./out1 "abc" "btarc" > out1.txt 2>/dev/null
+    ./out2 "abc" "btarc" > out2.txt 2>/dev/null
+
+    if ! diff -q out1.txt out2.txt >/dev/null ; then
+        out1=$(cat out1.txt)
+        out2=$(cat out2.txt)
+        echo "$(tput setaf 1)$(tput bold)FAIL$(tput sgr 0)"
+        echo "\${GREEN}Expected Output:\${RESET} \\"$out1\\""
+        echo "\${RED}Your Output:\${RESET}     \\"$out2\\""
+        rm out1 out2 out1.txt out2.txt 2>/dev/null
+        exit 1
+    fi
+
+# 5. test 
+    gcc -w -o out1 "$file1"
+    gcc -w -o out2 "$file2"
+
+    ./out1 "mais non!" "mais non!" > out1.txt 2>/dev/null
+    ./out2 "mais non!" "mais non!" > out2.txt 2>/dev/null
+
+    if ! diff -q out1.txt out2.txt >/dev/null ; then
+        out1=$(cat out1.txt)
+        out2=$(cat out2.txt)
+        echo "$(tput setaf 1)$(tput bold)FAIL$(tput sgr 0)"
+        echo "\${GREEN}Expected Output:\${RESET} \\"$out1\\""
+        echo "\${RED}Your Output:\${RESET}     \\"$out2\\""
+        rm out1 out2 out1.txt out2.txt 2>/dev/null
+        exit 1
+    fi
+
+
+    rm out1 out2 out1.txt out2.txt 2>/dev/null
+    echo "$(tput setaf 2)$(tput bold)PASSED 🎉$(tput sgr 0)"
+    exit 1`,
+
+  // Tests derivados del tester.sh real. Las salidas se obtuvieron
+  // compilando la solución de rank02 con gcc -w y ejecutándola.
+  testsRank02: [
+    { id: 'tester_1', entrada: [], salida: "\n", fuente: 'tester.sh' },
+    { id: 'tester_2', entrada: ["fgex.;","tyf34gdgf;'ektufjhgdgex.;.;rtjynur6"], salida: "1\n", fuente: 'tester.sh' },
+    { id: 'tester_3', entrada: ["abc","2altrb53c.sse"], salida: "1\n", fuente: 'tester.sh' },
+    { id: 'tester_4', entrada: ["abc","btarc"], salida: "0\n", fuente: 'tester.sh' },
+    { id: 'tester_5', entrada: ["mais non!","mais non!"], salida: "1\n", fuente: 'tester.sh' },
+  ],
+
   versiones: [
     {
       id: 'clasica',
@@ -94,6 +230,73 @@ int\tmain(int argc, char **argv)
 \t}
 \twrite(1, "\\n", 1);
 \treturn (0);
+}`,
+    },
+    {
+      id: 'punteros',
+      nombre: 'Con punteros avanzando sobre ambos strings',
+      descripcion: 'Resuelve la subsecuencia sin índices, moviendo dos punteros en paralelo.',
+      recomendada: false,
+      codigo: `#include <unistd.h>
+
+int\tmain(int argc, char **argv)
+{
+\tchar\t*s1;
+\tchar\t*s2;
+\tchar\tc;
+
+\tif (argc == 3)
+\t{
+\t\ts1 = argv[1];
+\t\ts2 = argv[2];
+\t\twhile (*s1 && *s2)
+\t\t{
+\t\t\tif (*s1 == *s2)
+\t\t\t\ts2++;
+\t\t\ts1++;
+\t\t}
+\t\tc = (*s2 == '\\0') ? '1' : '0';
+\t\twrite(1, &c, 1);
+\t\twrite(1, "\\n", 1);
+\t\treturn (0);
+\t}
+\twrite(1, "\\n", 1);
+\treturn (0);
+}`,
+    },
+  
+    {
+      id: 'rank02',
+      nombre: 'Versión rank02 (solución de referencia)',
+      descripcion: 'Solución tal y como aparece en el repo de referencia rank02. Útil para comparar estilo, validaciones y constraints reales del examen.',
+      recomendada: false,
+      origen: 'rank02',
+      codigo: `
+#include <unistd.h>
+
+void	hidenp(char *probe, char *target)
+{
+	while (*probe != '\\0')
+	{
+		while (*probe != *target && *target != '\\0')
+			++target;
+		if (*target == '\\0')
+		{
+			write(1, "0", 1);
+			return;
+		}
+		++target;
+		++probe;
+	}
+	write(1, "1", 1);
+}
+
+int		main(int argc, char **argv)
+{
+	if (argc == 3)
+		hidenp(argv[1], argv[2]);
+	write(1, "\\n", 1);
+	return (0);
 }`,
     },
   ],

@@ -17,9 +17,8 @@ import FormulaVisualizer from '@/components/exercise/FormulaVisualizer'
 import CodeViewer       from '@/components/exercise/CodeViewer'
 import TrapsList        from '@/components/exercise/TrapsList'
 import ImageGenerator   from '@/components/exercise/ImageGenerator'
-// PROMPT 7 — Simuladores
 import InputPlayground  from '@/components/simulator/InputPlayground'
-import StepTracer       from '@/components/simulator/StepTracer'
+import GdbStepper       from '@/components/gdb/GdbStepper'
 
 // ─── Tabs config ──────────────────────────────────────────────────────────────
 const TABS = [
@@ -43,10 +42,63 @@ const STATUS_CONFIG = {
 // ─── Sub-componentes de tabs ──────────────────────────────────────────────────
 
 function TabSubject({ exercise }) {
+  // Subject toggle: si el ejercicio expone subjectAlternativo, ofrecemos
+  // alternar entre la variante didáctica y la del examen real.
+  const [variant, setVariant] = useState('default')   // 'default' | 'alternativo' | 'real'
+  const hasAlt  = Boolean(exercise.subjectAlternativo)
+  const hasReal = Boolean(exercise.subjectReal)
+  const showSwitch = hasAlt || hasReal
+
+  const subjectToShow =
+    variant === 'alternativo' ? exercise.subjectAlternativo :
+    variant === 'real'        ? exercise.subjectReal :
+                                exercise.subject
+
   return (
     <div className="space-y-4">
+      {showSwitch && (
+        <div className="flex flex-wrap items-center gap-2 text-xs">
+          <span className="text-zinc-500 font-semibold uppercase tracking-wide mr-1">Subject</span>
+          <button
+            onClick={() => setVariant('default')}
+            className={`px-2.5 py-1 rounded-md border ${
+              variant === 'default'
+                ? 'bg-zinc-900 text-white border-zinc-900'
+                : 'bg-white text-zinc-600 border-zinc-200 hover:bg-zinc-50'
+            }`}
+          >
+            Vigente
+          </button>
+          {hasReal && (
+            <button
+              onClick={() => setVariant('real')}
+              className={`px-2.5 py-1 rounded-md border ${
+                variant === 'real'
+                  ? 'bg-blue-600 text-white border-blue-600'
+                  : 'bg-white text-blue-700 border-blue-200 hover:bg-blue-50'
+              }`}
+              title="Subject literal del repo rank02 (sub.txt)"
+            >
+              Examen real (rank02)
+            </button>
+          )}
+          {hasAlt && (
+            <button
+              onClick={() => setVariant('alternativo')}
+              className={`px-2.5 py-1 rounded-md border ${
+                variant === 'alternativo'
+                  ? 'bg-purple-600 text-white border-purple-600'
+                  : 'bg-white text-purple-700 border-purple-200 hover:bg-purple-50'
+              }`}
+              title="Subject didáctico anterior, conservado como variante"
+            >
+              Didáctico
+            </button>
+          )}
+        </div>
+      )}
       <SubjectViewer
-        subject={exercise.subject}
+        subject={subjectToShow}
         funcionesPermitidas={exercise.funcionesPermitidas}
         archivosEsperados={exercise.archivosEsperados}
       />
@@ -88,7 +140,14 @@ function TabSimulador({ exercise }) {
 }
 
 function TabGDB({ exercise }) {
-  return <StepTracer steps={exercise.gdbSteps} title={`GDB — ${exercise.nombre}`} />
+  return (
+    <GdbStepper
+      steps={exercise.gdbSteps}
+      caminos={exercise.gdbCaminos}
+      title={`GDB — ${exercise.nombre}`}
+      exerciseConceptos={exercise.conceptos || []}
+    />
+  )
 }
 
 function CopyButton({ text }) {
@@ -145,6 +204,17 @@ function TabVariantes({ exercise }) {
               >
                 {v.nombre}
                 {v.recomendada && <span className="ml-1.5 text-xs text-green-400">★</span>}
+                {v.origen === 'rank02' && (
+                  <span
+                    className={clsx(
+                      'ml-1.5 text-[10px] px-1.5 py-0.5 rounded-full font-semibold uppercase tracking-wide',
+                      i === selected ? 'bg-blue-400 text-white' : 'bg-blue-100 text-blue-700'
+                    )}
+                    title="Solución literal del repo rank02"
+                  >
+                    rank02
+                  </span>
+                )}
               </button>
             ))}
           </div>

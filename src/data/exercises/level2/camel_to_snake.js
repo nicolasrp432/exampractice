@@ -5,7 +5,10 @@ export default {
   dificultad: 'medio',
   tipoEntrega: 'programa',
   archivosEsperados: ['camel_to_snake.c'],
-  funcionesPermitidas: ['write'],
+  // El subject real permite también malloc/free/realloc — útil si quieres
+  // construir el resultado en buffer antes de escribirlo. La versión
+  // didáctica solo usa write, que es perfectamente válida.
+  funcionesPermitidas: ['write', 'malloc', 'free', 'realloc'],
 
   subject: `Assignment name  : camel_to_snake
 Expected files   : camel_to_snake.c
@@ -27,6 +30,30 @@ hello_world_foo
 $> ./camel_to_snake ""
 
 $>`,
+
+  // Subject literal del repo rank02 (sub.txt). Útil para comparar con
+  // el subject didáctico activo y para la pestaña "Examen real".
+  subjectReal: `Assignment name  : camel_to_snake
+Expected files   : camel_to_snake.c
+Allowed functions: malloc, free, realloc, write
+--------------------------------------------------------------------------------
+
+Write a program that takes a single string in lowerCamelCase format
+and converts it into a string in snake_case format.
+
+A lowerCamelCase string is a string where each word begins with a capital letter
+except for the first one.
+
+A snake_case string is a string where each word is in lower case, separated by
+an underscore "_".
+
+Examples:
+$>./camel_to_snake "hereIsACamelCaseWord"
+here_is_a_camel_case_word
+$>./camel_to_snake "helloWorld" | cat -e
+hello_world$
+$>./camel_to_snake | cat -e
+$`,
 
   descripcion: 'Programa que convierte lowerCamelCase a snake_case: cada letra mayúscula se reemplaza por "_" + su versión minúscula.',
 
@@ -60,6 +87,115 @@ Fórmula: mayúscula → '_' + (c + 32).
       resultado: 'hello_world',
     },
   },
+
+  // Tester oficial copiado literalmente desde rank02 (tester.sh).
+  testerReal: `#!/bin/bash
+source ../../../main/colors.sh
+file1=camel_to_snake.c
+file2=../../../../rendu/camel_to_snake/camel_to_snake.c
+
+
+# 1. test
+    gcc -Werror -Wall -Wextra -o out1 "$file1"
+    gcc -Werror -Wall -Wextra -o out2 "$file2"
+
+    ./out1 > out1.txt 2>/dev/null
+    ./out2 > out2.txt 2>/dev/null
+
+    if ! diff -q out1.txt out2.txt >/dev/null ; then
+        out1=$(cat out1.txt)
+        out2=$(cat out2.txt)
+        echo "$(tput setaf 1)$(tput bold)FAIL$(tput sgr 0)"
+        echo "\${GREEN}Expected Output:\${RESET} \\"$out1\\""
+        echo "\${RED}Your Output:\${RESET}     \\"$out2\\""
+        rm out1 out2 out1.txt out2.txt 2>/dev/null
+        exit 1
+    fi
+
+
+# 2. test
+    gcc -w -o out1 "$file1"
+    gcc -w -o out2 "$file2"
+
+    ./out1 "" > out1.txt 2>/dev/null
+    ./out2 "" > out2.txt 2>/dev/null
+
+    if ! diff -q out1.txt out2.txt >/dev/null ; then
+        out1=$(cat out1.txt)
+        out2=$(cat out2.txt)
+        echo "$(tput setaf 1)$(tput bold)FAIL$(tput sgr 0)"
+        echo "\${GREEN}Expected Output:\${RESET} \\"$out1\\""
+        echo "\${RED}Your Output:\${RESET}     \\"$out2\\""
+        rm out1 out2 out1.txt out2.txt 2>/dev/null
+        exit 1
+    fi
+
+# 3. test
+    gcc -w -o out1 "$file1"
+    gcc -w -o out2 "$file2"
+
+    ./out1 "hereIsACamelCaseString" > out1.txt 2>/dev/null
+    ./out2 "hereIsACamelCaseString" > out2.txt 2>/dev/null
+
+    if ! diff -q out1.txt out2.txt >/dev/null ; then
+        out1=$(cat out1.txt)
+        out2=$(cat out2.txt)
+        echo "$(tput setaf 1)$(tput bold)FAIL$(tput sgr 0)"
+        echo "\${GREEN}Expected Output:\${RESET} \\"$out1\\""
+        echo "\${RED}Your Output:\${RESET}     \\"$out2\\""
+        rm out1 out2 out1.txt out2.txt 2>/dev/null
+        exit 1
+    fi
+
+# 4. test
+    gcc -w -o out1 "$file1"
+    gcc -w -o out2 "$file2"
+
+    ./out1 "helloWorld" > out1.txt 2>/dev/null
+    ./out2 "helloWorld" > out2.txt 2>/dev/null
+
+    if ! diff -q out1.txt out2.txt >/dev/null ; then
+        out1=$(cat out1.txt)
+        out2=$(cat out2.txt)
+        echo "$(tput setaf 1)$(tput bold)FAIL$(tput sgr 0)"
+        echo "\${GREEN}Expected Output:\${RESET} \\"$out1\\""
+        echo "\${RED}Your Output:\${RESET}     \\"$out2\\""
+        rm out1 out2 out1.txt out2.txt 2>/dev/null
+        exit 1
+    fi
+
+
+# 5. test 
+    gcc -w -o out1 "$file1"
+    gcc -w -o out2 "$file2"
+
+    ./out1 "testWith" "multipleArguments" "aAaAaAaAaAaAa" > out1.txt 2>/dev/null
+    ./out2 "testWith" "multipleArguments" "aAaAaAaAaAaAa" > out2.txt 2>/dev/null
+
+    if ! diff -q out1.txt out2.txt >/dev/null ; then
+        out1=$(cat out1.txt)
+        out2=$(cat out2.txt)
+        echo "$(tput setaf 1)$(tput bold)FAIL$(tput sgr 0)"
+        echo "\${GREEN}Expected Output:\${RESET} \\"$out1\\""
+        echo "\${RED}Your Output:\${RESET}     \\"$out2\\""
+        rm out1 out2 out1.txt out2.txt 2>/dev/null
+        exit 1
+    fi
+
+
+    rm out1 out2 out1.txt out2.txt 2>/dev/null
+    echo "$(tput setaf 2)$(tput bold)PASSED 🎉$(tput sgr 0)"
+    exit 1`,
+
+  // Tests derivados del tester.sh real. Las salidas se obtuvieron
+  // compilando la solución de rank02 con gcc -w y ejecutándola.
+  testsRank02: [
+    { id: 'tester_1', entrada: [], salida: "\n", fuente: 'tester.sh' },
+    { id: 'tester_2', entrada: [""], salida: "\n", fuente: 'tester.sh' },
+    { id: 'tester_3', entrada: ["hereIsACamelCaseString"], salida: "here_is_a_camel_case_string\n", fuente: 'tester.sh' },
+    { id: 'tester_4', entrada: ["helloWorld"], salida: "hello_world\n", fuente: 'tester.sh' },
+    { id: 'tester_5', entrada: ["testWith","multipleArguments","aAaAaAaAaAaAa"], salida: "\n", fuente: 'tester.sh' },
+  ],
 
   versiones: [
     {
@@ -125,6 +261,35 @@ int\tmain(int argc, char **argv)
 \t}
 \twrite(1, "\\n", 1);
 \treturn (0);
+}`,
+    },
+  
+    {
+      id: 'rank02',
+      nombre: 'Versión rank02 (solución de referencia)',
+      descripcion: 'Solución tal y como aparece en el repo de referencia rank02. Útil para comparar estilo, validaciones y constraints reales del examen.',
+      recomendada: false,
+      origen: 'rank02',
+      codigo: `#include <stdlib.h>
+#include <unistd.h>
+
+int main(int argc, char **argv)
+{
+	if (argc == 2)
+	{
+		for (int i = 0; argv[1][i]; i += 1)
+		{
+			if (argv[1][i] >= 'A' 
+			&& argv[1][i] <= 'Z')
+			{
+				write(STDOUT_FILENO, "_", 1);
+				argv[1][i] += 32;
+			}
+			write(STDOUT_FILENO, &argv[1][i], 1);
+		}
+	}
+	write(STDOUT_FILENO, "\\n", 1);
+	return EXIT_SUCCESS;
 }`,
     },
   ],

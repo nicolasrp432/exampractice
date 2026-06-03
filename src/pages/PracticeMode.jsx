@@ -4,17 +4,24 @@ import Editor from '@monaco-editor/react'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
   ArrowLeft, Play, Trash2, Sparkles, ChevronDown, ChevronUp, Eye, Timer,
-  CheckCircle2, XCircle, Circle, Trophy, RotateCcw, Save, X, ClipboardList, BookOpen
+  CheckCircle2, XCircle, Circle, Trophy, RotateCcw, Save, X, ClipboardList, BookOpen,
+  Microscope, Terminal, Plus, AlertTriangle, Loader2
 } from 'lucide-react'
 import clsx from 'clsx'
 import { getExercise } from '@/data/index'
 import { compileAndRun } from '@/utils/compiler'
-import { buildFullCode } from '@/utils/testHarnesses'
+import { buildFullCode, testHarnesses } from '@/utils/testHarnesses'
+import { getDiff } from '@/utils/simulators/index'
 import { useProgressStore } from '@/store/progressStore'
+import { useSettingsStore } from '@/store/settingsStore'
 import { useUserVariants } from '@/hooks/useUserVariants'
+import { useLiveTrace } from '@/hooks/useLiveTrace'
 import LevelBadge from '@/components/layout/LevelBadge'
 import SubjectViewer from '@/components/exercise/SubjectViewer'
 import ImageGenerator from '@/components/exercise/ImageGenerator'
+import GdbStepper from '@/components/gdb/GdbStepper'
+import RunPanel from '@/components/practice/RunPanel'
+import PracticeDiagnostics from '@/components/practice/PracticeDiagnostics'
 
 // ─── Default placeholder code ────────────────────────────────────────────────
 function getPlaceholder(exercise) {
@@ -24,6 +31,45 @@ function getPlaceholder(exercise) {
     return `#include <unistd.h>\n\n/*\n** ${exercise.nombre}\n** Funciones permitidas: ${fns}\n*/\n\nint main(int ac, char **av)\n{\n\t// Tu código aquí\n\t(void)ac;\n\t(void)av;\n\treturn (0);\n}\n`
   }
   return `#include <unistd.h>\n\n/*\n** ${exercise.nombre}\n** Funciones permitidas: ${fns}\n*/\n\n// Escribe tu función aquí\n// (El main de test se añade automáticamente al compilar)\n\n`
+}
+
+function countLines(text) {
+  if (!text) return 0
+  return text.split('\n').length
+}
+
+function getDiagnosticScope(exercise, code, lineNumber) {
+  if (!exercise || !Number.isInteger(lineNumber)) return 'código generado'
+  if (exercise.tipoEntrega !== 'funcion') return 'tu código'
+
+  const harness = testHarnesses[exercise.id]
+  if (!harness) return 'tu código'
+
+  const headerLines = countLines(harness.header)
+  const userLines = countLines(code)
+  const userStart = headerLines + 1
+  const userEnd = headerLines + userLines
+  const mainStart = userEnd + 1
+
+  if (lineNumber >= userStart && lineNumber <= userEnd) return 'tu código'
+  if (lineNumber >= mainStart) return 'el harness de prueba'
+  return 'el prefijo del harness'
+}
+
+function buildCodeExcerpt(source, lineNumber, radius = 2) {
+  if (!source || !Number.isInteger(lineNumber) || lineNumber < 1) return []
+  const lines = source.split('\n')
+  const start = Math.max(1, lineNumber - radius)
+  const end = Math.min(lines.length, lineNumber + radius)
+
+  return Array.from({ length: end - start + 1 }, (_, index) => {
+    const currentLine = start + index
+    return {
+      number: currentLine,
+      text: lines[currentLine - 1] ?? '',
+      active: currentLine === lineNumber,
+    }
+  })
 }
 
 // ─── Diff renderer ────────────────────────────────────────────────────────────
@@ -108,6 +154,11 @@ function TestRow({ test, index }) {
             <div className="text-xs text-zinc-500 mb-1">
               Input: <code className="font-mono bg-white px-1 rounded">{test.entrada?.length ? test.entrada.join(' ') : '(sin args)'}</code>
             </div>
+            {test.diff && (
+              <div className="text-[11px] font-mono text-orange-700 mb-2">
+                Primer byte distinto en la posición {test.diff.position}: {test.diff.expected} vs {test.diff.got}
+              </div>
+            )}
             <DiffView got={test.output} expected={test.salida} />
           </motion.div>
         )}
@@ -117,8 +168,12 @@ function TestRow({ test, index }) {
 }
 
 // ─── Compile Error Banner ─────────────────────────────────────────────────────
-function CompileErrorBanner({ error, onDismiss }) {
+function CompileErrorBanner({ error, diagnostics = [], source = '', userCode = '', exercise, onDismiss }) {
   if (!error) return null
+  const primary = diagnostics[0]
+  const excerpt = buildCodeExcerpt(source, primary?.line)
+  const scope = getDiagnosticScope(exercise, userCode, primary?.line)
+
   return (
     <motion.div
       initial={{ height: 0, opacity: 0 }}
@@ -134,6 +189,44 @@ function CompileErrorBanner({ error, onDismiss }) {
           </button>
         </div>
         <pre className="text-xs font-mono text-red-700 whitespace-pre-wrap leading-relaxed">{error}</pre>
+        {primary && (
+          <div className="mt-2 rounded-lg border border-red-200 bg-white p-2">
+            <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-[11px] font-mono text-zinc-600 mb-2">
+              <span className="font-semibold text-red-600">
+                Línea {primary.line}{primary.column ? `, columna ${primary.column}` : ''}
+              </span>
+              <span>·</span>
+              <span>{scope}</span>
+            </div>
+            <div className="space-y-0.5 font-mono text-[11px] leading-5">
+              {excerpt.map((line) => (
+                <div
+                  key={line.number}
+                  className={clsx(
+                    'grid grid-cols-[3.5rem_1fr] gap-2 rounded px-2',
+                    line.active ? 'bg-red-50 text-red-900' : 'text-zinc-500'
+                  )}
+                >
+                  <span className="text-right select-none">{line.number}</span>
+                  <span className="whitespace-pre-wrap break-words">{line.text || ' '}</span>
+                </div>
+              ))}
+            </div>
+            <p className="mt-2 text-[11px] text-red-700 font-mono">
+              {primary.message}
+            </p>
+          </div>
+        )}
+        {diagnostics.length > 1 && (
+          <details className="mt-2 text-[11px] text-zinc-500">
+            <summary className="cursor-pointer select-none">Ver más detalles</summary>
+            <ul className="mt-2 space-y-1 font-mono">
+              {diagnostics.slice(1).map((diag, index) => (
+                <li key={`${diag.raw}-${index}`}>{diag.raw}</li>
+              ))}
+            </ul>
+          </details>
+        )}
       </div>
     </motion.div>
   )
@@ -391,6 +484,112 @@ function CelebrationOverlay({ show, onClose }) {
   )
 }
 
+function GdbTraceModal({ open, onClose, exercise, traceState, args, onRerun }) {
+  const { status, error, result } = traceState
+  const steps = result?.steps ?? []
+  const truncated = steps.some((s) => s.title?.startsWith('⚠'))
+  const cached = status === 'cached'
+
+  return (
+    <AnimatePresence>
+      {open && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4"
+          onMouseDown={onClose}
+        >
+          <motion.div
+            initial={{ scale: 0.96, y: 20, opacity: 0 }}
+            animate={{ scale: 1, y: 0, opacity: 1 }}
+            exit={{ scale: 0.98, opacity: 0 }}
+            transition={{ type: 'spring', stiffness: 260, damping: 24 }}
+            className="w-full max-w-6xl overflow-hidden rounded-3xl border border-zinc-200 bg-white shadow-2xl"
+            onMouseDown={(event) => event.stopPropagation()}
+          >
+            <div className="flex items-center justify-between gap-3 border-b border-zinc-200 bg-zinc-50 px-5 py-4">
+              <div className="min-w-0">
+                <p className="text-xs font-semibold uppercase tracking-wide text-zinc-500">Ejecución paso a paso · traza real</p>
+                <h2 className="text-base font-semibold text-zinc-800 truncate">
+                  {exercise?.nombre || 'Traza de ejecución'}
+                  <span className="ml-2 text-xs font-mono font-normal text-zinc-500">
+                    argv: [{args.map((a) => JSON.stringify(a)).join(', ')}]
+                  </span>
+                </h2>
+              </div>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={onRerun}
+                  disabled={status === 'running'}
+                  className={clsx(
+                    'rounded-lg border px-3 py-1.5 text-sm transition-colors',
+                    status === 'running'
+                      ? 'border-zinc-200 bg-zinc-50 text-zinc-400 cursor-not-allowed'
+                      : 'border-purple-200 bg-purple-50 text-purple-700 hover:bg-purple-100'
+                  )}
+                  title="Volver a ejecutar con los args actuales"
+                >
+                  {status === 'running' ? 'Trazando…' : 'Re-ejecutar'}
+                </button>
+                <button
+                  onClick={onClose}
+                  className="rounded-lg border border-zinc-200 bg-white px-3 py-1.5 text-sm text-zinc-600 transition-colors hover:bg-zinc-50"
+                >
+                  Cerrar
+                </button>
+              </div>
+            </div>
+
+            <div className="max-h-[82vh] overflow-y-auto bg-zinc-50 p-4">
+              {status === 'running' && (
+                <div className="rounded-xl border border-dashed border-purple-200 bg-white p-8 text-center text-purple-600">
+                  <Loader2 size={20} className="mx-auto mb-2 animate-spin" />
+                  Instrumentando y ejecutando en Wandbox…
+                </div>
+              )}
+              {status === 'error' && (
+                <div className="rounded-xl border border-amber-200 bg-amber-50 p-5 text-sm text-amber-800">
+                  <div className="flex items-center gap-2 font-semibold mb-1">
+                    <AlertTriangle size={14} />
+                    No se pudo generar la traza
+                  </div>
+                  <p>{error}</p>
+                  {result?.compileError && (
+                    <pre className="mt-3 max-h-40 overflow-auto rounded bg-white p-2 text-[11px] font-mono leading-snug text-zinc-700">
+                      {result.compileError}
+                    </pre>
+                  )}
+                </div>
+              )}
+              {(status === 'done' || status === 'cached') && steps.length > 0 && (
+                <>
+                  {truncated && (
+                    <div className="mb-3 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-800">
+                      ⚠ La traza fue truncada a 8000 pasos. El programa siguió ejecutándose pero ya no estamos registrando.
+                    </div>
+                  )}
+                  <GdbStepper
+                    steps={steps}
+                    title={`Traza real — ${exercise?.nombre || 'programa'}`}
+                    exerciseConceptos={exercise?.conceptos || []}
+                    cached={cached}
+                  />
+                </>
+              )}
+              {status === 'idle' && (
+                <div className="rounded-xl border border-dashed border-zinc-300 bg-white p-8 text-center text-zinc-400">
+                  Pulsa "Re-ejecutar" para generar la traza.
+                </div>
+              )}
+            </div>
+          </motion.div>
+        </motion.div>
+      )}
+    </AnimatePresence>
+  )
+}
+
 // ─── useTimer ─────────────────────────────────────────────────────────────────
 function useTimer() {
   const [seconds, setSeconds] = useState(0)
@@ -413,10 +612,13 @@ export default function PracticeMode() {
   const exercise = getExercise(id)
   const { marcarEstado, registrarIntento, ejercicios } = useProgressStore()
   const progreso = ejercicios[id]
+  const strictMoulinette = useSettingsStore(s => s.strictMoulinette)
+  const toggleStrictMoulinette = useSettingsStore(s => s.toggleStrictMoulinette)
   const timer = useTimer()
   const { saveVariant } = useUserVariants(id)
 
   const STORAGE_KEY = `42prep-code-${id}`
+  const ARGS_KEY = `42prep-args-${id}`
 
   // Editor state
   const [code, setCode] = useState(() => localStorage.getItem(STORAGE_KEY) || getPlaceholder(exercise))
@@ -424,13 +626,37 @@ export default function PracticeMode() {
 
   // Tests state
   const [tests, setTests] = useState(() =>
-    (exercise?.tests || []).map(t => ({ ...t, status: 'pending', output: null }))
+    (exercise?.tests || []).map(t => ({ ...t, status: 'pending', output: null, diff: null }))
   )
   const [isRunning, setIsRunning]     = useState(false)
   const [intentos, setIntentos]       = useState(0)
   const [celebrate, setCelebrate]     = useState(false)
   const [compileError, setCompileError] = useState(null)
+  const [compileDiagnostics, setCompileDiagnostics] = useState([])
+  const [compileSource, setCompileSource] = useState('')
+  const [compileUserCode, setCompileUserCode] = useState('')
   const [showSaveModal, setShowSaveModal] = useState(false)
+  const [showGdbTrace, setShowGdbTrace] = useState(false)
+  const [activeRightTab, setActiveRightTab] = useState('tests') // tests | run
+
+  // Run-with-params state
+  const [args, setArgs] = useState(() => {
+    try {
+      const stored = JSON.parse(localStorage.getItem(ARGS_KEY) || 'null')
+      if (Array.isArray(stored)) return stored
+    } catch {}
+    return exercise?.tests?.[0]?.entrada?.map(String) ?? []
+  })
+  const [stdin, setStdin] = useState('')
+  const [runResult, setRunResult] = useState(null)
+  const [runStatus, setRunStatus] = useState('idle') // idle | running | done
+
+  useEffect(() => {
+    localStorage.setItem(ARGS_KEY, JSON.stringify(args))
+  }, [args, ARGS_KEY])
+
+  // Live trace hook (Python-Tutor-style stepper)
+  const liveTrace = useLiveTrace()
 
   const [activeTab, setActiveTab] = useState('enunciado') // 'enunciado' | 'moulinette' | 'mnemotecnia'
   const [compileMode, setCompileMode] = useState(null)
@@ -463,15 +689,20 @@ export default function PracticeMode() {
     if (!timer.running) timer.start()
     setIsRunning(true)
     setCompileError(null)
+    setCompileDiagnostics([])
+    setCompileSource('')
+    setCompileUserCode('')
     setIntentos(i => i + 1)
     setActiveTab('moulinette') // Switch to Moulinette tab to see run details
 
     // Reset all tests to pending
-    setTests(exercise.tests.map(t => ({ ...t, status: 'pending', output: null })))
+    setTests(exercise.tests.map(t => ({ ...t, status: 'pending', output: null, diff: null })))
     allPassedRef.current = false
 
     // Build code to send (append test harness for funcion-type)
     const fullCode = buildFullCode(exercise.id, exercise.tipoEntrega, code)
+    setCompileSource(fullCode)
+    setCompileUserCode(code)
 
     let hadError = false
     let passedAll = true
@@ -482,7 +713,9 @@ export default function PracticeMode() {
 
       let result
       try {
-        result = await compileAndRun(fullCode, test.entrada, exercise.id)
+        result = await compileAndRun(fullCode, test.entrada, exercise.id, {
+          compilerOptionRaw: strictMoulinette ? '-Wall\n-Wextra\n-Werror' : '',
+        })
         if (result && result.mode) {
           setCompileMode(result.mode)
         }
@@ -490,7 +723,7 @@ export default function PracticeMode() {
         hadError = true
         passedAll = false
         setCompileError(`Error de red: ${err.message}\n\nVerifica tu conexión o intenta de nuevo.`)
-        setTests(prev => prev.map(t => ({ ...t, status: t.status === 'pending' ? 'failed' : t.status })))
+        setTests(prev => prev.map(t => ({ ...t, status: t.status === 'pending' ? 'failed' : t.status, diff: t.status === 'pending' ? null : t.diff })))
         break
       }
 
@@ -503,22 +736,44 @@ export default function PracticeMode() {
             ? 'El servidor de compilación está ocupado. Intenta de nuevo en unos segundos.'
             : result.compileError
         )
-        setTests(prev => prev.map(t => ({ ...t, status: 'failed', output: '' })))
+        setCompileDiagnostics(result.compileDiagnostics || [])
+        // Cada test queda marcado como failed con el compileError adjunto,
+        // para que PracticeDiagnostics pueda razonar sobre él.
+        setTests(prev => prev.map(t => ({
+          ...t,
+          status: 'failed',
+          output: '',
+          diff: null,
+          compileError: result.compileError,
+        })))
         break
       }
 
       const passed = result.stdout === test.salida
       if (!passed) passedAll = false
+      const diff = passed ? null : getDiff(result.stdout, test.salida)
 
       setTests(prev => {
         const next = [...prev]
-        next[i] = { ...next[i], status: passed ? 'passed' : 'failed', output: result.stdout }
+        next[i] = {
+          ...next[i],
+          status: passed ? 'passed' : 'failed',
+          output: result.stdout,
+          diff,
+          // Campos extra para heurísticas de PracticeDiagnostics. Son aditivos
+          // y no afectan al resto del flujo.
+          stderr: result.stderr ?? '',
+          exitCode: result.exitCode ?? null,
+          signal: result.signal ?? null,
+          compileError: null,
+        }
         return next
       })
     }
 
     setIsRunning(false)
     registrarIntento(id, passedAll)
+    if (!hadError) setCompileDiagnostics([])
     if (passedAll && !hadError) {
       marcarEstado(id, 'dominado')
       setCelebrate(true)
@@ -531,18 +786,49 @@ export default function PracticeMode() {
     const placeholder = getPlaceholder(exercise)
     setCode(placeholder)
     setCompileError(null)
-    setTests((exercise?.tests || []).map(t => ({ ...t, status: 'pending', output: null })))
+    setCompileDiagnostics([])
+    setCompileSource('')
+    setCompileUserCode('')
+    setTests((exercise?.tests || []).map(t => ({ ...t, status: 'pending', output: null, diff: null })))
   }
 
-  const handleFormat = () => {
-    if (editorRef.current) {
-      editorRef.current.getAction('editor.action.formatDocument')?.run()
+  const handleRunWithArgs = async () => {
+    if (!exercise || runStatus === 'running') return
+    setRunStatus('running')
+    setRunResult(null)
+    const fullCode = buildFullCode(exercise.id, exercise.tipoEntrega, code)
+    try {
+      const result = await compileAndRun(fullCode, args, { stdin })
+      setRunResult(result)
+    } catch (err) {
+      setRunResult({
+        compileError: null,
+        stdout: '',
+        stderr: '',
+        exitCode: -1,
+        signal: null,
+        compileMessage: '',
+        networkError: err.message,
+      })
+    } finally {
+      setRunStatus('done')
     }
+  }
+
+  const handleTrace = async () => {
+    if (!exercise) return
+    setActiveRightTab('run')
+    setShowGdbTrace(true)
+    const fullCode = buildFullCode(exercise.id, exercise.tipoEntrega, code)
+    await liveTrace.run(fullCode, args, stdin)
   }
 
   const handleUseSolution = (solutionCode) => {
     setCode(solutionCode)
     setCompileError(null)
+    setCompileDiagnostics([])
+    setCompileSource('')
+    setCompileUserCode('')
   }
 
   // Estado badge
@@ -569,6 +855,14 @@ export default function PracticeMode() {
   return (
     <div className="flex flex-col h-screen bg-zinc-50 overflow-hidden">
       <CelebrationOverlay show={celebrate} onClose={() => setCelebrate(false)} />
+      <GdbTraceModal
+        open={showGdbTrace}
+        onClose={() => setShowGdbTrace(false)}
+        exercise={exercise}
+        traceState={liveTrace}
+        args={args}
+        onRerun={handleTrace}
+      />
 
       {showSaveModal && (
         <SaveVariantModal
@@ -655,7 +949,16 @@ export default function PracticeMode() {
             {compileError && (
               <CompileErrorBanner
                 error={compileError}
-                onDismiss={() => setCompileError(null)}
+                diagnostics={compileDiagnostics}
+                source={compileSource}
+                userCode={compileUserCode}
+                exercise={exercise}
+                onDismiss={() => {
+                  setCompileError(null)
+                  setCompileDiagnostics([])
+                  setCompileSource('')
+                  setCompileUserCode('')
+                }}
               />
             )}
           </AnimatePresence>
@@ -686,14 +989,6 @@ export default function PracticeMode() {
             </button>
 
             <button
-              onClick={handleFormat}
-              className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm text-zinc-600 bg-zinc-100 hover:bg-zinc-200 transition-colors"
-            >
-              <Sparkles size={14} />
-              Formato ✨
-            </button>
-
-            <button
               onClick={() => setShowSaveModal(true)}
               className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm text-blue-600 bg-blue-50 hover:bg-blue-100 border border-blue-200 transition-colors"
               title="Guardar el código actual como variante"
@@ -702,7 +997,25 @@ export default function PracticeMode() {
               Guardar variante
             </button>
 
-            <span className="ml-auto text-xs text-zinc-400 font-mono">Ctrl+Enter para compilar</span>
+            <button
+              onClick={handleTrace}
+              className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm text-purple-700 bg-purple-50 hover:bg-purple-100 border border-purple-200 transition-colors"
+              title="Compilar instrumentado y ver paso a paso con los args actuales"
+            >
+              <Microscope size={14} />
+              Ver ejecución paso a paso
+            </button>
+
+            <label className="ml-auto flex items-center gap-1.5 text-xs text-zinc-500 cursor-pointer select-none" title="Compilar con -Wall -Wextra -Werror, como la Moulinette del 42">
+              <input
+                type="checkbox"
+                checked={strictMoulinette}
+                onChange={toggleStrictMoulinette}
+                className="accent-zinc-900"
+              />
+              Moulinette estricta
+            </label>
+            <span className="text-xs text-zinc-400 font-mono">Ctrl+Enter</span>
           </div>
         </div>
 
@@ -734,6 +1047,24 @@ export default function PracticeMode() {
             >
               <Trophy size={14} />
               Moulinette
+              <span className={clsx(
+                'rounded-full px-1.5 py-0.5 text-[10px] font-mono shrink-0 ml-0.5',
+                allPassed ? 'bg-green-100 text-green-700 font-bold' : 'bg-zinc-200 text-zinc-600'
+              )}>
+                {passedCount}/{tests.length}
+              </span>
+            </button>
+            <button
+              onClick={() => setActiveTab('run')}
+              className={clsx(
+                'flex-1 py-3 text-xs font-semibold flex items-center justify-center gap-1.5 border-b-2 transition-all duration-200 focus:outline-none',
+                activeTab === 'run'
+                  ? 'border-zinc-900 text-zinc-900 bg-white font-bold'
+                  : 'border-transparent text-zinc-500 hover:text-zinc-800 hover:bg-zinc-100/50'
+              )}
+            >
+              <Terminal size={14} />
+              Params
             </button>
             <button
               onClick={() => setActiveTab('mnemotecnia')}
@@ -758,7 +1089,7 @@ export default function PracticeMode() {
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -5 }}
                 transition={{ duration: 0.15 }}
-                className="space-y-4 h-full"
+                className="space-y-4"
               >
                 {/* --- TAB: ENUNCIADO --- */}
                 {activeTab === 'enunciado' && (
@@ -818,6 +1149,20 @@ export default function PracticeMode() {
                       </span>
                     </div>
 
+                    {/* Diagnóstico: "siguiente cosa que arreglar" — sólo aparece si hay
+                        tests fallidos y aporta una sugerencia heurística por cada uno. */}
+                    <PracticeDiagnostics
+                      tests={tests}
+                      exercise={exercise}
+                      onInspect={(test) => {
+                        setArgs((test.entrada || []).map(String))
+                        setActiveTab('run')
+                      }}
+                    />
+
+                    {/* Separator */}
+                    <div className="h-px bg-zinc-100" />
+
                     {/* Test list */}
                     {tests.length === 0 ? (
                       <p className="text-sm text-zinc-400 text-center py-6">Sin tests definidos aún para este ejercicio.</p>
@@ -848,6 +1193,23 @@ export default function PracticeMode() {
                       </div>
                     </div>
                   </div>
+                )}
+
+                {/* --- TAB: RUN --- */}
+                {activeTab === 'run' && (
+                  <RunPanel
+                    args={args}
+                    setArgs={setArgs}
+                    stdin={stdin}
+                    setStdin={setStdin}
+                    onRun={handleRunWithArgs}
+                    onTrace={handleTrace}
+                    running={runStatus === 'running'}
+                    tracing={liveTrace.status === 'running'}
+                    result={runResult?.networkError ? null : runResult}
+                    traceError={runResult?.networkError ? `Error de red: ${runResult.networkError}` : null}
+                    tests={exercise.tests}
+                  />
                 )}
 
                 {/* --- TAB: MNEMOTECNIA --- */}

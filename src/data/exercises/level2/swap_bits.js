@@ -22,6 +22,29 @@ swap_bits(1)  → 16   (00000001 → 00010000)
 swap_bits(16) → 1    (00010000 → 00000001)
 swap_bits(65) → 20   (01000001 → 00010100)`,
 
+  // Subject literal del repo rank02 (sub.txt). Útil para comparar con
+  // el subject didáctico activo y para la pestaña "Examen real".
+  subjectReal: `Assignment name  : swap_bits
+Expected files   : swap_bits.c
+Allowed functions:
+--------------------------------------------------------------------------------
+
+Write a function that takes a byte, swaps its halves (like the example) and
+returns the result.
+
+Your function must be declared as follows:
+
+unsigned char	swap_bits(unsigned char octet);
+
+Example:
+
+  1 byte
+_____________
+ 0100 | 0001
+     \\ /
+     / \\
+ 0001 | 0100`,
+
   descripcion: 'Función que intercambia los dos nibbles (mitades de 4 bits) de un byte. El nibble bajo (bits 0-3) pasa a ser el alto (bits 4-7) y viceversa. Fórmula: (octet << 4) | (octet >> 4).',
 
   palacio: {
@@ -55,6 +78,81 @@ Combina ambas partes con OR y listo: los nibbles están intercambiados.`,
     },
   },
 
+  // Tester oficial copiado literalmente desde rank02 (tester.sh).
+  testerReal: `#!/bin/bash
+source ../../../main/colors.sh
+file1=swap_bits.c
+file2=../../../../rendu/swap_bits/swap_bits.c
+
+
+# 1. test
+    gcc -Werror -Wall -Wextra -o out1 "$file1" main.c
+    gcc -Werror -Wall -Wextra -o out2 "$file2" main.c
+
+    ./out1 "a" > out1.txt 2>/dev/null
+    ./out2 "a" > out2.txt 2>/dev/null
+
+    if ! diff -q out1.txt out2.txt >/dev/null ; then
+        out1=$(cat out1.txt)
+        out2=$(cat out2.txt)
+        echo "$(tput setaf 1)$(tput bold)FAIL$(tput sgr 0)"
+        echo "\${GREEN}Expected Output:\${RESET} \\"$out1\\""
+        echo "\${RED}Your Output:\${RESET}     \\"$out2\\""
+        rm out1 out2 out1.txt out2.txt 2>/dev/null
+        exit 1
+    fi
+
+
+# 2. test
+    gcc -w -o out1 "$file1" main.c
+    gcc -w -o out2 "$file2" main.c
+
+    ./out1 "0" > out1.txt 2>/dev/null
+    ./out2 "0" > out2.txt 2>/dev/null
+
+    if ! diff -q out1.txt out2.txt >/dev/null ; then
+        out1=$(cat out1.txt)
+        out2=$(cat out2.txt)
+        echo "$(tput setaf 1)$(tput bold)FAIL$(tput sgr 0)"
+        echo "\${GREEN}Expected Output:\${RESET} \\"$out1\\""
+        echo "\${RED}Your Output:\${RESET}     \\"$out2\\""
+        rm out1 out2 out1.txt out2.txt 2>/dev/null
+        exit 1
+    fi
+
+
+# 3. test
+    gcc -w -o out1 "$file1" main.c
+    gcc -w -o out2 "$file2" main.c
+
+    ./out1 "P" > out1.txt 2>/dev/null
+    ./out2 "P" > out2.txt 2>/dev/null
+
+    if ! diff -q out1.txt out2.txt >/dev/null ; then
+        out1=$(cat out1.txt)
+        out2=$(cat out2.txt)
+        echo "$(tput setaf 1)$(tput bold)FAIL$(tput sgr 0)"
+        echo "\${GREEN}Expected Output:\${RESET} \\"$out1\\""
+        echo "\${RED}Your Output:\${RESET}     \\"$out2\\""
+        rm out1 out2 out1.txt out2.txt 2>/dev/null
+        exit 1
+    fi
+
+
+
+    rm out1 out2 out1.txt out2.txt 2>/dev/null
+    echo "$(tput setaf 2)$(tput bold)PASSED 🎉$(tput sgr 0)"
+    exit 1
+`,
+
+  // Tests derivados del tester.sh real. Las salidas se obtuvieron
+  // compilando la solución de rank02 con gcc -w y ejecutándola.
+  testsRank02: [
+    { id: 'tester_1', entrada: ["a"], salida: "a\n\u0016\n", fuente: 'tester.sh' },
+    { id: 'tester_2', entrada: ["0"], salida: "0\n\u0003\n", fuente: 'tester.sh' },
+    { id: 'tester_3', entrada: ["P"], salida: "P\n\u0005\n", fuente: 'tester.sh' },
+  ],
+
   versiones: [
     {
       id: 'compacta',
@@ -79,6 +177,21 @@ Combina ambas partes con OR y listo: los nibbles están intercambiados.`,
 \tlow = (octet & 0x0F) << 4;
 \thigh = (octet & 0xF0) >> 4;
 \treturn (low | high);
+}`,
+    },
+  
+    {
+      id: 'rank02',
+      nombre: 'Versión rank02 (solución de referencia)',
+      descripcion: 'Solución tal y como aparece en el repo de referencia rank02. Útil para comparar estilo, validaciones y constraints reales del examen.',
+      recomendada: false,
+      origen: 'rank02',
+      codigo: `
+#include <unistd.h>
+
+unsigned char	swap_bits(unsigned char octet)
+{
+	return ((octet >> 4) | (octet << 4));
 }`,
     },
   ],

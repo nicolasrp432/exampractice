@@ -23,6 +23,37 @@ lcm(2, 3)   → 6
 lcm(3, 3)   → 3
 lcm(0, 5)   → 0`,
 
+  // Subject literal del repo rank02 (sub.txt). Útil para comparar con
+  // el subject didáctico activo y para la pestaña "Examen real".
+  subjectReal: `Assignment name  : lcm
+Expected files   : lcm.c
+Allowed functions:
+--------------------------------------------------------------------------------
+
+Write a function who takes two unsigned int as parameters and returns the
+computed LCM of those parameters.
+
+LCM (Lowest Common Multiple) of two non-zero integers is the smallest postive
+integer divisible by the both integers.
+
+A LCM can be calculated in two ways:
+
+- You can calculate every multiples of each integers until you have a common
+multiple other than 0
+
+- You can use the HCF (Highest Common Factor) of these two integers and
+calculate as follows:
+
+	LCM(x, y) = | x * y | / HCF(x, y)
+
+  | x * y | means "Absolute value of the product of x by y"
+
+If at least one integer is null, LCM is equal to 0.
+
+Your function must be prototyped as follows:
+
+  unsigned int    lcm(unsigned int a, unsigned int b);`,
+
   descripcion: 'Función que calcula el Mínimo Común Múltiplo (MCM). Usa la relación lcm(a,b) = a/gcd(a,b)*b para evitar overflow. Necesita implementar gcd (algoritmo de Euclides).',
 
   palacio: {
@@ -55,6 +86,113 @@ Luego divide a entre el GCD antes de multiplicar para evitar overflow.`,
       resultado: '12',
     },
   },
+
+  // Tester oficial copiado literalmente desde rank02 (tester.sh).
+  testerReal: `#!/bin/bash
+source ../../../main/colors.sh
+file1=lcm.c
+file2=../../../../rendu/lcm/lcm.c
+
+
+# 1. test
+    gcc -Werror -Wall -Wextra -o out1 "$file1" main.c
+    gcc -Werror -Wall -Wextra -o out2 "$file2" main.c
+
+    ./out1 > out1.txt 2>/dev/null
+    ./out2 > out2.txt 2>/dev/null
+
+    if ! diff -q out1.txt out2.txt >/dev/null ; then
+        out1=$(cat out1.txt)
+        out2=$(cat out2.txt)
+        echo "$(tput setaf 1)$(tput bold)FAIL$(tput sgr 0)"
+        echo "\${GREEN}Expected Output:\${RESET} \\"$out1\\""
+        echo "\${RED}Your Output:\${RESET}     \\"$out2\\""
+        rm out1 out2 out1.txt out2.txt 2>/dev/null
+        exit 1
+    fi
+
+# 2. test
+    gcc -w -o out1 "$file1" main.c
+    gcc -w -o out2 "$file2" main.c
+
+    ./out1 "2" "8" > out1.txt 2>/dev/null
+    ./out2 "2" "8" > out2.txt 2>/dev/null
+
+    if ! diff -q out1.txt out2.txt >/dev/null ; then
+        out1=$(cat out1.txt)
+        out2=$(cat out2.txt)
+        echo "$(tput setaf 1)$(tput bold)FAIL$(tput sgr 0)"
+        echo "\${GREEN}Expected Output:\${RESET} \\"$out1\\""
+        echo "\${RED}Your Output:\${RESET}     \\"$out2\\""
+        rm out1 out2 out1.txt out2.txt 2>/dev/null
+        exit 1
+    fi
+
+# 3. test
+    gcc -w -o out1 "$file1" main.c
+    gcc -w -o out2 "$file2" main.c
+
+    ./out1 "98" > out1.txt 2>/dev/null
+    ./out2 "98" > out2.txt 2>/dev/null
+
+    if ! diff -q out1.txt out2.txt >/dev/null ; then
+        out1=$(cat out1.txt)
+        out2=$(cat out2.txt)
+        echo "$(tput setaf 1)$(tput bold)FAIL$(tput sgr 0)"
+        echo "\${GREEN}Expected Output:\${RESET} \\"$out1\\""
+        echo "\${RED}Your Output:\${RESET}     \\"$out2\\""
+        rm out1 out2 out1.txt out2.txt 2>/dev/null
+        exit 1
+    fi
+
+# 4. test
+    gcc -w -o out1 "$file1" main.c
+    gcc -w -o out2 "$file2" main.c
+
+    ./out1 "42" "12" > out1.txt 2>/dev/null
+    ./out2 "42" "12" > out2.txt 2>/dev/null
+
+    if ! diff -q out1.txt out2.txt >/dev/null ; then
+        out1=$(cat out1.txt)
+        out2=$(cat out2.txt)
+        echo "$(tput setaf 1)$(tput bold)FAIL$(tput sgr 0)"
+        echo "\${GREEN}Expected Output:\${RESET} \\"$out1\\""
+        echo "\${RED}Your Output:\${RESET}     \\"$out2\\""
+        rm out1 out2 out1.txt out2.txt 2>/dev/null
+        exit 1
+    fi
+
+# 5. test 
+    gcc -w -o out1 "$file1" main.c
+    gcc -w -o out2 "$file2" main.c
+
+    ./out1 "42" "10" > out1.txt 2>/dev/null
+    ./out2 "42" "10" > out2.txt 2>/dev/null
+
+    if ! diff -q out1.txt out2.txt >/dev/null ; then
+        out1=$(cat out1.txt)
+        out2=$(cat out2.txt)
+        echo "$(tput setaf 1)$(tput bold)FAIL$(tput sgr 0)"
+        echo "\${GREEN}Expected Output:\${RESET} \\"$out1\\""
+        echo "\${RED}Your Output:\${RESET}     \\"$out2\\""
+        rm out1 out2 out1.txt out2.txt 2>/dev/null
+        exit 1
+    fi
+
+
+    rm out1 out2 out1.txt out2.txt 2>/dev/null
+    echo "$(tput setaf 2)$(tput bold)PASSED 🎉$(tput sgr 0)"
+    exit 1`,
+
+  // Tests derivados del tester.sh real. Las salidas se obtuvieron
+  // compilando la solución de rank02 con gcc -w y ejecutándola.
+  testsRank02: [
+    { id: 'tester_1', entrada: [], salida: "", fuente: 'tester.sh' },
+    { id: 'tester_2', entrada: ["2","8"], salida: "8", fuente: 'tester.sh' },
+    { id: 'tester_3', entrada: ["98"], salida: "", fuente: 'tester.sh' },
+    { id: 'tester_4', entrada: ["42","12"], salida: "84", fuente: 'tester.sh' },
+    { id: 'tester_5', entrada: ["42","10"], salida: "210", fuente: 'tester.sh' },
+  ],
 
   versiones: [
     {
@@ -99,6 +237,31 @@ unsigned int\tlcm(unsigned int a, unsigned int b)
 \tif (a == 0 || b == 0)
 \t\treturn (0);
 \treturn (a / gcd(a, b) * b);
+}`,
+    },
+  
+    {
+      id: 'rank02',
+      nombre: 'Versión rank02 (solución de referencia)',
+      descripcion: 'Solución tal y como aparece en el repo de referencia rank02. Útil para comparar estilo, validaciones y constraints reales del examen.',
+      recomendada: false,
+      origen: 'rank02',
+      codigo: `unsigned int lcm(unsigned int a, unsigned int b)
+{
+	unsigned int n;	
+
+	if (a == 0 || b == 0)
+		return (0);
+	if (a > b)
+		n = a;
+	else
+		n = b;
+	while (1)
+	{
+		if (n % a == 0 && n % b == 0)
+			return (n);
+		++n;
+	}
 }`,
     },
   ],

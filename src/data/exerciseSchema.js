@@ -3,13 +3,13 @@ const REQUIRED_FIELDS = [
   'archivosEsperados', 'funcionesPermitidas', 'subject', 'descripcion',
   'palacio', 'herramientas', 'formulaClave', 'versiones',
   'tests', 'gdbSteps', 'trampas', 'bajoCelCapot',
-  'estrategia', 'razonEstrategia', 'progreso',
+  'estrategia', 'razonEstrategia',
 ]
 
 const PALACIO_REQUIRED = ['habitacion', 'personaje', 'emoji', 'historia', 'anclas']
 const VALID_NIVELES = [1, 2, 3, 4]
 const VALID_DIFICULTADES = ['fácil', 'medio', 'difícil']
-const VALID_TIPO_ENTREGA = ['programa', 'función']
+const VALID_TIPO_ENTREGA = ['programa', 'función', 'funcion']
 const VALID_HABITACIONES = ['cocina', 'salón', 'dormitorio', 'garaje']
 const VALID_ESTRATEGIAS = ['MEMORIZAR', 'ENTENDER', 'AMBOS']
 const VALID_ESTADOS = ['no_iniciado', 'estudiando', 'practicando', 'dominado']
@@ -94,4 +94,94 @@ export function validateAll(exercises) {
   return { allValid: results.length === 0, failures: results }
 }
 
-export const EXERCISE_SCHEMA_VERSION = '1.0'
+// ── Campos opcionales añadidos por la integración con rank02 ──────────────────
+// Ninguno es obligatorio. validateExercise NO los exige.
+// validateOptionalRank02 los valida solo si están presentes, para que el día
+// que un ejercicio los declare, no se cuele un campo malformado.
+//
+// Campos a nivel raíz:
+//   - subjectReal:         string. Subject literal del repo rank02 (sub.txt).
+//   - subjectAlternativo:  string. Subject didáctico anterior, conservado.
+//   - mainReal:            string. Contenido del main.c real (cuando rank02 lo trae).
+//   - testerReal:          string. Contenido del tester.sh oficial.
+//   - testsRank02:         array de tests derivados del tester.sh.
+//
+// Campos opcionales en versiones[i]:
+//   - origen: 'plataforma' | 'rank02' | 'didactica'
+//
+// Campos opcionales en gdbSteps[i] / o caminos GDB:
+//   - fuente: 'didactica' | 'real'
+//   - linea:  number (línea del código de la versión recomendada)
+//
+// Esquema futuro de gdbCaminos (opcional, alternativo a gdbSteps):
+//   [{ id, nombre, pasos: [...] }]
+const VALID_VERSION_ORIGENES = ['plataforma', 'rank02', 'didactica']
+const VALID_GDB_FUENTES      = ['didactica', 'real']
+
+export function validateOptionalRank02(data) {
+  const errors = []
+
+  if (data.subjectReal !== undefined && typeof data.subjectReal !== 'string')
+    errors.push('subjectReal debe ser string')
+  if (data.subjectAlternativo !== undefined && typeof data.subjectAlternativo !== 'string')
+    errors.push('subjectAlternativo debe ser string')
+  if (data.mainReal !== undefined && typeof data.mainReal !== 'string')
+    errors.push('mainReal debe ser string')
+  if (data.testerReal !== undefined && typeof data.testerReal !== 'string')
+    errors.push('testerReal debe ser string')
+
+  if (data.testsRank02 !== undefined) {
+    if (!Array.isArray(data.testsRank02)) {
+      errors.push('testsRank02 debe ser array')
+    } else {
+      data.testsRank02.forEach((t, i) => {
+        if (!t || typeof t !== 'object') {
+          errors.push(`testsRank02[${i}] debe ser objeto`)
+          return
+        }
+        if (!t.id) errors.push(`testsRank02[${i}].id faltante`)
+        if (!Array.isArray(t.entrada)) errors.push(`testsRank02[${i}].entrada debe ser array`)
+        if (t.salida === undefined) errors.push(`testsRank02[${i}].salida faltante`)
+        if (t.fuente !== undefined && t.fuente !== 'tester.sh')
+          errors.push(`testsRank02[${i}].fuente inválida: "${t.fuente}"`)
+      })
+    }
+  }
+
+  if (Array.isArray(data.versiones)) {
+    data.versiones.forEach((v, i) => {
+      if (v && v.origen !== undefined && !VALID_VERSION_ORIGENES.includes(v.origen))
+        errors.push(`versiones[${i}].origen inválido: "${v.origen}"`)
+    })
+  }
+
+  if (Array.isArray(data.gdbSteps)) {
+    data.gdbSteps.forEach((s, i) => {
+      if (s && s.fuente !== undefined && !VALID_GDB_FUENTES.includes(s.fuente))
+        errors.push(`gdbSteps[${i}].fuente inválida: "${s.fuente}"`)
+      if (s && s.linea !== undefined && !Number.isInteger(s.linea))
+        errors.push(`gdbSteps[${i}].linea debe ser entero`)
+    })
+  }
+
+  if (data.gdbCaminos !== undefined) {
+    if (!Array.isArray(data.gdbCaminos)) {
+      errors.push('gdbCaminos debe ser array')
+    } else {
+      data.gdbCaminos.forEach((c, i) => {
+        if (!c || typeof c !== 'object') {
+          errors.push(`gdbCaminos[${i}] debe ser objeto`)
+          return
+        }
+        if (!c.id)     errors.push(`gdbCaminos[${i}].id faltante`)
+        if (!c.nombre) errors.push(`gdbCaminos[${i}].nombre faltante`)
+        if (!Array.isArray(c.pasos))
+          errors.push(`gdbCaminos[${i}].pasos debe ser array`)
+      })
+    }
+  }
+
+  return { valid: errors.length === 0, errors }
+}
+
+export const EXERCISE_SCHEMA_VERSION = '1.1'

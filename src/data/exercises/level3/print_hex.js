@@ -25,6 +25,29 @@ ff$
 $> ./print_hex 0 | cat -e
 0$`,
 
+  // Subject literal del repo rank02 (sub.txt). Útil para comparar con
+  // el subject didáctico activo y para la pestaña "Examen real".
+  subjectReal: `Assignment name  : print_hex
+Expected files   : print_hex.c
+Allowed functions: write
+--------------------------------------------------------------------------------
+
+Write a program that takes a positive (or zero) number expressed in base 10,
+and displays it in base 16 (lowercase letters) followed by a newline.
+
+If the number of parameters is not 1, the program displays a newline.
+
+Examples:
+
+$> ./print_hex "10" | cat -e
+a$
+$> ./print_hex "255" | cat -e
+ff$
+$> ./print_hex "5156454" | cat -e
+4eae66$
+$> ./print_hex | cat -e
+$`,
+
   descripcion: 'Programa que convierte un entero positivo a base hexadecimal (minúsculas) e imprime el resultado. Usa una tabla de dígitos hex y recursión similar a put_nbr.',
 
   palacio: {
@@ -57,6 +80,113 @@ La tabla "0123456789abcdef" es la clave: hex[n%16] da el dígito correcto.`,
       resultado: '"ff"',
     },
   },
+
+  // Tester oficial copiado literalmente desde rank02 (tester.sh).
+  testerReal: `#!/bin/bash
+source ../../../main/colors.sh
+file1=print_hex.c
+file2=../../../../rendu/print_hex/print_hex.c
+
+
+# 1. test
+    gcc -Werror -Wall -Wextra -o out1 "$file1"
+    gcc -Werror -Wall -Wextra -o out2 "$file2"
+
+    ./out1 > out1.txt 2>/dev/null
+    ./out2 > out2.txt 2>/dev/null
+
+    if ! diff -q out1.txt out2.txt >/dev/null ; then
+        out1=$(cat out1.txt)
+        out2=$(cat out2.txt)
+        echo "$(tput setaf 1)$(tput bold)FAIL$(tput sgr 0)"
+        echo "\${GREEN}Expected Output:\${RESET} \\"$out1\\""
+        echo "\${RED}Your Output:\${RESET}     \\"$out2\\""
+        rm out1 out2 out1.txt out2.txt 2>/dev/null
+        exit 1
+    fi
+
+# 2. test
+    gcc -w -o out1 "$file1"
+    gcc -w -o out2 "$file2"
+
+    ./out1 "4324324" > out1.txt 2>/dev/null
+    ./out2 "4324324" > out2.txt 2>/dev/null
+
+    if ! diff -q out1.txt out2.txt >/dev/null ; then
+        out1=$(cat out1.txt)
+        out2=$(cat out2.txt)
+        echo "$(tput setaf 1)$(tput bold)FAIL$(tput sgr 0)"
+        echo "\${GREEN}Expected Output:\${RESET} \\"$out1\\""
+        echo "\${RED}Your Output:\${RESET}     \\"$out2\\""
+        rm out1 out2 out1.txt out2.txt 2>/dev/null
+        exit 1
+    fi
+
+# 3. test
+    gcc -w -o out1 "$file1"
+    gcc -w -o out2 "$file2"
+
+    ./out1 "98" > out1.txt 2>/dev/null
+    ./out2 "98" > out2.txt 2>/dev/null
+
+    if ! diff -q out1.txt out2.txt >/dev/null ; then
+        out1=$(cat out1.txt)
+        out2=$(cat out2.txt)
+        echo "$(tput setaf 1)$(tput bold)FAIL$(tput sgr 0)"
+        echo "\${GREEN}Expected Output:\${RESET} \\"$out1\\""
+        echo "\${RED}Your Output:\${RESET}     \\"$out2\\""
+        rm out1 out2 out1.txt out2.txt 2>/dev/null
+        exit 1
+    fi
+
+# 4. test
+    gcc -w -o out1 "$file1"
+    gcc -w -o out2 "$file2"
+
+    ./out1 "42" > out1.txt 2>/dev/null
+    ./out2 "42" > out2.txt 2>/dev/null
+
+    if ! diff -q out1.txt out2.txt >/dev/null ; then
+        out1=$(cat out1.txt)
+        out2=$(cat out2.txt)
+        echo "$(tput setaf 1)$(tput bold)FAIL$(tput sgr 0)"
+        echo "\${GREEN}Expected Output:\${RESET} \\"$out1\\""
+        echo "\${RED}Your Output:\${RESET}     \\"$out2\\""
+        rm out1 out2 out1.txt out2.txt 2>/dev/null
+        exit 1
+    fi
+
+# 5. test 
+    gcc -w -o out1 "$file1"
+    gcc -w -o out2 "$file2"
+
+    ./out1 "10" > out1.txt 2>/dev/null
+    ./out2 "10" > out2.txt 2>/dev/null
+
+    if ! diff -q out1.txt out2.txt >/dev/null ; then
+        out1=$(cat out1.txt)
+        out2=$(cat out2.txt)
+        echo "$(tput setaf 1)$(tput bold)FAIL$(tput sgr 0)"
+        echo "\${GREEN}Expected Output:\${RESET} \\"$out1\\""
+        echo "\${RED}Your Output:\${RESET}     \\"$out2\\""
+        rm out1 out2 out1.txt out2.txt 2>/dev/null
+        exit 1
+    fi
+
+
+    rm out1 out2 out1.txt out2.txt 2>/dev/null
+    echo "$(tput setaf 2)$(tput bold)PASSED 🎉$(tput sgr 0)"
+    exit 1`,
+
+  // Tests derivados del tester.sh real. Las salidas se obtuvieron
+  // compilando la solución de rank02 con gcc -w y ejecutándola.
+  testsRank02: [
+    { id: 'tester_1', entrada: [], salida: "\n", fuente: 'tester.sh' },
+    { id: 'tester_2', entrada: ["4324324"], salida: "41fbe4\n", fuente: 'tester.sh' },
+    { id: 'tester_3', entrada: ["98"], salida: "62\n", fuente: 'tester.sh' },
+    { id: 'tester_4', entrada: ["42"], salida: "2a\n", fuente: 'tester.sh' },
+    { id: 'tester_5', entrada: ["10"], salida: "a\n", fuente: 'tester.sh' },
+  ],
 
   versiones: [
     {
@@ -132,6 +262,47 @@ int\tmain(int argc, char **argv)
 \t\twrite(1, &buf[--len], 1);
 \twrite(1, "\\n", 1);
 \treturn (0);
+}`,
+    },
+  
+    {
+      id: 'rank02',
+      nombre: 'Versión rank02 (solución de referencia)',
+      descripcion: 'Solución tal y como aparece en el repo de referencia rank02. Útil para comparar estilo, validaciones y constraints reales del examen.',
+      recomendada: false,
+      origen: 'rank02',
+      codigo: `
+
+#include <unistd.h>
+
+int		ft_atoi(char *str)
+{
+	int n = 0;
+
+	while (*str != '\\0')
+	{
+		n = n * 10;
+		n = n + *str - '0';
+		++str;
+	}
+	return (n);
+}
+
+void	print_hex(int n)
+{
+	char hex_digits[] = "0123456789abcdef";
+
+	if (n >= 16)
+		print_hex(n / 16);
+	write(1, &hex_digits[n % 16], 1);
+}
+
+int		main(int argc, char **argv)
+{
+	if (argc == 2)
+		print_hex(ft_atoi(argv[1]));
+
+	write(1, "\\n", 1);
 }`,
     },
   ],

@@ -25,6 +25,28 @@ $> ./paramsum a b c | cat -e
 $> ./paramsum "hello world" foo bar | cat -e
 3$`,
 
+  // Subject literal del repo rank02 (sub.txt). Útil para comparar con
+  // el subject didáctico activo y para la pestaña "Examen real".
+  subjectReal: `Assignment name  : paramsum
+Expected files   : paramsum.c
+Allowed functions: write
+--------------------------------------------------------------------------------
+
+Write a program that displays the number of arguments passed to it, followed by
+a newline.
+
+If there are no arguments, just display a 0 followed by a newline.
+
+Example:
+
+$>./paramsum 1 2 3 5 7 24
+6
+$>./paramsum 6 12 24 | cat -e
+3$
+$>./paramsum | cat -e
+0$
+$>`,
+
   descripcion: 'Programa que imprime el número de argumentos recibidos (sin contar el nombre del programa). Básicamente imprime argc-1.',
 
   palacio: {
@@ -57,6 +79,131 @@ Con tres argumentos: argc=4, imprime 3.`,
       resultado: '3',
     },
   },
+
+  // Tester oficial copiado literalmente desde rank02 (tester.sh).
+  testerReal: `#!/bin/bash
+source ../../../main/colors.sh
+file1=paramsum.c
+file2=../../../../rendu/paramsum/paramsum.c
+
+
+# 1. test
+    gcc -Werror -Wall -Wextra -o out1 "$file1"
+    gcc -Werror -Wall -Wextra -o out2 "$file2"
+
+    ./out1 > out1.txt 2>/dev/null
+    ./out2 > out2.txt 2>/dev/null
+
+    if ! diff -q out1.txt out2.txt >/dev/null ; then
+        out1=$(cat out1.txt)
+        out2=$(cat out2.txt)
+        echo "$(tput setaf 1)$(tput bold)FAIL$(tput sgr 0)"
+        echo "\${GREEN}Expected Output:\${RESET} \\"$out1\\""
+        echo "\${RED}Your Output:\${RESET}     \\"$out2\\""
+        rm out1 out2 out1.txt out2.txt 2>/dev/null
+        exit 1
+    fi
+
+# 2. test
+    gcc -w -o out1 "$file1"
+    gcc -w -o out2 "$file2"
+
+    ./out1 "fgex.;" > out1.txt 2>/dev/null
+    ./out2 "fgex.;" > out2.txt 2>/dev/null
+
+    if ! diff -q out1.txt out2.txt >/dev/null ; then
+        out1=$(cat out1.txt)
+        out2=$(cat out2.txt)
+        echo "$(tput setaf 1)$(tput bold)FAIL$(tput sgr 0)"
+        echo "\${GREEN}Expected Output:\${RESET} \\"$out1\\""
+        echo "\${RED}Your Output:\${RESET}     \\"$out2\\""
+        rm out1 out2 out1.txt out2.txt 2>/dev/null
+        exit 1
+    fi
+
+# 3. test
+    gcc -w -o out1 "$file1"
+    gcc -w -o out2 "$file2"
+
+    ./out1 "abc" "2altrb53c.sse" > out1.txt 2>/dev/null
+    ./out2 "abc" "2altrb53c.sse" > out2.txt 2>/dev/null
+
+    if ! diff -q out1.txt out2.txt >/dev/null ; then
+        out1=$(cat out1.txt)
+        out2=$(cat out2.txt)
+        echo "$(tput setaf 1)$(tput bold)FAIL$(tput sgr 0)"
+        echo "\${GREEN}Expected Output:\${RESET} \\"$out1\\""
+        echo "\${RED}Your Output:\${RESET}     \\"$out2\\""
+        rm out1 out2 out1.txt out2.txt 2>/dev/null
+        exit 1
+    fi
+
+# 4. test
+    gcc -w -o out1 "$file1"
+    gcc -w -o out2 "$file2"
+
+    ./out1 "abc" "btarc" > out1.txt 2>/dev/null
+    ./out2 "abc" "btarc" > out2.txt 2>/dev/null
+
+    if ! diff -q out1.txt out2.txt >/dev/null ; then
+        out1=$(cat out1.txt)
+        out2=$(cat out2.txt)
+        echo "$(tput setaf 1)$(tput bold)FAIL$(tput sgr 0)"
+        echo "\${GREEN}Expected Output:\${RESET} \\"$out1\\""
+        echo "\${RED}Your Output:\${RESET}     \\"$out2\\""
+        rm out1 out2 out1.txt out2.txt 2>/dev/null
+        exit 1
+    fi
+
+# 5. test 
+    gcc -w -o out1 "$file1"
+    gcc -w -o out2 "$file2"
+
+    ./out1 "fgex.;" "1" "2 " "3" "4" "5" "6" " 7" "8" "9" "10" > out1.txt 2>/dev/null
+    ./out2 "fgex.;" "1" "2 " "3" "4" "5" "6" " 7" "8" "9" "10" > out2.txt 2>/dev/null
+
+    if ! diff -q out1.txt out2.txt >/dev/null ; then
+        out1=$(cat out1.txt)
+        out2=$(cat out2.txt)
+        echo "$(tput setaf 1)$(tput bold)FAIL$(tput sgr 0)"
+        echo "\${GREEN}Expected Output:\${RESET} \\"$out1\\""
+        echo "\${RED}Your Output:\${RESET}     \\"$out2\\""
+        rm out1 out2 out1.txt out2.txt 2>/dev/null
+        exit 1
+    fi
+
+# 6. test 
+    gcc -w -o out1 "$file1"
+    gcc -w -o out2 "$file2"
+
+    ./out1 "mais non!" "mais non!" > out1.txt 2>/dev/null
+    ./out2 "mais non!" "mais non!" > out2.txt 2>/dev/null
+
+    if ! diff -q out1.txt out2.txt >/dev/null ; then
+        out1=$(cat out1.txt)
+        out2=$(cat out2.txt)
+        echo "$(tput setaf 1)$(tput bold)FAIL$(tput sgr 0)"
+        echo "\${GREEN}Expected Output:\${RESET} \\"$out1\\""
+        echo "\${RED}Your Output:\${RESET}     \\"$out2\\""
+        rm out1 out2 out1.txt out2.txt 2>/dev/null
+        exit 1
+    fi
+
+
+    rm out1 out2 out1.txt out2.txt 2>/dev/null
+    echo "$(tput setaf 2)$(tput bold)PASSED 🎉$(tput sgr 0)"
+    exit 1`,
+
+  // Tests derivados del tester.sh real. Las salidas se obtuvieron
+  // compilando la solución de rank02 con gcc -w y ejecutándola.
+  testsRank02: [
+    { id: 'tester_1', entrada: [], salida: "0\n", fuente: 'tester.sh' },
+    { id: 'tester_2', entrada: ["fgex.;"], salida: "1\n", fuente: 'tester.sh' },
+    { id: 'tester_3', entrada: ["abc","2altrb53c.sse"], salida: "2\n", fuente: 'tester.sh' },
+    { id: 'tester_4', entrada: ["abc","btarc"], salida: "2\n", fuente: 'tester.sh' },
+    { id: 'tester_5', entrada: ["fgex.;","1","2 ","3","4","5","6"," 7","8","9","10"], salida: "11\n", fuente: 'tester.sh' },
+    { id: 'tester_6', entrada: ["mais non!","mais non!"], salida: "2\n", fuente: 'tester.sh' },
+  ],
 
   versiones: [
     {
@@ -111,6 +258,38 @@ int\tmain(int argc, char **argv)
 \t\twrite(1, &buf[--len], 1);
 \twrite(1, "\\n", 1);
 \treturn (0);
+}`,
+    },
+  
+    {
+      id: 'rank02',
+      nombre: 'Versión rank02 (solución de referencia)',
+      descripcion: 'Solución tal y como aparece en el repo de referencia rank02. Útil para comparar estilo, validaciones y constraints reales del examen.',
+      recomendada: false,
+      origen: 'rank02',
+      codigo: `
+
+#include <unistd.h>
+
+void	ft_putnbr(int n)
+{
+	char digit;
+
+	if (n >= 10)
+		ft_putnbr(n / 10);
+
+	digit = (n % 10) + '0';
+	write(1, &digit, 1);
+}
+
+int		main(int argc, char **argv)
+{
+	(void)argv;		// Silence 'unused parameter' error
+
+	ft_putnbr(argc - 1);
+	write(1, "\\n", 1);
+
+	return (0);
 }`,
     },
   ],

@@ -27,6 +27,32 @@ $> ./inter "padinton" ""
 
 $>`,
 
+  // Subject literal del repo rank02 (sub.txt). Útil para comparar con
+  // el subject didáctico activo y para la pestaña "Examen real".
+  subjectReal: `Assignment name  : inter
+Expected files   : inter.c
+Allowed functions: write
+--------------------------------------------------------------------------------
+
+Write a program that takes two strings and displays, without doubles, the
+characters that appear in both strings, in the order they appear in the first
+one.
+
+The display will be followed by a \\n.
+
+If the number of arguments is not 2, the program displays \\n.
+
+Examples:
+
+$>./inter "padinton" "paqefwtdjetyiytjneytjoeyjnejeyj" | cat -e
+padinto$
+$>./inter ddf6vewg64f gtwthgdwthdwfteewhrtag6h4ffdhsd | cat -e
+df6ewg4$
+$>./inter "rien" "cette phrase ne cache rien" | cat -e
+rien$
+$>./inter | cat -e
+$`,
+
   descripcion: 'Programa que imprime los caracteres comunes a s1 y s2, en el orden de aparición en s1, sin duplicados. Usa función auxiliar iter() para buscar en s2, y tabla seen[] para evitar duplicados.',
 
   palacio: {
@@ -60,6 +86,150 @@ Si sale por el \\0 → no encontrado. Si sale por coincidencia → encontrado.`,
       resultado: '"padnto"',
     },
   },
+
+  // Tester oficial copiado literalmente desde rank02 (tester.sh).
+  testerReal: `#!/bin/bash
+source ../../../main/colors.sh
+file1=inter.c
+file2=../../../../rendu/inter/inter.c
+
+
+# 1. test
+    gcc -Werror -Wall -Wextra -o out1 "$file1"
+    gcc -Werror -Wall -Wextra -o out2 "$file2"
+
+    ./out1 "padinton" "paqefwtdjetyiytjneytjoeyjnejeyj" > out1.txt 2>/dev/null
+    ./out2 "padinton" "paqefwtdjetyiytjneytjoeyjnejeyj" > out2.txt 2>/dev/null
+
+    if ! diff -q out1.txt out2.txt >/dev/null ; then
+        out1=$(cat out1.txt)
+        out2=$(cat out2.txt)
+        echo "$(tput setaf 1)$(tput bold)FAIL$(tput sgr 0)"
+        echo "\${GREEN}Expected Output:\${RESET} \\"$out1\\""
+        echo "\${RED}Your Output:\${RESET}     \\"$out2\\""
+        rm out1 out2 out1.txt out2.txt 2>/dev/null
+        exit 1
+    fi
+
+# 2. test
+    gcc -w -o out1 "$file1"
+    gcc -w -o out2 "$file2"
+
+    ./out1 "ddf6vewg64f" "gtwthgdwthdwfteewhrtag6h4ffdhsd" > out1.txt 2>/dev/null
+    ./out2 "ddf6vewg64f" "gtwthgdwthdwfteewhrtag6h4ffdhsd" > out2.txt 2>/dev/null
+
+    if ! diff -q out1.txt out2.txt >/dev/null ; then
+        out1=$(cat out1.txt)
+        out2=$(cat out2.txt)
+        echo "$(tput setaf 1)$(tput bold)FAIL$(tput sgr 0)"
+        echo "\${GREEN}Expected Output:\${RESET} \\"$out1\\""
+        echo "\${RED}Your Output:\${RESET}     \\"$out2\\""
+        rm out1 out2 out1.txt out2.txt 2>/dev/null
+        exit 1
+    fi
+
+# 3. test
+    gcc -w -o out1 "$file1"
+    gcc -w -o out2 "$file2"
+    
+    ./out1 "rien" "cette phrase ne cache rien" > out1.txt 2>/dev/null
+    ./out2 "rien" "cette phrase ne cache rien" > out2.txt 2>/dev/null
+
+    if ! diff -q out1.txt out2.txt >/dev/null ; then
+        out1=$(cat out1.txt)
+        out2=$(cat out2.txt)
+        echo "$(tput setaf 1)$(tput bold)FAIL$(tput sgr 0)"
+        echo "\${GREEN}Expected Output:\${RESET} \\"$out1\\""
+        echo "\${RED}Your Output:\${RESET}     \\"$out2\\""
+        rm out1 out2 out1.txt out2.txt 2>/dev/null
+        exit 1
+    fi
+
+# 4. test
+    gcc -w -o out1 "$file1"
+    gcc -w -o out2 "$file2"
+
+    ./out1 "Oupsi" "Oups" > out1.txt 2>/dev/null
+    ./out2 "Oupsi" "Oups" > out2.txt 2>/dev/null
+
+    if ! diff -q out1.txt out2.txt >/dev/null ; then
+        out1=$(cat out1.txt)
+        out2=$(cat out2.txt)
+        echo "$(tput setaf 1)$(tput bold)FAIL$(tput sgr 0)"
+        echo "\${GREEN}Expected Output:\${RESET} \\"$out1\\""
+        echo "\${RED}Your Output:\${RESET}     \\"$out2\\""
+        rm out1 out2 out1.txt out2.txt 2>/dev/null
+        exit 1
+    fi
+
+# 5. test 
+    gcc -w -o out1 "$file1"
+    gcc -w -o out2 "$file2"
+
+    ./out1 "Manger pour vivre" "Vivre pour manger" > out1.txt 2>/dev/null
+    ./out2 "Manger pour vivre" "Vivre pour manger" > out2.txt 2>/dev/null
+
+    if ! diff -q out1.txt out2.txt >/dev/null ; then
+        out1=$(cat out1.txt)
+        out2=$(cat out2.txt)
+        echo "$(tput setaf 1)$(tput bold)FAIL$(tput sgr 0)"
+        echo "\${GREEN}Expected Output:\${RESET} \\"$out1\\""
+        echo "\${RED}Your Output:\${RESET}     \\"$out2\\""
+        rm out1 out2 out1.txt out2.txt 2>/dev/null
+        exit 1
+    fi
+
+# 6. test
+    gcc -w -o out1 "$file1"
+    gcc -w -o out2 "$file2"
+
+    ./out1 > out1.txt 2>/dev/null
+    ./out2 > out2.txt 2>/dev/null
+
+    if ! diff -q out1.txt out2.txt >/dev/null ; then
+        out1=$(cat out1.txt)
+        out2=$(cat out2.txt)
+        echo "$(tput setaf 1)$(tput bold)FAIL$(tput sgr 0)"
+        echo "\${GREEN}Expected Output:\${RESET} \\"$out1\\""
+        echo "\${RED}Your Output:\${RESET}     \\"$out2\\""
+        rm out1 out2 out1.txt out2.txt 2>/dev/null
+        exit 1
+    fi
+
+# 7. test
+    gcc -w -o out1 "$file1"
+    gcc -w -o out2 "$file2"
+
+    ./out1 "Too" "Many" "Arguments" > out1.txt 2>/dev/null
+    ./out2 "Too" "Many" "Arguments" > out2.txt 2>/dev/null
+
+    if ! diff -q out1.txt out2.txt >/dev/null ; then
+        out1=$(cat out1.txt)
+        out2=$(cat out2.txt)
+        echo "$(tput setaf 1)$(tput bold)FAIL$(tput sgr 0)"
+        echo "\${GREEN}Expected Output:\${RESET} \\"$out1\\""
+        echo "\${RED}Your Output:\${RESET}     \\"$out2\\""
+        rm out1 out2 out1.txt out2.txt 2>/dev/null
+        exit 1
+    fi
+    
+
+    rm out1 out2 out1.txt out2.txt 2>/dev/null
+    echo "$(tput setaf 2)$(tput bold)PASSED 🎉$(tput sgr 0)"
+    exit 1
+`,
+
+  // Tests derivados del tester.sh real. Las salidas se obtuvieron
+  // compilando la solución de rank02 con gcc -w y ejecutándola.
+  testsRank02: [
+    { id: 'tester_1', entrada: ["padinton","paqefwtdjetyiytjneytjoeyjnejeyj"], salida: "padinto\n", fuente: 'tester.sh' },
+    { id: 'tester_2', entrada: ["ddf6vewg64f","gtwthgdwthdwfteewhrtag6h4ffdhsd"], salida: "df6ewg4\n", fuente: 'tester.sh' },
+    { id: 'tester_3', entrada: ["rien","cette phrase ne cache rien"], salida: "rien\n", fuente: 'tester.sh' },
+    { id: 'tester_4', entrada: ["Oupsi","Oups"], salida: "Oups\n", fuente: 'tester.sh' },
+    { id: 'tester_5', entrada: ["Manger pour vivre","Vivre pour manger"], salida: "anger pouvi\n", fuente: 'tester.sh' },
+    { id: 'tester_6', entrada: [], salida: "\n", fuente: 'tester.sh' },
+    { id: 'tester_7', entrada: ["Too","Many","Arguments"], salida: "\n", fuente: 'tester.sh' },
+  ],
 
   versiones: [
     {
@@ -146,6 +316,57 @@ int\tmain(int argc, char **argv)
 \t}
 \twrite(1, "\\n", 1);
 \treturn (0);
+}`,
+    },
+  
+    {
+      id: 'rank02',
+      nombre: 'Versión rank02 (solución de referencia)',
+      descripcion: 'Solución tal y como aparece en el repo de referencia rank02. Útil para comparar estilo, validaciones y constraints reales del examen.',
+      recomendada: false,
+      origen: 'rank02',
+      codigo: `
+#include <unistd.h>
+
+int	main(int ac, char **av)
+{
+	int	i;
+	int k;
+	int l;
+	char *s1;
+	char *s2;
+
+	i = 0;
+	l = 0;
+	if (ac == 3)
+	{
+		s1 = av[1];
+		s2 = av[2];
+		while (s1[i] != '\\0')
+		{
+			k = 0;
+			while (s2[k] != '\\0')
+			{
+				if(s1[i] == s2[k])
+				{ 
+					l = 0;
+					while (s1[l] != s1[i])
+						l++;
+					if (l == i)
+					{
+						l = 0;
+						while (s2[l] != s2[k])
+							l++;
+						if (l == k)
+							write(1, &s1[i], 1);
+					}
+				}
+				k++;
+			}
+			i++;
+		}
+	}
+	write(1, "\\n", 1);
 }`,
     },
   ],

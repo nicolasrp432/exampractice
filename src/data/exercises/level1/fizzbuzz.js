@@ -19,6 +19,47 @@ If the number is a multiple of 3, replace it with the word "Fizz".
 If the number is a multiple of 5, replace it with the word "Buzz".
 If the number is a multiple of both 3 and 5, replace it with the word "FizzBuzz".`,
 
+  // Subject literal del repo rank02 (sub.txt). Útil para comparar con
+  // el subject didáctico activo y para la pestaña "Examen real".
+  subjectReal: `Assignment name  : fizzbuzz
+Expected files   : fizzbuzz.c
+Allowed functions: write
+--------------------------------------------------------------------------------
+
+Write a program that prints the numbers from 1 to 100, each separated by a
+newline.
+
+If the number is a multiple of 3, it prints 'fizz' instead.
+
+If the number is a multiple of 5, it prints 'buzz' instead.
+
+If the number is both a multiple of 3 and a multiple of 5, it prints 'fizzbuzz' instead.
+
+Example:
+
+$>./fizzbuzz
+1
+2
+fizz
+4
+buzz
+fizz
+7
+8
+fizz
+buzz
+11
+fizz
+13
+14
+fizzbuzz
+[...]
+97
+98
+fizz
+buzz
+$>`,
+
   descripcion: 'Programa que imprime del 1 al 100: múltiplos de 15 → "FizzBuzz", de 3 → "Fizz", de 5 → "Buzz", resto → el número.',
 
   palacio: {
@@ -51,6 +92,41 @@ El truco: comprobar el 15 PRIMERO (else if), sino Fizz y Buzz compiten.`,
       resultado: 'FizzBuzz',
     },
   },
+
+  // Tester oficial copiado literalmente desde rank02 (tester.sh).
+  testerReal: `#!/bin/bash
+source ../../../main/colors.sh
+file1=fizzbuzz.c
+file2=../../../../rendu/fizzbuzz/fizzbuzz.c
+
+
+# 1. test
+    gcc -Werror -Wall -Wextra -o out1 "$file1"
+    gcc -Werror -Wall -Wextra -o out2 "$file2"
+
+    ./out1 > out1.txt 2>/dev/null
+    ./out2 > out2.txt 2>/dev/null
+
+    if ! diff -q out1.txt out2.txt >/dev/null ; then
+        out1=$(cat out1.txt)
+        out2=$(cat out2.txt)
+        echo "$(tput setaf 1)$(tput bold)FAIL$(tput sgr 0)"
+        echo "\${GREEN}Expected Output:\${RESET} \\"$out1\\""
+        echo "\${RED}Your Output:\${RESET}     \\"$out2\\""
+        rm out1 out2 out1.txt out2.txt 2>/dev/null
+        exit 1
+    fi
+
+
+    rm out1 out2 out1.txt out2.txt 2>/dev/null
+    echo "$(tput setaf 2)$(tput bold)PASSED 🎉$(tput sgr 0)"
+    exit 1`,
+
+  // Tests derivados del tester.sh real. Las salidas se obtuvieron
+  // compilando la solución de rank02 con gcc -w y ejecutándola.
+  testsRank02: [
+    { id: 'tester_1', entrada: [], salida: "1\n2\nfizz\n4\nbuzz\nfizz\n7\n8\nfizz\nbuzz\n11\nfizz\n13\n14\nfizzbuzz\n16\n17\nfizz\n19\nbuzz\nfizz\n22\n23\nfizz\nbuzz\n26\nfizz\n28\n29\nfizzbuzz\n31\n32\nfizz\n34\nbuzz\nfizz\n37\n38\nfizz\nbuzz\n41\nfizz\n43\n44\nfizzbuzz\n46\n47\nfizz\n49\nbuzz\nfizz\n52\n53\nfizz\nbuzz\n56\nfizz\n58\n59\nfizzbuzz\n61\n62\nfizz\n64\nbuzz\nfizz\n67\n68\nfizz\nbuzz\n71\nfizz\n73\n74\nfizzbuzz\n76\n77\nfizz\n79\nbuzz\nfizz\n82\n83\nfizz\nbuzz\n86\nfizz\n88\n89\nfizzbuzz\n91\n92\nfizz\n94\nbuzz\nfizz\n97\n98\nfizz\nbuzz\n", fuente: 'tester.sh' },
+  ],
 
   versiones: [
     {
@@ -133,6 +209,48 @@ int\tmain(void)
 \t\ti++;
 \t}
 \treturn (0);
+}`,
+    },
+  
+    {
+      id: 'rank02',
+      nombre: 'Versión rank02 (solución de referencia)',
+      descripcion: 'Solución tal y como aparece en el repo de referencia rank02. Útil para comparar estilo, validaciones y constraints reales del examen.',
+      recomendada: false,
+      origen: 'rank02',
+      codigo: `#include <unistd.h>
+
+int	main(void)
+{
+	int	i;
+	int k;
+	int l;
+
+	i = 1;
+	while (i <= 100)
+	{
+		if ((i % 3 == 0) && (i % 5 == 0))
+			write(1, "fizzbuzz", 8);
+		else if (i % 3 == 0)
+			write(1, "fizz", 4);
+		else if (i % 5 == 0)
+			write(1, "buzz", 4);
+		else if (i > 10)
+		{
+			k = i / 10 + '0';
+			l = i % 10 + '0';
+			write (1, &k, 1);
+			write (1, &l, 1);
+		}
+		else
+		
+		{
+			k = i + '0';
+			write(1, &k, 1);
+		}
+		write(1,"\\n", 1);
+		i++;
+	}		
 }`,
     },
   ],

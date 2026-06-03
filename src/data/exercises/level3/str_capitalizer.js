@@ -29,6 +29,36 @@ Hello World$
 $> ./str_capitalizer "a b c" | cat -e
 A B C$`,
 
+  // Subject literal del repo rank02 (sub.txt). Útil para comparar con
+  // el subject didáctico activo y para la pestaña "Examen real".
+  subjectReal: `Assignment name  : str_capitalizer
+Expected files   : str_capitalizer.c
+Allowed functions: write
+--------------------------------------------------------------------------------
+
+Write a program that takes one or several strings and, for each argument,
+capitalizes the first character of each word (If it's a letter, obviously),
+puts the rest in lowercase, and displays the result on the standard output,
+followed by a \\n.
+
+A "word" is defined as a part of a string delimited either by spaces/tabs, or
+by the start/end of the string. If a word only has one letter, it must be
+capitalized.
+
+If there are no arguments, the progam must display \\n.
+
+Example:
+
+$> ./str_capitalizer | cat -e
+$
+$> ./str_capitalizer "a FiRSt LiTTlE TESt" | cat -e
+A First Little Test$
+$> ./str_capitalizer "__SecONd teST A LITtle BiT   Moar comPLEX" "   But... This iS not THAT COMPLEX" "     Okay, this is the last 1239809147801 but not    the least    t" | cat -e
+__second Test A Little Bit   Moar Complex$
+   But... This Is Not That Complex$
+     Okay, This Is The Last 1239809147801 But Not    The Least    T$
+$>`,
+
   descripcion: 'Programa que capitaliza la primera letra de cada palabra (secuencia de no-espacios) y pone en minúsculas el resto. Para cada argumento imprime el resultado seguido de newline.',
 
   palacio: {
@@ -61,6 +91,113 @@ Si no es espacio y !capitalize: MINÚSCULA.`,
       resultado: '"Hello World"',
     },
   },
+
+  // Tester oficial copiado literalmente desde rank02 (tester.sh).
+  testerReal: `#!/bin/bash
+source ../../../main/colors.sh
+file1=str_capitalizer.c
+file2=../../../../rendu/str_capitalizer/str_capitalizer.c
+
+
+# 1. test
+    gcc -Werror -Wall -Wextra -o out1 "$file1"
+    gcc -Werror -Wall -Wextra -o out2 "$file2"
+
+    ./out1 > out1.txt 2>/dev/null
+    ./out2 > out2.txt 2>/dev/null
+
+    if ! diff -q out1.txt out2.txt >/dev/null ; then
+        out1=$(cat out1.txt)
+        out2=$(cat out2.txt)
+        echo "$(tput setaf 1)$(tput bold)FAIL$(tput sgr 0)"
+        echo "\${GREEN}Expected Output:\${RESET} \\"$out1\\""
+        echo "\${RED}Your Output:\${RESET}     \\"$out2\\""
+        rm out1 out2 out1.txt out2.txt 2>/dev/null
+        exit 1
+    fi
+
+# 2. test
+    gcc -w -o out1 "$file1"
+    gcc -w -o out2 "$file2"
+
+    ./out1 "a FiRSt LiTTlE TESt" > out1.txt 2>/dev/null
+    ./out2 "a FiRSt LiTTlE TESt" > out2.txt 2>/dev/null
+
+    if ! diff -q out1.txt out2.txt >/dev/null ; then
+        out1=$(cat out1.txt)
+        out2=$(cat out2.txt)
+        echo "$(tput setaf 1)$(tput bold)FAIL$(tput sgr 0)"
+        echo "\${GREEN}Expected Output:\${RESET} \\"$out1\\""
+        echo "\${RED}Your Output:\${RESET}     \\"$out2\\""
+        rm out1 out2 out1.txt out2.txt 2>/dev/null
+        exit 1
+    fi
+
+# 3. test
+    gcc -w -o out1 "$file1"
+    gcc -w -o out2 "$file2"
+
+    ./out1 "SecONd teST A LITtle BiT   Moar comPLEX" "   But... This iS not THAT COMPLEX" "     Okay, this is the last 1239809147801 but not    the least    t" > out1.txt 2>/dev/null
+    ./out2 "SecONd teST A LITtle BiT   Moar comPLEX" "   But... This iS not THAT COMPLEX" "     Okay, this is the last 1239809147801 but not    the least    t" > out2.txt 2>/dev/null
+
+    if ! diff -q out1.txt out2.txt >/dev/null ; then
+        out1=$(cat out1.txt)
+        out2=$(cat out2.txt)
+        echo "$(tput setaf 1)$(tput bold)FAIL$(tput sgr 0)"
+        echo "\${GREEN}Expected Output:\${RESET} \\"$out1\\""
+        echo "\${RED}Your Output:\${RESET}     \\"$out2\\""
+        rm out1 out2 out1.txt out2.txt 2>/dev/null
+        exit 1
+    fi
+
+# 4. test
+    gcc -w -o out1 "$file1"
+    gcc -w -o out2 "$file2"
+
+    ./out1 "Okay i thing you got it!!! " > out1.txt 2>/dev/null
+    ./out2 "Okay i thing you got it!!! " > out2.txt 2>/dev/null
+
+    if ! diff -q out1.txt out2.txt >/dev/null ; then
+        out1=$(cat out1.txt)
+        out2=$(cat out2.txt)
+        echo "$(tput setaf 1)$(tput bold)FAIL$(tput sgr 0)"
+        echo "\${GREEN}Expected Output:\${RESET} \\"$out1\\""
+        echo "\${RED}Your Output:\${RESET}     \\"$out2\\""
+        rm out1 out2 out1.txt out2.txt 2>/dev/null
+        exit 1
+    fi
+
+# 5. test 
+    gcc -w -o out1 "$file1"
+    gcc -w -o out2 "$file2"
+
+    ./out1 "10" > out1.txt 2>/dev/null
+    ./out2 "10" > out2.txt 2>/dev/null
+
+    if ! diff -q out1.txt out2.txt >/dev/null ; then
+        out1=$(cat out1.txt)
+        out2=$(cat out2.txt)
+        echo "$(tput setaf 1)$(tput bold)FAIL$(tput sgr 0)"
+        echo "\${GREEN}Expected Output:\${RESET} \\"$out1\\""
+        echo "\${RED}Your Output:\${RESET}     \\"$out2\\""
+        rm out1 out2 out1.txt out2.txt 2>/dev/null
+        exit 1
+    fi
+
+
+    rm out1 out2 out1.txt out2.txt 2>/dev/null
+    echo "$(tput setaf 2)$(tput bold)PASSED 🎉$(tput sgr 0)"
+    exit 1`,
+
+  // Tests derivados del tester.sh real. Las salidas se obtuvieron
+  // compilando la solución de rank02 con gcc -w y ejecutándola.
+  testsRank02: [
+    { id: 'tester_1', entrada: [], salida: "\n", fuente: 'tester.sh' },
+    { id: 'tester_2', entrada: ["a FiRSt LiTTlE TESt"], salida: "A First Little Test\n", fuente: 'tester.sh' },
+    { id: 'tester_3', entrada: ["SecONd teST A LITtle BiT   Moar comPLEX","   But... This iS not THAT COMPLEX","     Okay, this is the last 1239809147801 but not    the least    t"], salida: "Second Test A Little Bit   Moar Complex\n   But... This Is Not That Complex\n     Okay, This Is The Last 1239809147801 But Not    The Least    T\n", fuente: 'tester.sh' },
+    { id: 'tester_4', entrada: ["Okay i thing you got it!!! "], salida: "Okay I Thing You Got It!!! \n", fuente: 'tester.sh' },
+    { id: 'tester_5', entrada: ["10"], salida: "10\n", fuente: 'tester.sh' },
+  ],
 
   versiones: [
     {
@@ -110,6 +247,110 @@ int\tmain(int argc, char **argv)
 \t\ti++;
 \t}
 \treturn (0);
+}`,
+    },
+    {
+      id: 'previo',
+      nombre: 'Con revisión del carácter anterior',
+      descripcion: 'Detecta el inicio de palabra mirando el carácter previo en vez de usar un flag.',
+      recomendada: false,
+      codigo: `#include <unistd.h>
+
+int\tmain(int argc, char **argv)
+{
+\tint\ti;
+\tint\tj;
+\tchar\tc;
+
+\tif (argc == 1)
+\t{
+\t\twrite(1, "\\n", 1);
+\t\treturn (0);
+\t}
+\ti = 1;
+\twhile (i < argc)
+\t{
+\t\tj = 0;
+\t\twhile (argv[i][j])
+\t\t{
+\t\t\tc = argv[i][j];
+\t\t\tif (c == ' ')
+\t\t\t\twrite(1, &c, 1);
+\t\t\telse if (j == 0 || argv[i][j - 1] == ' ')
+\t\t\t{
+\t\t\t\tif (c >= 'a' && c <= 'z')
+\t\t\t\t\tc -= 32;
+\t\t\t\twrite(1, &c, 1);
+\t\t\t}
+\t\t\telse
+\t\t\t{
+\t\t\t\tif (c >= 'A' && c <= 'Z')
+\t\t\t\t\tc += 32;
+\t\t\t\twrite(1, &c, 1);
+\t\t\t}
+\t\t\tj++;
+\t\t}
+\t\twrite(1, "\\n", 1);
+\t\ti++;
+\t}
+\treturn (0);
+}`,
+    },
+  
+    {
+      id: 'rank02',
+      nombre: 'Versión rank02 (solución de referencia)',
+      descripcion: 'Solución tal y como aparece en el repo de referencia rank02. Útil para comparar estilo, validaciones y constraints reales del examen.',
+      recomendada: false,
+      origen: 'rank02',
+      codigo: `
+
+#include <unistd.h>
+
+void	str_capitalizer(char *str)
+{
+	while (*str != '\\0')
+	{
+		while (*str != '\\0' && (*str == ' ' || *str == '\\t'))
+		{
+			write(1, str, 1);
+			++str;
+		}
+
+		if (*str != '\\0')
+		{
+			if (*str >= 'a' && *str <= 'z')
+				*str = *str - ('a' - 'A');
+			write(1, str, 1);
+			++str;
+		}
+
+		while (*str != '\\0' && *str != ' ' && *str != '\\t')
+		{
+			if (*str >= 'A' && *str <= 'Z')
+				*str = *str + ('a' - 'A');
+			write(1, str, 1);
+			++str;
+		}
+	}
+	write(1, "\\n", 1);
+}
+
+int		main(int argc, char **argv)
+{
+	if (argc == 1)
+		write(1, "\\n", 1);
+	else
+	{
+		int i = 1;
+		while (i < argc)
+		{
+			str_capitalizer(argv[i]);
+			++i;
+		}
+	}
+
+	return (0);
 }`,
     },
   ],

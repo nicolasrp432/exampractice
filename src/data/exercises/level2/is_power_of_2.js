@@ -26,6 +26,21 @@ is_power_of_2(8)   → 1  (2^3)
 is_power_of_2(0)   → 0  (no es potencia de 2)
 is_power_of_2(3)   → 0  (no es potencia de 2)`,
 
+  // Subject literal del repo rank02 (sub.txt). Útil para comparar con
+  // el subject didáctico activo y para la pestaña "Examen real".
+  subjectReal: `Assignment name  : is_power_of_2
+Expected files   : is_power_of_2.c
+Allowed functions: None
+--------------------------------------------------------------------------------
+
+Write a function that determines if a given number is a power of 2.
+
+This function returns 1 if the given number is a power of 2, otherwise it returns 0.
+
+Your function must be declared as follows:
+
+int	    is_power_of_2(unsigned int n);`,
+
   descripcion: 'Función que devuelve 1 si n es potencia de 2, 0 si no. El truco bit a bit: una potencia de 2 tiene exactamente 1 bit activo. n & (n-1) pone ese bit a 0. Si el resultado es 0 (y n>0), es potencia de 2.',
 
   palacio: {
@@ -59,6 +74,114 @@ La fórmula es: return (n > 0 && (n & (n - 1)) == 0).`,
     },
   },
 
+  // Tester oficial copiado literalmente desde rank02 (tester.sh).
+  testerReal: `#!/bin/bash
+source ../../../main/colors.sh
+file1=is_power_of_2.c
+file2=../../../../rendu/is_power_of_2/is_power_of_2.c
+
+
+# 1. test
+    gcc -Werror -Wall -Wextra -o out1 "$file1" main.c
+    gcc -Werror -Wall -Wextra -o out2 "$file2" main.c
+
+    ./out1 "1024" > out1.txt 2>/dev/null
+    ./out2 "1024" > out2.txt 2>/dev/null
+
+    if ! diff -q out1.txt out2.txt >/dev/null ; then
+        out1=$(cat out1.txt)
+        out2=$(cat out2.txt)
+        echo "$(tput setaf 1)$(tput bold)FAIL$(tput sgr 0)"
+        echo "\${GREEN}Expected Output:\${RESET} \\"$out1\\""
+        echo "\${RED}Your Output:\${RESET}     \\"$out2\\""
+        rm out1 out2 out1.txt out2.txt 2>/dev/null
+        exit 1
+    fi
+
+# 2. test
+    gcc -w -o out1 "$file1" main.c
+    gcc -w -o out2 "$file2" main.c
+
+    ./out1 "1023" > out1.txt 2>/dev/null
+    ./out2 "1023" > out2.txt 2>/dev/null
+
+    if ! diff -q out1.txt out2.txt >/dev/null ; then
+        out1=$(cat out1.txt)
+        out2=$(cat out2.txt)
+        echo "$(tput setaf 1)$(tput bold)FAIL$(tput sgr 0)"
+        echo "\${GREEN}Expected Output:\${RESET} \\"$out1\\""
+        echo "\${RED}Your Output:\${RESET}     \\"$out2\\""
+        rm out1 out2 out1.txt out2.txt 2>/dev/null
+        exit 1
+    fi
+
+# 3. test
+    gcc -w -o out1 "$file1" main.c
+    gcc -w -o out2 "$file2" main.c
+
+    ./out1 "0" > out1.txt 2>/dev/null
+    ./out2 "0" > out2.txt 2>/dev/null
+
+    if ! diff -q out1.txt out2.txt >/dev/null ; then
+        out1=$(cat out1.txt)
+        out2=$(cat out2.txt)
+        echo "$(tput setaf 1)$(tput bold)FAIL$(tput sgr 0)"
+        echo "\${GREEN}Expected Output:\${RESET} \\"$out1\\""
+        echo "\${RED}Your Output:\${RESET}     \\"$out2\\""
+        rm out1 out2 out1.txt out2.txt 2>/dev/null
+        exit 1
+    fi
+
+# 4. test
+    gcc -w -o out1 "$file1" main.c
+    gcc -w -o out2 "$file2" main.c
+
+    ./out1 "1" > out1.txt 2>/dev/null
+    ./out2 "1" > out2.txt 2>/dev/null
+
+    if ! diff -q out1.txt out2.txt >/dev/null ; then
+        out1=$(cat out1.txt)
+        out2=$(cat out2.txt)
+        echo "$(tput setaf 1)$(tput bold)FAIL$(tput sgr 0)"
+        echo "\${GREEN}Expected Output:\${RESET} \\"$out1\\""
+        echo "\${RED}Your Output:\${RESET}     \\"$out2\\""
+        rm out1 out2 out1.txt out2.txt 2>/dev/null
+        exit 1
+    fi
+
+# 5. test 
+    gcc -w -o out1 "$file1" main.c
+    gcc -w -o out2 "$file2" main.c
+
+    ./out1 "-3" > out1.txt 2>/dev/null
+    ./out2 "-3" > out2.txt 2>/dev/null
+
+    if ! diff -q out1.txt out2.txt >/dev/null ; then
+        out1=$(cat out1.txt)
+        out2=$(cat out2.txt)
+        echo "$(tput setaf 1)$(tput bold)FAIL$(tput sgr 0)"
+        echo "\${GREEN}Expected Output:\${RESET} \\"$out1\\""
+        echo "\${RED}Your Output:\${RESET}     \\"$out2\\""
+        rm out1 out2 out1.txt out2.txt 2>/dev/null
+        exit 1
+    fi
+
+
+    rm out1 out2 out1.txt out2.txt 2>/dev/null
+    echo "$(tput setaf 2)$(tput bold)PASSED 🎉$(tput sgr 0)"
+    exit 1
+`,
+
+  // Tests derivados del tester.sh real. Las salidas se obtuvieron
+  // compilando la solución de rank02 con gcc -w y ejecutándola.
+  testsRank02: [
+    { id: 'tester_1', entrada: ["1024"], salida: "is_power_of_2(\"1024\") = 1\n", fuente: 'tester.sh' },
+    { id: 'tester_2', entrada: ["1023"], salida: "is_power_of_2(\"1023\") = 0\n", fuente: 'tester.sh' },
+    { id: 'tester_3', entrada: ["0"], salida: "is_power_of_2(\"0\") = 0\n", fuente: 'tester.sh' },
+    { id: 'tester_4', entrada: ["1"], salida: "is_power_of_2(\"1\") = 1\n", fuente: 'tester.sh' },
+    { id: 'tester_5', entrada: ["-3"], salida: "is_power_of_2(\"-3\") = 0\n", fuente: 'tester.sh' },
+  ],
+
   versiones: [
     {
       id: 'bitwise',
@@ -86,6 +209,30 @@ La fórmula es: return (n > 0 && (n & (n - 1)) == 0).`,
 \t\tn /= 2;
 \t}
 \treturn (1);
+}`,
+    },
+  
+    {
+      id: 'rank02',
+      nombre: 'Versión rank02 (solución de referencia)',
+      descripcion: 'Solución tal y como aparece en el repo de referencia rank02. Útil para comparar estilo, validaciones y constraints reales del examen.',
+      recomendada: false,
+      origen: 'rank02',
+      codigo: `
+#include <stdio.h>
+
+int         is_power_of_2(unsigned int n)
+{
+	if (n == 0)
+		return (0);
+	while (n > 1)
+	{
+		if (n % 2 == 0)
+			n = n / 2;
+		else
+			return (0);
+	}
+	return (1);
 }`,
     },
   ],
