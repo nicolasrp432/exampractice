@@ -35,6 +35,7 @@ export default function RunPanel({
   result,
   traceError,
   tests = [],
+  exercise = null,
 }) {
   const [showStdin, setShowStdin] = useState(Boolean(stdin))
 
@@ -56,6 +57,9 @@ export default function RunPanel({
   const signal = result?.signal
   const crashed = signal !== null && signal !== undefined
   const nonZero = !crashed && exit !== undefined && exit !== 0 && exit !== -1
+
+  const fileExpected = exercise?.archivosEsperados?.[0] || `${exercise?.nombre || 'function'}.c`
+  const isProgram = exercise?.tipoEntrega === 'programa'
 
   return (
     <div className="space-y-3 text-sm">
@@ -218,6 +222,46 @@ export default function RunPanel({
           )}
         </div>
       )}
+
+      {/* Sección: Compilar localmente en tu terminal */}
+      <div className="mt-4 rounded-xl border border-zinc-200 bg-zinc-50 p-4">
+        <details className="group">
+          <summary className="flex items-center justify-between cursor-pointer select-none text-xs font-semibold text-zinc-500 group-open:text-zinc-800 uppercase tracking-wide">
+            <span className="flex items-center gap-1.5">
+              <Terminal size={13} className="text-zinc-400 group-open:text-zinc-700" />
+              Compilar localmente en tu terminal
+            </span>
+            <span className="text-[10px] text-zinc-400 group-open:hidden">Mostrar</span>
+            <span className="text-[10px] text-zinc-400 hidden group-open:inline">Ocultar</span>
+          </summary>
+          <div className="mt-3 space-y-2.5 text-xs text-zinc-600 leading-relaxed">
+            <p>
+              Si tu conexión falla o deseas probar directamente en tu ordenador de manera independiente:
+            </p>
+            <ol className="list-decimal list-inside space-y-1 text-[11px] text-zinc-500">
+              <li>Crea un archivo local llamado <code className="font-mono bg-zinc-100 px-1 py-0.5 rounded text-zinc-800">{fileExpected}</code>.</li>
+              <li>Pega tu código del editor en el archivo.</li>
+              <li>Compila en tu terminal con <code>gcc</code>:</li>
+            </ol>
+            <div className="relative rounded-lg bg-zinc-900 px-3 py-2 text-[10px] font-mono text-green-400 overflow-x-auto whitespace-pre">
+              {isProgram ? (
+                <span>gcc -Wall -Wextra -Werror {fileExpected} && ./a.out</span>
+              ) : (
+                <span>
+                  # 1. Crea un archivo main.c con tus casos de prueba
+                  <br />
+                  # 2. Compila tu archivo y tu main juntos:
+                  <br />
+                  gcc -Wall -Wextra -Werror main.c {fileExpected} && ./a.out
+                </span>
+              )}
+            </div>
+            <p className="text-[10px] text-zinc-400 italic">
+              💡 Recuerda que para funciones, el compilador local o de examen de 42 añade un main de pruebas al compilar.
+            </p>
+          </div>
+        </details>
+      </div>
     </div>
   )
 }

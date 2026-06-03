@@ -45,20 +45,9 @@ export default function ImageGenerator({ exercise, onSaveImage, savedImageUrl = 
     const encodedPrompt = encodeURIComponent(finalPrompt)
     const url = `https://image.pollinations.ai/prompt/${encodedPrompt}?width=800&height=800&nologo=true&seed=${seed}`
     
-    // Prefetch image to ensure smooth loading transition
-    const img = new Image()
-    img.src = url
-    img.onload = () => {
-      setImageUrl(url)
-      setIsLoading(false)
-      // Auto-persist locally
-      localStorage.setItem(`42prep-img-${exercise.id}`, url)
-      localStorage.setItem(`42prep-prompt-${exercise.id}`, finalPrompt)
-    }
-    img.onerror = () => {
-      setIsLoading(false)
-      alert('Error al generar la imagen. Intenta de nuevo.')
-    }
+    setImageUrl(url)
+    localStorage.setItem(`42prep-img-${exercise.id}`, url)
+    localStorage.setItem(`42prep-prompt-${exercise.id}`, finalPrompt)
   }
 
   const handleSave = () => {
@@ -106,11 +95,16 @@ export default function ImageGenerator({ exercise, onSaveImage, savedImageUrl = 
 
           {imageUrl ? (
             <motion.img
-              key="image"
+              key={imageUrl} // Use imageUrl as key to trigger animations and loader on changes
               src={imageUrl}
               alt={`Mnemotecnia para ${exercise.nombre}`}
               initial={{ scale: 1.05, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
+              onLoad={() => setIsLoading(false)}
+              onError={() => {
+                setIsLoading(false)
+                alert('Error al generar la imagen. Intenta de nuevo.')
+              }}
               className="h-full w-full object-cover transition-transform duration-300 hover:scale-105"
             />
           ) : (

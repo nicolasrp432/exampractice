@@ -11,7 +11,7 @@ import clsx from 'clsx'
 import { getExercise } from '@/data/index'
 import { compileAndRun } from '@/utils/compiler'
 import { buildFullCode, testHarnesses } from '@/utils/testHarnesses'
-import { getDiff } from '@/utils/simulators/index'
+import { getDiff, simulators } from '@/utils/simulators/index'
 import { useProgressStore } from '@/store/progressStore'
 import { useSettingsStore } from '@/store/settingsStore'
 import { useUserVariants } from '@/hooks/useUserVariants'
@@ -168,11 +168,26 @@ function TestRow({ test, index }) {
 }
 
 // ─── Compile Error Banner ─────────────────────────────────────────────────────
-function CompileErrorBanner({ error, diagnostics = [], source = '', userCode = '', exercise, onDismiss }) {
+function CompileErrorBanner({
+  error,
+  diagnostics = [],
+  source = '',
+  userCode = '',
+  exercise,
+  onDismiss,
+  preferredCompileMode,
+  onToggleMock,
+}) {
   if (!error) return null
   const primary = diagnostics[0]
   const excerpt = buildCodeExcerpt(source, primary?.line)
   const scope = getDiagnosticScope(exercise, userCode, primary?.line)
+
+  const isServerBusy =
+    error.includes('ocupado') ||
+    error.includes('OCI runtime') ||
+    error.includes('Resource temporarily unavailable') ||
+    error.includes('Error de red')
 
   return (
     <motion.div
@@ -181,14 +196,28 @@ function CompileErrorBanner({ error, diagnostics = [], source = '', userCode = '
       exit={{ height: 0, opacity: 0 }}
       className="shrink-0 bg-red-50 border-t border-red-200 overflow-hidden"
     >
-      <div className="px-4 py-2 max-h-40 overflow-auto">
+      <div className="px-4 py-2 max-h-48 overflow-auto">
         <div className="flex items-center justify-between mb-1">
-          <p className="text-xs font-bold text-red-600">❌ Error de compilación (gcc)</p>
+          <p className="text-xs font-bold text-red-600">❌ Error de compilación / ejecución</p>
           <button onClick={onDismiss} className="text-red-400 hover:text-red-600 p-0.5">
             <X size={12} />
           </button>
         </div>
         <pre className="text-xs font-mono text-red-700 whitespace-pre-wrap leading-relaxed">{error}</pre>
+        
+        {isServerBusy && (
+          <button
+            onClick={() => {
+              onToggleMock()
+              onDismiss()
+            }}
+            className="mt-2 flex items-center gap-1.5 px-3 py-1.5 bg-zinc-900 text-white rounded-lg text-xs font-semibold hover:bg-zinc-800 transition-all shadow hover:scale-102"
+          >
+            <Sparkles size={13} className="text-yellow-400 animate-pulse" />
+            Activar simulación offline instantánea (Bypassear servidor)
+          </button>
+        )}
+
         {primary && (
           <div className="mt-2 rounded-lg border border-red-200 bg-white p-2">
             <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-[11px] font-mono text-zinc-600 mb-2">
@@ -620,6 +649,78 @@ export default function PracticeMode() {
   const STORAGE_KEY = `42prep-code-${id}`
   const ARGS_KEY = `42prep-args-${id}`
 
+  // Compile preference: auto (compiler endpoints) or mock (local offline JS simulator)
+  const [preferredCompileMode, setPreferredCompileMode] = useState(() => {
+    return localStorage.getItem(`42prep-preferred-compile-mode-${id}`) || 'auto'
+  })
+
+  useEffect(() => {
+    localStorage.setItem(`42prep-preferred-compile-mode-${id}`, preferredCompileMode)
+  }, [preferredCompileMode, id])
+
+  // Sidebar resizing and collapse states
+  const [sidebarWidth, setSidebarWidth] = useState(() => {
+    const val = localStorage.getItem(`42prep-sidebar-width-${id}`)
+    return val ? Number(val) : 384
+  })
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(() => {
+    return localStorage.getItem(`42prep-sidebar-collapsed-${id}`) === 'true'
+  })
+
+  useEffect(() => {
+    localStorage.setItem(`42prep-sidebar-width-${id}`, sidebarWidth)
+  }, [sidebarWidth, id])
+
+  useEffect(() => {
+    localStorage.setItem(`42prep-sidebar-collapsed-${id}`, isSidebarCollapsed)
+  }, [isSidebarCollapsed, id])
+
+  // Mobile layout state
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768)
+  const [activeMobileTab, setActiveMobileTab] = useState(null) // null | 'enunciado' | 'moulinette' | 'run' | 'mnemotecnia'
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 768)
+    }
+    window.addEventListener('resize', handleResize)
+    return () => window.removeEventListener('resize', handleResize)
+  }, [])
+
+  // Resize drag event handlers for desktop
+  const isResizingRef = useRef(false)
+
+  const handleMouseMove = useCallback((e) => {
+    if (!isResizingRef.current) return
+    const newWidth = window.innerWidth - e.clientX
+    if (newWidth >= 280 && newWidth <= 700) {
+      setSidebarWidth(newWidth)
+      setIsSidebarCollapsed(false)
+    } else if (newWidth < 140) {
+      setIsSidebarCollapsed(true)
+    }
+  }, [])
+
+  const handleMouseUp = useCallback(() => {
+    isResizingRef.current = false
+    document.removeEventListener('mousemove', handleMouseMove)
+    document.removeEventListener('mouseup', handleMouseUp)
+  }, [handleMouseMove])
+
+  const handleMouseDown = useCallback((e) => {
+    e.preventDefault()
+    isResizingRef.current = true
+    document.addEventListener('mousemove', handleMouseMove)
+    document.addEventListener('mouseup', handleMouseUp)
+  }, [handleMouseMove, handleMouseUp])
+
+  useEffect(() => {
+    return () => {
+      document.removeEventListener('mousemove', handleMouseMove)
+      document.removeEventListener('mouseup', handleMouseUp)
+    }
+  }, [handleMouseMove, handleMouseUp])
+
   // Editor state
   const [code, setCode] = useState(() => localStorage.getItem(STORAGE_KEY) || getPlaceholder(exercise))
   const editorRef = useRef(null)
@@ -637,7 +738,6 @@ export default function PracticeMode() {
   const [compileUserCode, setCompileUserCode] = useState('')
   const [showSaveModal, setShowSaveModal] = useState(false)
   const [showGdbTrace, setShowGdbTrace] = useState(false)
-  const [activeRightTab, setActiveRightTab] = useState('tests') // tests | run
 
   // Run-with-params state
   const [args, setArgs] = useState(() => {
@@ -684,7 +784,7 @@ export default function PracticeMode() {
     return () => window.removeEventListener('keydown', handler)
   })
 
-  const handleCompile = async () => {
+  const handleCompile = async (forceMockMode = null) => {
     if (isRunning || !exercise) return
     if (!timer.running) timer.start()
     setIsRunning(true)
@@ -693,7 +793,12 @@ export default function PracticeMode() {
     setCompileSource('')
     setCompileUserCode('')
     setIntentos(i => i + 1)
-    setActiveTab('moulinette') // Switch to Moulinette tab to see run details
+    
+    if (isMobile) {
+      setActiveMobileTab('moulinette')
+    } else {
+      setActiveTab('moulinette') // Switch to Moulinette tab to see run details
+    }
 
     // Reset all tests to pending
     setTests(exercise.tests.map(t => ({ ...t, status: 'pending', output: null, diff: null })))
@@ -707,15 +812,32 @@ export default function PracticeMode() {
     let hadError = false
     let passedAll = true
 
+    const forceMock = forceMockMode === 'mock' || preferredCompileMode === 'mock'
+
     // Run tests sequentially — Wandbox can't handle many parallel container launches
     for (let i = 0; i < exercise.tests.length; i++) {
       const test = exercise.tests[i]
 
       let result
       try {
-        result = await compileAndRun(fullCode, test.entrada, exercise.id, {
-          compilerOptionRaw: strictMoulinette ? '-Wall\n-Wextra\n-Werror' : '',
-        })
+        if (forceMock) {
+          // Simulate using native JS simulation
+          const simulateFn = simulators[exercise.id]
+          const stdout = simulateFn ? simulateFn(test.entrada) : ''
+          result = {
+            compileError: null,
+            compileDiagnostics: [],
+            stdout,
+            stderr: '',
+            exitCode: 0,
+            signal: null,
+            mode: 'mock',
+          }
+        } else {
+          result = await compileAndRun(fullCode, test.entrada, exercise.id, {
+            compilerOptionRaw: strictMoulinette ? '-Wall\n-Wextra\n-Werror' : '',
+          })
+        }
         if (result && result.mode) {
           setCompileMode(result.mode)
         }
@@ -733,7 +855,7 @@ export default function PracticeMode() {
         const isServerBusy = result.compileError.includes('OCI runtime') || result.compileError.includes('Resource temporarily unavailable')
         setCompileError(
           isServerBusy
-            ? 'El servidor de compilación está ocupado. Intenta de nuevo en unos segundos.'
+            ? 'El servidor de compilación está ocupado. Intenta de nuevo en unos segundos o activa la simulación offline.'
             : result.compileError
         )
         setCompileDiagnostics(result.compileDiagnostics || [])
@@ -796,9 +918,26 @@ export default function PracticeMode() {
     if (!exercise || runStatus === 'running') return
     setRunStatus('running')
     setRunResult(null)
+
+    if (preferredCompileMode === 'mock') {
+      const simulateFn = simulators[exercise.id]
+      const stdout = simulateFn ? simulateFn(args) : ''
+      setRunResult({
+        compileError: null,
+        stdout,
+        stderr: '',
+        exitCode: 0,
+        signal: null,
+        compileMessage: '',
+        mode: 'mock',
+      })
+      setRunStatus('done')
+      return
+    }
+
     const fullCode = buildFullCode(exercise.id, exercise.tipoEntrega, code)
     try {
-      const result = await compileAndRun(fullCode, args, { stdin })
+      const result = await compileAndRun(fullCode, args, exercise.id, { stdin })
       setRunResult(result)
     } catch (err) {
       setRunResult({
@@ -817,7 +956,11 @@ export default function PracticeMode() {
 
   const handleTrace = async () => {
     if (!exercise) return
-    setActiveRightTab('run')
+    if (isMobile) {
+      setActiveMobileTab('run')
+    } else {
+      setActiveTab('run')
+    }
     setShowGdbTrace(true)
     const fullCode = buildFullCode(exercise.id, exercise.tipoEntrega, code)
     await liveTrace.run(fullCode, args, stdin)
@@ -839,6 +982,176 @@ export default function PracticeMode() {
     dominado:    { label: '✓ Dominado',   cls: 'bg-green-100 text-green-700' },
   }[progreso?.estado || 'no_iniciado']
 
+  const renderTabContent = (tabName) => {
+    switch (tabName) {
+      case 'enunciado':
+        return (
+          <div className="space-y-4">
+            <div className="flex items-center gap-2">
+              <ClipboardList size={16} className="text-zinc-500" />
+              <h2 className="font-bold text-sm text-zinc-800">Enunciado del Ejercicio</h2>
+            </div>
+            <SubjectViewer
+              subject={exercise.subject}
+              funcionesPermitidas={exercise.funcionesPermitidas}
+              archivosEsperados={exercise.archivosEsperados}
+            />
+          </div>
+        )
+      case 'moulinette':
+        return (
+          <div className="space-y-4">
+            {/* Tests header */}
+            <div className="flex items-center justify-between">
+              <h2 className="font-semibold text-zinc-800 flex items-center gap-2 text-sm">
+                <Trophy size={16} className="text-amber-500" />
+                Tests de la Moulinette
+              </h2>
+              <span className={clsx(
+                'text-sm font-bold tabular-nums',
+                allPassed ? 'text-green-600' : 'text-zinc-500'
+              )}>
+                {passedCount}/{tests.length}
+              </span>
+            </div>
+
+            {/* Progress bar */}
+            <div className="h-2 bg-zinc-100 rounded-full overflow-hidden">
+              <motion.div
+                className={clsx('h-full rounded-full', allPassed ? 'bg-green-500' : 'bg-blue-500')}
+                animate={{ width: tests.length ? `${(passedCount / tests.length) * 100}%` : '0%' }}
+                transition={{ type: 'spring', stiffness: 200, damping: 25 }}
+              />
+            </div>
+
+            {/* Compilation mode indicator */}
+            <div className="flex items-center gap-2 text-xs text-zinc-500 bg-zinc-50 border border-zinc-100 p-2 rounded-xl">
+              <span className={clsx(
+                'w-2 h-2 rounded-full inline-block shrink-0',
+                compileMode === 'local' ? 'bg-green-500 animate-pulse' :
+                compileMode === 'wandbox' ? 'bg-blue-500' :
+                compileMode === 'mock' ? 'bg-orange-500 animate-pulse' :
+                'bg-zinc-300'
+              )}></span>
+              <span>
+                {compileMode === 'local' ? 'Verificación local en tu entorno con gcc' :
+                 compileMode === 'wandbox' ? 'Verificación remota (Wandbox API)' :
+                 compileMode === 'mock' ? 'Modo de simulación offline (Fallbacks activos)' :
+                 'Listo para compilar tu solución'}
+              </span>
+            </div>
+
+            {/* Diagnóstico: "siguiente cosa que arreglar" — sólo aparece si hay
+                tests fallidos y aporta una sugerencia heurística por cada uno. */}
+            <PracticeDiagnostics
+              tests={tests}
+              exercise={exercise}
+              onInspect={(test) => {
+                setArgs((test.entrada || []).map(String))
+                if (isMobile) {
+                  setActiveMobileTab('run')
+                } else {
+                  setActiveTab('run')
+                }
+              }}
+            />
+
+            {/* Separator */}
+            <div className="h-px bg-zinc-100" />
+
+            {/* Test list */}
+            {tests.length === 0 ? (
+              <p className="text-sm text-zinc-400 text-center py-6">Sin tests definidos aún para este ejercicio.</p>
+            ) : (
+              <div className="space-y-2">
+                {tests.map((test, i) => (
+                  <TestRow key={test.id || i} test={test} index={i} />
+                ))}
+              </div>
+            )}
+
+            {/* Session stats */}
+            <div className="rounded-2xl border border-zinc-100 bg-zinc-50/50 p-4 mt-6">
+              <h3 className="text-xs font-bold text-zinc-400 uppercase tracking-wider mb-3">Estadísticas de la sesión</h3>
+              <div className="grid grid-cols-3 gap-2 text-center">
+                <div>
+                  <p className="text-lg font-black text-zinc-800">{intentos}</p>
+                  <p className="text-[10px] font-semibold text-zinc-500">Intentos</p>
+                </div>
+                <div>
+                  <p className="text-lg font-black text-zinc-800">{timer.fmt}</p>
+                  <p className="text-[10px] font-semibold text-zinc-500">Tiempo</p>
+                </div>
+                <div>
+                  <p className="text-lg font-black text-green-600">{passedCount}</p>
+                  <p className="text-[10px] font-semibold text-zinc-500">Tests ✓</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        )
+      case 'run':
+        return (
+          <RunPanel
+            args={args}
+            setArgs={setArgs}
+            stdin={stdin}
+            setStdin={setStdin}
+            onRun={handleRunWithArgs}
+            onTrace={handleTrace}
+            running={runStatus === 'running'}
+            tracing={liveTrace.status === 'running'}
+            result={runResult?.networkError ? null : runResult}
+            traceError={runResult?.networkError ? `Error de red: ${runResult.networkError}` : null}
+            tests={exercise.tests}
+            exercise={exercise}
+          />
+        )
+      case 'mnemotecnia':
+        return (
+          <div className="space-y-4">
+            {/* Story card */}
+            <div className="border-l-4 border-purple-500 bg-purple-50 rounded-r-2xl px-4 py-3.5 text-xs leading-relaxed text-purple-950">
+              <div className="font-bold mb-1.5 flex items-center gap-1.5 text-purple-900">
+                <span className="text-base">{exercise.palacio?.emoji}</span>
+                <span>{exercise.palacio?.personaje}</span>
+              </div>
+              <p>{exercise.palacio?.historia}</p>
+            </div>
+            
+            {/* Anchors chips */}
+            <div className="space-y-2">
+              <h4 className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider">Anclas de Memoria</h4>
+              <div className="flex flex-wrap gap-1.5">
+                {exercise.palacio?.anclas?.map((anchor, i) => (
+                  <span key={i} className="px-2.5 py-1 bg-purple-100 text-purple-700 rounded-lg text-xs font-mono">
+                    {anchor}
+                  </span>
+                ))}
+              </div>
+            </div>
+
+            {/* AI image generator card */}
+            <ImageGenerator exercise={exercise} />
+
+            <div className="h-px bg-zinc-100 my-4" />
+
+            {/* Hint system */}
+            <HintSystem exercise={exercise} intentos={intentos} />
+
+            {/* Solution reveal */}
+            {intentos >= 3 && !allPassed && (
+              <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="mt-4">
+                <SolutionReveal exercise={exercise} onUse={handleUseSolution} />
+              </motion.div>
+            )}
+          </div>
+        )
+      default:
+        return null
+    }
+  }
+
   if (!exercise) {
     return (
       <div className="flex items-center justify-center h-screen bg-zinc-50">
@@ -853,7 +1166,7 @@ export default function PracticeMode() {
   }
 
   return (
-    <div className="flex flex-col h-screen bg-zinc-50 overflow-hidden">
+    <div className={clsx("flex flex-col h-screen bg-zinc-50 overflow-hidden", isMobile && "pb-14")}>
       <CelebrationOverlay show={celebrate} onClose={() => setCelebrate(false)} />
       <GdbTraceModal
         open={showGdbTrace}
@@ -894,7 +1207,7 @@ export default function PracticeMode() {
         </div>
 
         <div className="flex items-center gap-4">
-          <div className="flex items-center gap-4 text-xs text-zinc-500">
+          <div className="flex items-center gap-4 text-xs text-zinc-500 hidden sm:flex">
             <span>Intentos: <strong className="text-zinc-700">{intentos}</strong></span>
             <span>Tests: <strong className="text-green-600">{passedCount}</strong>/<strong className="text-zinc-700">{tests.length}</strong></span>
           </div>
@@ -913,7 +1226,7 @@ export default function PracticeMode() {
       </header>
 
       {/* ── Main 2-column layout ── */}
-      <div className="flex flex-1 overflow-hidden">
+      <div className="flex flex-1 overflow-hidden relative">
 
         {/* ── LEFT: Editor ── */}
         <div className="flex flex-col flex-1 min-w-0 border-r border-zinc-200">
@@ -959,33 +1272,54 @@ export default function PracticeMode() {
                   setCompileSource('')
                   setCompileUserCode('')
                 }}
+                preferredCompileMode={preferredCompileMode}
+                onToggleMock={() => {
+                  setPreferredCompileMode('mock')
+                  handleCompile('mock')
+                }}
               />
             )}
           </AnimatePresence>
 
           {/* Bottom action bar */}
-          <div className="shrink-0 flex items-center gap-3 px-4 py-3 bg-white border-t border-zinc-200">
+          <div className="shrink-0 flex flex-wrap items-center gap-3 px-4 py-3 bg-white border-t border-zinc-200">
             <motion.button
               whileTap={{ scale: 0.95 }}
-              onClick={handleCompile}
+              onClick={() => handleCompile()}
               disabled={isRunning}
               className={clsx(
-                'flex items-center gap-2 px-5 py-2 rounded-lg font-semibold text-sm transition-all',
+                'flex items-center gap-2 px-5 py-2 rounded-lg font-semibold text-sm transition-all shadow-sm',
                 isRunning
                   ? 'bg-zinc-100 text-zinc-400 cursor-not-allowed'
-                  : 'bg-zinc-900 text-white hover:bg-zinc-700 shadow-sm'
+                  : preferredCompileMode === 'mock'
+                  ? 'bg-purple-600 text-white hover:bg-purple-700 shadow-purple-100'
+                  : 'bg-zinc-900 text-white hover:bg-zinc-700'
               )}
             >
               <Play size={15} className={isRunning ? 'animate-pulse' : ''} />
-              {isRunning ? 'Compilando…' : 'Compilar ▶'}
+              {isRunning
+                ? 'Validando…'
+                : preferredCompileMode === 'mock'
+                ? 'Verificar (Simulador) ⚡'
+                : 'Compilar ▶'}
             </motion.button>
+
+            <select
+              value={preferredCompileMode}
+              onChange={(e) => setPreferredCompileMode(e.target.value)}
+              className="px-2 py-2 bg-zinc-50 border border-zinc-200 rounded-lg text-xs font-semibold text-zinc-700 focus:outline-none focus:ring-1 focus:ring-zinc-400 cursor-pointer"
+              title="Elige si deseas validar usando el compilador Wandbox o la simulación offline"
+            >
+              <option value="auto">Verificación Automática (Compilador)</option>
+              <option value="mock">Simulador Offline (Instantáneo)</option>
+            </select>
 
             <button
               onClick={handleClear}
               className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm text-zinc-600 bg-zinc-100 hover:bg-zinc-200 transition-colors"
             >
               <Trash2 size={14} />
-              Limpiar 🧹
+              <span className="hidden sm:inline">Limpiar 🧹</span>
             </button>
 
             <button
@@ -994,7 +1328,7 @@ export default function PracticeMode() {
               title="Guardar el código actual como variante"
             >
               <Save size={14} />
-              Guardar variante
+              <span className="hidden md:inline">Guardar variante</span>
             </button>
 
             <button
@@ -1003,7 +1337,7 @@ export default function PracticeMode() {
               title="Compilar instrumentado y ver paso a paso con los args actuales"
             >
               <Microscope size={14} />
-              Ver ejecución paso a paso
+              <span className="hidden lg:inline">Ver ejecución paso a paso</span>
             </button>
 
             <label className="ml-auto flex items-center gap-1.5 text-xs text-zinc-500 cursor-pointer select-none" title="Compilar con -Wall -Wextra -Werror, como la Moulinette del 42">
@@ -1013,250 +1347,210 @@ export default function PracticeMode() {
                 onChange={toggleStrictMoulinette}
                 className="accent-zinc-900"
               />
-              Moulinette estricta
+              <span className="hidden md:inline">Moulinette estricta</span>
             </label>
-            <span className="text-xs text-zinc-400 font-mono">Ctrl+Enter</span>
+            <span className="text-xs text-zinc-400 font-mono hidden sm:inline">Ctrl+Enter</span>
           </div>
         </div>
+
+        {/* ── DRAGGABLE DIVIDER (Resizer) ── */}
+        {!isMobile && !isSidebarCollapsed && (
+          <div
+            onMouseDown={handleMouseDown}
+            className="w-[5px] hover:w-[7px] bg-zinc-200 hover:bg-zinc-400 cursor-col-resize select-none shrink-0 transition-all flex items-center justify-center relative group z-30"
+          >
+            <button
+              onClick={(e) => {
+                e.stopPropagation()
+                setIsSidebarCollapsed(true)
+              }}
+              className="absolute left-1/2 -translate-x-1/2 top-1/2 -translate-y-1/2 w-4 h-7 rounded-full bg-zinc-800 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hover:bg-zinc-900 border border-zinc-700 shadow"
+              title="Ocultar panel lateral"
+            >
+              <span className="text-[10px] font-bold">&gt;</span>
+            </button>
+          </div>
+        )}
 
         {/* ── RIGHT: Tabbed Sidebar Panel ── */}
-        <div className="w-96 xl:w-[420px] shrink-0 flex flex-col bg-white border-l border-zinc-200 overflow-hidden">
-          
-          {/* Tab Navigation Headers */}
-          <div className="flex border-b border-zinc-200 bg-zinc-50 shrink-0 select-none">
-            <button
-              onClick={() => setActiveTab('enunciado')}
-              className={clsx(
-                'flex-1 py-3 text-xs font-semibold flex items-center justify-center gap-1.5 border-b-2 transition-all duration-200 focus:outline-none',
-                activeTab === 'enunciado'
-                  ? 'border-zinc-900 text-zinc-900 bg-white font-bold'
-                  : 'border-transparent text-zinc-500 hover:text-zinc-800 hover:bg-zinc-100/50'
-              )}
-            >
-              <ClipboardList size={14} />
-              Enunciado
-            </button>
-            <button
-              onClick={() => setActiveTab('moulinette')}
-              className={clsx(
-                'flex-1 py-3 text-xs font-semibold flex items-center justify-center gap-1.5 border-b-2 transition-all duration-200 focus:outline-none',
-                activeTab === 'moulinette'
-                  ? 'border-zinc-900 text-zinc-900 bg-white font-bold'
-                  : 'border-transparent text-zinc-500 hover:text-zinc-800 hover:bg-zinc-100/50'
-              )}
-            >
-              <Trophy size={14} />
-              Moulinette
-              <span className={clsx(
-                'rounded-full px-1.5 py-0.5 text-[10px] font-mono shrink-0 ml-0.5',
-                allPassed ? 'bg-green-100 text-green-700 font-bold' : 'bg-zinc-200 text-zinc-600'
-              )}>
-                {passedCount}/{tests.length}
-              </span>
-            </button>
-            <button
-              onClick={() => setActiveTab('run')}
-              className={clsx(
-                'flex-1 py-3 text-xs font-semibold flex items-center justify-center gap-1.5 border-b-2 transition-all duration-200 focus:outline-none',
-                activeTab === 'run'
-                  ? 'border-zinc-900 text-zinc-900 bg-white font-bold'
-                  : 'border-transparent text-zinc-500 hover:text-zinc-800 hover:bg-zinc-100/50'
-              )}
-            >
-              <Terminal size={14} />
-              Params
-            </button>
-            <button
-              onClick={() => setActiveTab('mnemotecnia')}
-              className={clsx(
-                'flex-1 py-3 text-xs font-semibold flex items-center justify-center gap-1.5 border-b-2 transition-all duration-200 focus:outline-none',
-                activeTab === 'mnemotecnia'
-                  ? 'border-zinc-900 text-zinc-900 bg-white font-bold'
-                  : 'border-transparent text-zinc-500 hover:text-zinc-800 hover:bg-zinc-100/50'
-              )}
-            >
-              <BookOpen size={14} />
-              Mnemotecnia
-            </button>
-          </div>
-
-          {/* Active Tab Panel Content */}
-          <div className="flex-1 overflow-y-auto p-4">
-            <AnimatePresence mode="wait">
-              <motion.div
-                key={activeTab}
-                initial={{ opacity: 0, y: 5 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -5 }}
-                transition={{ duration: 0.15 }}
-                className="space-y-4"
+        {!isMobile && !isSidebarCollapsed && (
+          <div
+            style={{ width: `${sidebarWidth}px` }}
+            className="shrink-0 flex flex-col bg-white border-l border-zinc-200 overflow-hidden"
+          >
+            {/* Tab Navigation Headers */}
+            <div className="flex border-b border-zinc-200 bg-zinc-50 shrink-0 select-none">
+              <button
+                onClick={() => setActiveTab('enunciado')}
+                className={clsx(
+                  'flex-1 py-3 text-xs font-semibold flex items-center justify-center gap-1.5 border-b-2 transition-all duration-200 focus:outline-none',
+                  activeTab === 'enunciado'
+                    ? 'border-zinc-900 text-zinc-900 bg-white font-bold'
+                    : 'border-transparent text-zinc-500 hover:text-zinc-800 hover:bg-zinc-100/50'
+                )}
               >
-                {/* --- TAB: ENUNCIADO --- */}
-                {activeTab === 'enunciado' && (
-                  <div className="space-y-4">
-                    <div className="flex items-center gap-2">
-                      <ClipboardList size={16} className="text-zinc-500" />
-                      <h2 className="font-bold text-sm text-zinc-800">Enunciado del Ejercicio</h2>
-                    </div>
-                    <SubjectViewer
-                      subject={exercise.subject}
-                      funcionesPermitidas={exercise.funcionesPermitidas}
-                      archivosEsperados={exercise.archivosEsperados}
-                    />
-                  </div>
+                <ClipboardList size={14} />
+                Enunciado
+              </button>
+              <button
+                onClick={() => setActiveTab('moulinette')}
+                className={clsx(
+                  'flex-1 py-3 text-xs font-semibold flex items-center justify-center gap-1.5 border-b-2 transition-all duration-200 focus:outline-none',
+                  activeTab === 'moulinette'
+                    ? 'border-zinc-900 text-zinc-900 bg-white font-bold'
+                    : 'border-transparent text-zinc-500 hover:text-zinc-800 hover:bg-zinc-100/50'
                 )}
-
-                {/* --- TAB: MOULINETTE --- */}
-                {activeTab === 'moulinette' && (
-                  <div className="space-y-4">
-                    {/* Tests header */}
-                    <div className="flex items-center justify-between">
-                      <h2 className="font-semibold text-zinc-800 flex items-center gap-2 text-sm">
-                        <Trophy size={16} className="text-amber-500" />
-                        Tests de la Moulinette
-                      </h2>
-                      <span className={clsx(
-                        'text-sm font-bold tabular-nums',
-                        allPassed ? 'text-green-600' : 'text-zinc-500'
-                      )}>
-                        {passedCount}/{tests.length}
-                      </span>
-                    </div>
-
-                    {/* Progress bar */}
-                    <div className="h-2 bg-zinc-100 rounded-full overflow-hidden">
-                      <motion.div
-                        className={clsx('h-full rounded-full', allPassed ? 'bg-green-500' : 'bg-blue-500')}
-                        animate={{ width: tests.length ? `${(passedCount / tests.length) * 100}%` : '0%' }}
-                        transition={{ type: 'spring', stiffness: 200, damping: 25 }}
-                      />
-                    </div>
-
-                    {/* Compilation mode indicator */}
-                    <div className="flex items-center gap-2 text-xs text-zinc-500 bg-zinc-50 border border-zinc-100 p-2 rounded-xl">
-                      <span className={clsx(
-                        'w-2 h-2 rounded-full inline-block shrink-0',
-                        compileMode === 'local' ? 'bg-green-500 animate-pulse' :
-                        compileMode === 'wandbox' ? 'bg-blue-500' :
-                        compileMode === 'mock' ? 'bg-orange-500 animate-pulse' :
-                        'bg-zinc-300'
-                      )}></span>
-                      <span>
-                        {compileMode === 'local' ? 'Verificación local en tu entorno con gcc' :
-                         compileMode === 'wandbox' ? 'Verificación remota (Wandbox API)' :
-                         compileMode === 'mock' ? 'Modo de simulación offline (Fallbacks activos)' :
-                         'Listo para compilar tu solución'}
-                      </span>
-                    </div>
-
-                    {/* Diagnóstico: "siguiente cosa que arreglar" — sólo aparece si hay
-                        tests fallidos y aporta una sugerencia heurística por cada uno. */}
-                    <PracticeDiagnostics
-                      tests={tests}
-                      exercise={exercise}
-                      onInspect={(test) => {
-                        setArgs((test.entrada || []).map(String))
-                        setActiveTab('run')
-                      }}
-                    />
-
-                    {/* Separator */}
-                    <div className="h-px bg-zinc-100" />
-
-                    {/* Test list */}
-                    {tests.length === 0 ? (
-                      <p className="text-sm text-zinc-400 text-center py-6">Sin tests definidos aún para este ejercicio.</p>
-                    ) : (
-                      <div className="space-y-2">
-                        {tests.map((test, i) => (
-                          <TestRow key={test.id || i} test={test} index={i} />
-                        ))}
-                      </div>
-                    )}
-
-                    {/* Session stats */}
-                    <div className="rounded-2xl border border-zinc-100 bg-zinc-50/50 p-4 mt-6">
-                      <h3 className="text-xs font-bold text-zinc-400 uppercase tracking-wider mb-3">Estadísticas de la sesión</h3>
-                      <div className="grid grid-cols-3 gap-2 text-center">
-                        <div>
-                          <p className="text-lg font-black text-zinc-800">{intentos}</p>
-                          <p className="text-[10px] font-semibold text-zinc-500">Intentos</p>
-                        </div>
-                        <div>
-                          <p className="text-lg font-black text-zinc-800">{timer.fmt}</p>
-                          <p className="text-[10px] font-semibold text-zinc-500">Tiempo</p>
-                        </div>
-                        <div>
-                          <p className="text-lg font-black text-green-600">{passedCount}</p>
-                          <p className="text-[10px] font-semibold text-zinc-500">Tests ✓</p>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
+              >
+                <Trophy size={14} />
+                Moulinette
+                <span className={clsx(
+                  'rounded-full px-1.5 py-0.5 text-[10px] font-mono shrink-0 ml-0.5',
+                  allPassed ? 'bg-green-100 text-green-700 font-bold' : 'bg-zinc-200 text-zinc-600'
+                )}>
+                  {passedCount}/{tests.length}
+                </span>
+              </button>
+              <button
+                onClick={() => setActiveTab('run')}
+                className={clsx(
+                  'flex-1 py-3 text-xs font-semibold flex items-center justify-center gap-1.5 border-b-2 transition-all duration-200 focus:outline-none',
+                  activeTab === 'run'
+                    ? 'border-zinc-900 text-zinc-900 bg-white font-bold'
+                    : 'border-transparent text-zinc-500 hover:text-zinc-800 hover:bg-zinc-100/50'
                 )}
-
-                {/* --- TAB: RUN --- */}
-                {activeTab === 'run' && (
-                  <RunPanel
-                    args={args}
-                    setArgs={setArgs}
-                    stdin={stdin}
-                    setStdin={setStdin}
-                    onRun={handleRunWithArgs}
-                    onTrace={handleTrace}
-                    running={runStatus === 'running'}
-                    tracing={liveTrace.status === 'running'}
-                    result={runResult?.networkError ? null : runResult}
-                    traceError={runResult?.networkError ? `Error de red: ${runResult.networkError}` : null}
-                    tests={exercise.tests}
-                  />
+              >
+                <Terminal size={14} />
+                Params
+              </button>
+              <button
+                onClick={() => setActiveTab('mnemotecnia')}
+                className={clsx(
+                  'flex-1 py-3 text-xs font-semibold flex items-center justify-center gap-1.5 border-b-2 transition-all duration-200 focus:outline-none',
+                  activeTab === 'mnemotecnia'
+                    ? 'border-zinc-900 text-zinc-900 bg-white font-bold'
+                    : 'border-transparent text-zinc-500 hover:text-zinc-800 hover:bg-zinc-100/50'
                 )}
+              >
+                <BookOpen size={14} />
+                Mnemotecnia
+              </button>
+            </div>
 
-                {/* --- TAB: MNEMOTECNIA --- */}
-                {activeTab === 'mnemotecnia' && (
-                  <div className="space-y-4">
-                    {/* Story card */}
-                    <div className="border-l-4 border-purple-500 bg-purple-50 rounded-r-2xl px-4 py-3.5 text-xs leading-relaxed text-purple-950">
-                      <div className="font-bold mb-1.5 flex items-center gap-1.5 text-purple-900">
-                        <span className="text-base">{exercise.palacio?.emoji}</span>
-                        <span>{exercise.palacio?.personaje}</span>
-                      </div>
-                      <p>{exercise.palacio?.historia}</p>
-                    </div>
-                    
-                    {/* Anchors chips */}
-                    <div className="space-y-2">
-                      <h4 className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider">Anclas de Memoria</h4>
-                      <div className="flex flex-wrap gap-1.5">
-                        {exercise.palacio?.anclas?.map((anchor, i) => (
-                          <span key={i} className="px-2.5 py-1 bg-purple-100 text-purple-700 rounded-lg text-xs font-mono">
-                            {anchor}
-                          </span>
-                        ))}
-                      </div>
-                    </div>
-
-                    {/* AI image generator card */}
-                    <ImageGenerator exercise={exercise} />
-
-                    <div className="h-px bg-zinc-100 my-4" />
-
-                    {/* Hint system */}
-                    <HintSystem exercise={exercise} intentos={intentos} />
-
-                    {/* Solution reveal */}
-                    {intentos >= 3 && !allPassed && (
-                      <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="mt-4">
-                        <SolutionReveal exercise={exercise} onUse={handleUseSolution} />
-                      </motion.div>
-                    )}
-                  </div>
-                )}
-              </motion.div>
-            </AnimatePresence>
+            {/* Active Tab Panel Content */}
+            <div className="flex-1 overflow-y-auto p-4">
+              <AnimatePresence mode="wait">
+                <motion.div
+                  key={activeTab}
+                  initial={{ opacity: 0, y: 5 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -5 }}
+                  transition={{ duration: 0.15 }}
+                  className="space-y-4"
+                >
+                  {renderTabContent(activeTab)}
+                </motion.div>
+              </AnimatePresence>
+            </div>
           </div>
-        </div>
+        )}
+
+        {/* Floating expand button if sidebar is hidden */}
+        {!isMobile && isSidebarCollapsed && (
+          <button
+            onClick={() => setIsSidebarCollapsed(false)}
+            className="absolute right-4 bottom-20 z-40 bg-zinc-900 text-white rounded-full p-3 shadow-lg hover:bg-zinc-800 transition-all flex items-center justify-center hover:scale-105 border border-zinc-700"
+            title="Mostrar panel lateral"
+          >
+            <ClipboardList size={20} />
+          </button>
+        )}
       </div>
+
+      {/* ── MOBILE BOTTOM SHEET ── */}
+      {isMobile && (
+        <AnimatePresence>
+          {activeMobileTab && (
+            <div className="fixed inset-0 z-50 bg-black/40 flex flex-col justify-end">
+              <div className="absolute inset-0" onClick={() => setActiveMobileTab(null)} />
+              <motion.div
+                initial={{ y: '100%' }}
+                animate={{ y: 0 }}
+                exit={{ y: '100%' }}
+                transition={{ type: 'spring', damping: 25, stiffness: 250 }}
+                className="relative z-10 w-full h-[70vh] bg-white rounded-t-3xl border-t border-zinc-200 flex flex-col shadow-2xl overflow-hidden"
+              >
+                {/* Handle bar */}
+                <div className="flex items-center justify-between px-5 py-3.5 border-b border-zinc-100 bg-zinc-50 shrink-0 select-none relative">
+                  <div className="w-12 h-1 bg-zinc-300 rounded-full absolute left-1/2 -translate-x-1/2 top-2" />
+                  <div className="flex items-center gap-1.5 text-xs font-bold text-zinc-600 uppercase mt-1">
+                    {activeMobileTab === 'enunciado' && 'Enunciado'}
+                    {activeMobileTab === 'moulinette' && `Moulinette (${passedCount}/${tests.length})`}
+                    {activeMobileTab === 'run' && 'Parámetros'}
+                    {activeMobileTab === 'mnemotecnia' && 'Mnemotecnia'}
+                  </div>
+                  <button
+                    onClick={() => setActiveMobileTab(null)}
+                    className="p-1 rounded-full bg-zinc-200 text-zinc-600 hover:bg-zinc-300 transition-colors"
+                  >
+                    <X size={14} />
+                  </button>
+                </div>
+                
+                {/* Content */}
+                <div className="flex-1 overflow-y-auto p-4 space-y-4 pb-8">
+                  {renderTabContent(activeMobileTab)}
+                </div>
+              </motion.div>
+            </div>
+          )}
+        </AnimatePresence>
+      )}
+
+      {/* ── MOBILE TAB BAR FOOTER ── */}
+      {isMobile && (
+        <div className="fixed inset-x-0 bottom-0 bg-white border-t border-zinc-200 flex items-center justify-around py-2 z-40 shadow-lg px-2">
+          <button
+            onClick={() => setActiveMobileTab('enunciado')}
+            className={clsx(
+              "flex flex-col items-center gap-1 py-1 px-3 text-[10px] font-semibold transition-all rounded-lg",
+              activeMobileTab === 'enunciado' ? "text-purple-600 bg-purple-50 font-bold" : "text-zinc-500 hover:text-zinc-800"
+            )}
+          >
+            <ClipboardList size={18} />
+            <span>Enunciado</span>
+          </button>
+          <button
+            onClick={() => setActiveMobileTab('moulinette')}
+            className={clsx(
+              "flex flex-col items-center gap-1 py-1 px-3 text-[10px] font-semibold transition-all rounded-lg",
+              activeMobileTab === 'moulinette' ? "text-purple-600 bg-purple-50 font-bold" : "text-zinc-500 hover:text-zinc-800"
+            )}
+          >
+            <Trophy size={18} />
+            <span>Moulinette</span>
+          </button>
+          <button
+            onClick={() => setActiveMobileTab('run')}
+            className={clsx(
+              "flex flex-col items-center gap-1 py-1 px-3 text-[10px] font-semibold transition-all rounded-lg",
+              activeMobileTab === 'run' ? "text-purple-600 bg-purple-50 font-bold" : "text-zinc-500 hover:text-zinc-800"
+            )}
+          >
+            <Terminal size={18} />
+            <span>Params</span>
+          </button>
+          <button
+            onClick={() => setActiveMobileTab('mnemotecnia')}
+            className={clsx(
+              "flex flex-col items-center gap-1 py-1 px-3 text-[10px] font-semibold transition-all rounded-lg",
+              activeMobileTab === 'mnemotecnia' ? "text-purple-600 bg-purple-50 font-bold" : "text-zinc-500 hover:text-zinc-800"
+            )}
+          >
+            <BookOpen size={18} />
+            <span>Memoria</span>
+          </button>
+        </div>
+      )}
     </div>
   )
 }
