@@ -1,13 +1,22 @@
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Image as ImageIcon, Sparkles, RefreshCw, Save, Edit3, Check, HelpCircle, Key, Eye, EyeOff } from 'lucide-react'
+import { Image as ImageIcon, Sparkles, RefreshCw, Save, Edit3, Check, HelpCircle, Key, Eye, EyeOff, Settings } from 'lucide-react'
 import clsx from 'clsx'
 
 export default function ImageGenerator({ exercise, onSaveImage, savedImageUrl = null }) {
-  const [apiKey, setApiKey] = useState(() => {
+  const [provider, setProvider] = useState(() => {
+    return localStorage.getItem('42prep-img-provider') || 'gemini'
+  })
+
+  const [geminiApiKey, setGeminiApiKey] = useState(() => {
     return import.meta.env.VITE_GEMINI_API_KEY || localStorage.getItem('42prep-gemini-api-key') || ''
   })
-  const [showKeyInput, setShowKeyInput] = useState(!apiKey)
+
+  const [pollinationsApiKey, setPollinationsApiKey] = useState(() => {
+    return import.meta.env.VITE_POLLINATIONS_API_KEY || localStorage.getItem('42prep-pollinations-api-key') || ''
+  })
+
+  const [showKeyInput, setShowKeyInput] = useState(!geminiApiKey && !pollinationsApiKey)
   const [showKeyText, setShowKeyText] = useState(false)
   const [imageUrl, setImageUrl] = useState(savedImageUrl || localStorage.getItem(`42prep-img-${exercise.id}`) || null)
   const [prompt, setPrompt] = useState('')
@@ -43,17 +52,29 @@ export default function ImageGenerator({ exercise, onSaveImage, savedImageUrl = 
     }
   }, [savedImageUrl])
 
-  const handleSaveApiKey = (key) => {
+  useEffect(() => {
+    localStorage.setItem('42prep-img-provider', provider)
+  }, [provider])
+
+  const handleSaveGeminiKey = (key) => {
     const trimmed = key.trim()
-    setApiKey(trimmed)
+    setGeminiApiKey(trimmed)
     localStorage.setItem('42prep-gemini-api-key', trimmed)
   }
 
+  const handleSavePollinationsKey = (key) => {
+    const trimmed = key.trim()
+    setPollinationsApiKey(trimmed)
+    localStorage.setItem('42prep-pollinations-api-key', trimmed)
+  }
+
   const handleGenerate = async () => {
-    if (!apiKey) {
+    const activeKey = provider === 'gemini' ? geminiApiKey : pollinationsApiKey
+
+    if (!activeKey) {
       setShowKeyInput(true)
       setHasError(true)
-      setErrorMsg('Por favor, introduce tu API Key de Google AI Studio para activar el generador.')
+      setErrorMsg(`Por favor, introduce tu API Key para ${provider === 'gemini' ? 'Google AI Studio' : 'Pollinations.ai'}.`)
       return
     }
 
@@ -65,48 +86,80 @@ export default function ImageGenerator({ exercise, onSaveImage, savedImageUrl = 
     const finalPrompt = customPrompt.trim() || prompt
 
     try {
-      const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-image:generateContent?key=${apiKey}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          contents: [{
-            parts: [
-              { text: finalPrompt }
-            ]
-          }],
-          generationConfig: {
-            responseModalities: ["TEXT", "IMAGE"]
-          }
+      if (provider === 'gemini') {
+        // Google Gemini Imagen 3
+        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-image:generateContent?key=${activeKey}`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            contents: [{
+              parts: [
+                { text: finalPrompt }
+              ]
+            }],
+            generationConfig: {
+              responseModalities: ["TEXT", "IMAGE"]
+            }
+          })
         })
-      })
 
-      if (!response.ok) {
-        const errData = await response.json().catch(() => ({}));
-        throw new Error(errData.error?.message || `HTTP Error ${response.status}`);
+        if (!response.ok) {
+          const errData = await response.json().catch(() => ({}));
+          const msg = errData.error?.message || `HTTP Error ${response.status}`;
+          
+          if (msg.includes('Quota exceeded') && msg.includes('limit: 0')) {
+            throw new Error('Cuota excedida (Límite 0). Tu API Key de Google no tiene una cuenta de facturación (tarjeta de crédito) vinculada en Google Cloud. AI Studio bloquea el uso de modelos de imágenes si el proyecto está en modo gratuito absoluto. Solución: Vincula facturación en tu Google Cloud Console, o cambia el proveedor de imágenes a Pollinations.ai usando una clave sin tarjeta.');
+          }
+          throw new Error(msg);
+        }
+
+        const data = await response.json()
+        const part = data.candidates?.[0]?.content?.parts?.find(p => p.inlineData)
+        
+        if (!part || !part.inlineData) {
+          throw new Error('No se recibió la imagen en el formato esperado de la API de Gemini.')
+        }
+
+        const mimeType = part.inlineData.mimeType || 'image/jpeg'
+        const base64Data = part.inlineData.data
+        const dataUrl = `data:${mimeType};base64,${base64Data}`
+
+        setImageUrl(dataUrl)
+        localStorage.setItem(`42prep-img-${exercise.id}`, dataUrl)
+        localStorage.setItem(`42prep-prompt-${exercise.id}`, finalPrompt)
+        setIsLoading(false)
+      } else {
+        // Pollinations.ai with Free API key
+        const seed = Math.floor(Math.random() * 1000000)
+        const cleanedPrompt = finalPrompt
+          .replace(/\\/g, '') // remove backslashes
+          .replace(/[\/\(\)\{\}\[\]"']/g, ' ') // remove parenthesis, quotes, slashes
+          .replace(/\s+/g, ' ')
+          .trim()
+        const encodedPrompt = encodeURIComponent(cleanedPrompt)
+        const url = `https://image.pollinations.ai/prompt/${encodedPrompt}?width=800&height=800&nologo=true&seed=${seed}&key=${activeKey}`
+        
+        // Pre-flight check to verify the key works and is not returning 402/Blocked
+        const testRes = await fetch(url)
+        if (!testRes.ok) {
+          if (testRes.status === 402) {
+            throw new Error('El servidor de Pollinations.ai devolvió 402. Esto significa que tu clave gratuita no tiene créditos o ha expirado. Por favor ingresa una nueva clave en enter.pollinations.ai.');
+          }
+          throw new Error(`Error en Pollinations.ai (HTTP ${testRes.status})`);
+        }
+
+        setImageUrl(url)
+        localStorage.setItem(`42prep-img-${exercise.id}`, url)
+        localStorage.setItem(`42prep-prompt-${exercise.id}`, finalPrompt)
+        setIsLoading(false)
       }
-
-      const data = await response.json()
-      const part = data.candidates?.[0]?.content?.parts?.find(p => p.inlineData)
-      
-      if (!part || !part.inlineData) {
-        throw new Error('No se recibió la imagen en el formato esperado de la API de Gemini.')
-      }
-
-      const mimeType = part.inlineData.mimeType || 'image/jpeg'
-      const base64Data = part.inlineData.data
-      const dataUrl = `data:${mimeType};base64,${base64Data}`
-
-      setImageUrl(dataUrl)
-      localStorage.setItem(`42prep-img-${exercise.id}`, dataUrl)
-      localStorage.setItem(`42prep-prompt-${exercise.id}`, finalPrompt)
-      setIsLoading(false)
     } catch (err) {
       console.error(err)
       setIsLoading(false)
       setHasError(true)
-      setErrorMsg(err.message || 'Error al generar la imagen con Gemini. Revisa tu clave o conexión.')
+      setErrorMsg(err.message || 'Error al generar la imagen. Revisa tu clave o conexión.')
     }
   }
 
@@ -130,18 +183,16 @@ export default function ImageGenerator({ exercise, onSaveImage, savedImageUrl = 
           <h3 className="font-bold text-zinc-900 text-sm">Asociación Visual (IA Generativa)</h3>
         </div>
         <div className="flex items-center gap-1.5">
-          {apiKey && (
-            <button
-              onClick={() => setShowKeyInput(o => !o)}
-              className="text-[10px] text-zinc-500 hover:text-zinc-800 underline font-semibold flex items-center gap-0.5"
-            >
-              <Key size={10} />
-              {showKeyInput ? 'Ocultar ajuste' : 'Ajustar API Key'}
-            </button>
-          )}
+          <button
+            onClick={() => setShowKeyInput(o => !o)}
+            className="text-[10px] text-zinc-500 hover:text-zinc-800 underline font-semibold flex items-center gap-0.5"
+          >
+            <Settings size={10} />
+            Configuración
+          </button>
           {imageUrl && (
             <span className="text-xs bg-purple-50 text-purple-600 px-2 py-0.5 rounded-full font-semibold flex items-center gap-1">
-              <Sparkles size={10} /> Gemini Imagen 3
+              <Sparkles size={10} /> {provider === 'gemini' ? 'Gemini Imagen' : 'Pollinations'}
             </span>
           )}
         </div>
@@ -149,44 +200,98 @@ export default function ImageGenerator({ exercise, onSaveImage, savedImageUrl = 
 
       {/* API Key Configuration Panel */}
       {showKeyInput && (
-        <div className="rounded-2xl border border-amber-200 bg-amber-50/50 p-4 space-y-2 text-xs">
-          <p className="font-bold text-amber-800 flex items-center gap-1.5">
-            <Key size={13} className="text-amber-600" />
-            Configura tu API Key de Google AI Studio
-          </p>
-          <p className="text-[11px] text-amber-700 leading-normal">
-            Esta plataforma utiliza el modelo <strong>gemini-3.1-flash-image</strong> (Imagen 3) de Google para crear ilustraciones personalizadas. La clave es gratuita y se almacena únicamente en tu navegador.
-          </p>
-          <ol className="list-decimal list-inside text-[10px] text-amber-600 space-y-0.5">
-            <li>Consigue tu clave gratis en <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener noreferrer" className="underline font-semibold text-amber-900">Google AI Studio</a>.</li>
-            <li>Pégala abajo o añádela en tu <code>.env</code> como <code>VITE_GEMINI_API_KEY</code>.</li>
-          </ol>
-          <div className="flex gap-1.5 mt-2">
-            <div className="relative flex-1">
-              <input
-                type={showKeyText ? "text" : "password"}
-                placeholder="Pega tu clave AIzaSy..."
-                value={apiKey}
-                onChange={(e) => handleSaveApiKey(e.target.value)}
-                className="w-full pl-2.5 pr-8 py-1.5 border border-amber-200 rounded-lg text-xs bg-white focus:outline-none focus:ring-1 focus:ring-amber-500 font-mono"
-              />
-              <button
-                type="button"
-                onClick={() => setShowKeyText(o => !o)}
-                className="absolute right-2 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-600"
-              >
-                {showKeyText ? <EyeOff size={13} /> : <Eye size={13} />}
-              </button>
-            </div>
-            {apiKey && (
-              <button
-                onClick={() => setShowKeyInput(false)}
-                className="px-3 py-1.5 bg-amber-600 hover:bg-amber-700 text-white rounded-lg text-[10px] font-bold transition-all shadow"
-              >
-                Guardar
-              </button>
-            )}
+        <div className="rounded-2xl border border-amber-200 bg-amber-50/50 p-4 space-y-3 text-xs">
+          <div className="flex items-center justify-between">
+            <p className="font-bold text-amber-800 flex items-center gap-1.5">
+              <Key size={13} className="text-amber-600" />
+              Proveedor de Generación de IA
+            </p>
+            <select
+              value={provider}
+              onChange={(e) => {
+                setProvider(e.target.value)
+                setHasError(false)
+              }}
+              className="bg-white border border-amber-200 rounded px-1.5 py-0.5 text-[11px] font-semibold text-amber-900 focus:outline-none"
+            >
+              <option value="gemini">Google Gemini (Imagen 3)</option>
+              <option value="pollinations">Pollinations.ai (Gratis sin tarjeta)</option>
+            </select>
           </div>
+
+          {provider === 'gemini' ? (
+            <div className="space-y-2">
+              <p className="text-[11px] text-amber-700 leading-normal">
+                Genera con <strong>gemini-3.1-flash-image</strong>. Requiere un proyecto en Google AI Studio que tenga la **facturación habilitada** (cuenta vinculada), de lo contrario Google limita la cuota a 0.
+              </p>
+              <ol className="list-decimal list-inside text-[10px] text-amber-600 space-y-0.5">
+                <li>Consigue tu clave en <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener noreferrer" className="underline font-semibold text-amber-900">Google AI Studio</a>.</li>
+                <li>Vincula facturación en Google Cloud Console para habilitar la cuota de imágenes.</li>
+              </ol>
+              <div className="flex gap-1.5 mt-2">
+                <div className="relative flex-1">
+                  <input
+                    type={showKeyText ? "text" : "password"}
+                    placeholder="Pega tu clave AIzaSy..."
+                    value={geminiApiKey}
+                    onChange={(e) => handleSaveGeminiKey(e.target.value)}
+                    className="w-full pl-2.5 pr-8 py-1.5 border border-amber-200 rounded-lg text-xs bg-white focus:outline-none focus:ring-1 focus:ring-amber-500 font-mono"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowKeyText(o => !o)}
+                    className="absolute right-2 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-600"
+                  >
+                    {showKeyText ? <EyeOff size={13} /> : <Eye size={13} />}
+                  </button>
+                </div>
+                {geminiApiKey && (
+                  <button
+                    onClick={() => setShowKeyInput(false)}
+                    className="px-3 py-1.5 bg-amber-600 hover:bg-amber-700 text-white rounded-lg text-[10px] font-bold transition-all shadow"
+                  >
+                    Guardar
+                  </button>
+                )}
+              </div>
+            </div>
+          ) : (
+            <div className="space-y-2">
+              <p className="text-[11px] text-amber-700 leading-normal">
+                Genera con <strong>Flux/Sana</strong>. Requiere una API Key gratuita de Pollinations.ai. Es 100% gratuita y **no requiere tarjetas de crédito**.
+              </p>
+              <ol className="list-decimal list-inside text-[10px] text-amber-600 space-y-0.5">
+                <li>Regístrate y copia tu clave en <a href="https://enter.pollinations.ai" target="_blank" rel="noopener noreferrer" className="underline font-semibold text-amber-900">enter.pollinations.ai</a> (GitHub/Google login).</li>
+                <li>Pégala aquí abajo para empezar.</li>
+              </ol>
+              <div className="flex gap-1.5 mt-2">
+                <div className="relative flex-1">
+                  <input
+                    type={showKeyText ? "text" : "password"}
+                    placeholder="Pega tu clave pk_..."
+                    value={pollinationsApiKey}
+                    onChange={(e) => handleSavePollinationsKey(e.target.value)}
+                    className="w-full pl-2.5 pr-8 py-1.5 border border-amber-200 rounded-lg text-xs bg-white focus:outline-none focus:ring-1 focus:ring-amber-500 font-mono"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowKeyText(o => !o)}
+                    className="absolute right-2 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-600"
+                  >
+                    {showKeyText ? <EyeOff size={13} /> : <Eye size={13} />}
+                  </button>
+                </div>
+                {pollinationsApiKey && (
+                  <button
+                    onClick={() => setShowKeyInput(false)}
+                    className="px-3 py-1.5 bg-amber-600 hover:bg-amber-700 text-white rounded-lg text-[10px] font-bold transition-all shadow"
+                  >
+                    Guardar
+                  </button>
+                )}
+              </div>
+            </div>
+          )}
         </div>
       )}
 
@@ -213,7 +318,7 @@ export default function ImageGenerator({ exercise, onSaveImage, savedImageUrl = 
                 <HelpCircle size={20} />
               </div>
               <p className="text-xs font-bold text-red-800 mb-1">No se pudo generar la imagen</p>
-              <p className="text-[10px] text-red-700 leading-normal max-w-xs mb-3">
+              <p className="text-[10px] text-red-700 leading-normal max-w-xs mb-3 text-left">
                 {errorMsg}
               </p>
               <button
@@ -239,7 +344,7 @@ export default function ImageGenerator({ exercise, onSaveImage, savedImageUrl = 
               onError={() => {
                 setIsLoading(false)
                 setHasError(true)
-                setErrorMsg('Error al renderizar los bytes de la imagen generada.')
+                setErrorMsg('Error al cargar los bytes de la imagen. Verifica tu clave o conexión.')
               }}
               className="h-full w-full object-cover transition-transform duration-300 hover:scale-105"
             />
