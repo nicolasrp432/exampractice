@@ -10,6 +10,7 @@ export default function ImageGenerator({ exercise, onSaveImage, savedImageUrl = 
   const [isEditingPrompt, setIsEditingPrompt] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [isSaved, setIsSaved] = useState(!!savedImageUrl)
+  const [hasError, setHasError] = useState(false)
 
   // Generate default prompt based on exercise mnemotecnia
   useEffect(() => {
@@ -39,6 +40,7 @@ export default function ImageGenerator({ exercise, onSaveImage, savedImageUrl = 
   const handleGenerate = () => {
     setIsLoading(true)
     setIsSaved(false)
+    setHasError(false)
     const seed = Math.floor(Math.random() * 1000000)
     // Generate image from pollinations.ai with random seed to guarantee variation
     const finalPrompt = customPrompt.trim() || prompt
@@ -93,21 +95,48 @@ export default function ImageGenerator({ exercise, onSaveImage, savedImageUrl = 
           ) : null}
         </AnimatePresence>
 
-          {imageUrl ? (
+          {hasError ? (
+            <div className="absolute inset-0 flex flex-col items-center justify-center bg-red-50/95 p-6 text-center z-10 overflow-y-auto">
+              <div className="h-10 w-10 rounded-full bg-red-100 flex items-center justify-center text-red-500 mb-2 shrink-0">
+                <HelpCircle size={20} />
+              </div>
+              <p className="text-xs font-bold text-red-800 mb-1">No se pudo cargar la imagen de la IA</p>
+              <p className="text-[10px] text-red-700 leading-normal max-w-xs mb-2">
+                Esto suele ocurrir si tu **bloqueador de anuncios (AdBlock, Brave Shields)** bloquea el dominio <code>pollinations.ai</code> o si hay saturación temporal en sus servidores.
+              </p>
+              <div className="text-[9px] text-zinc-500 leading-normal max-w-xs mb-3 text-left border-l-2 border-red-300 pl-2">
+                💡 **Recomendaciones:**
+                <br />1. Desactiva tu AdBlocker o Brave Shields para este sitio.
+                <br />2. Desconecta tu VPN temporalmente.
+                <br />3. Intenta de nuevo en unos segundos.
+              </div>
+              <button
+                onClick={handleGenerate}
+                className="px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white rounded-lg text-[10px] font-bold transition-all shadow"
+              >
+                Reintentar generación
+              </button>
+            </div>
+          ) : null}
+
+          {imageUrl && !hasError ? (
             <motion.img
               key={imageUrl} // Use imageUrl as key to trigger animations and loader on changes
               src={imageUrl}
               alt={`Mnemotecnia para ${exercise.nombre}`}
               initial={{ scale: 1.05, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
-              onLoad={() => setIsLoading(false)}
+              onLoad={() => {
+                setIsLoading(false)
+                setHasError(false)
+              }}
               onError={() => {
                 setIsLoading(false)
-                alert('Error al generar la imagen. Intenta de nuevo.')
+                setHasError(true)
               }}
               className="h-full w-full object-cover transition-transform duration-300 hover:scale-105"
             />
-          ) : (
+          ) : !imageUrl && !hasError ? (
             <div className="text-center p-6 space-y-3 text-zinc-400">
               <div className="h-16 w-16 rounded-full bg-purple-50 flex items-center justify-center mx-auto text-purple-400">
                 <ImageIcon size={28} />
@@ -119,7 +148,7 @@ export default function ImageGenerator({ exercise, onSaveImage, savedImageUrl = 
                 </p>
               </div>
             </div>
-          )}
+          ) : null}
       </div>
 
       {/* Control Actions */}
