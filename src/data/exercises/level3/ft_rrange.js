@@ -71,6 +71,20 @@ Mismo malloc, misma estructura, solo cambia la fórmula de llenado.`,
 
   herramientas: ['strings'],
 
+  campayoMetodo: {
+    feynman: `Igual que ft_range pero el array está en orden DESCENDENTE.
+El primer elemento es max-1 y el último es min.
+Crea el array con malloc, igual que ft_range.
+Pero lo rellena al revés: arr[0] = max-1, arr[1] = max-2, ..., arr[size-1] = min.`,
+    datosPuros: [
+      { elemento: 'arr[i] = max - 1 - i', nota: 'fórmula descendente: el primer elemento es max-1' },
+      { elemento: 'int *ft_rrange(int min, int max)', nota: 'misma firma que ft_range' },
+    ],
+    asociaciones: [
+      { dato: 'arr[i] = max - 1 - i (descending)', imagen: 'ft_rrange es ft_range mirándose en el espejo. El array empieza por el número grande (max-1) y va bajando hasta min. La fórmula max-1-i es el truco: i crece pero el valor baja.' },
+    ],
+  },
+
   formulaClave: {
     descripcion: 'Igual que ft_range pero arr[i] = max-1-i (descendente)',
     formula: 'arr=malloc((max-min)*sizeof(int)); for i=0;i<max-min: arr[i]=max-1-i; return arr;',

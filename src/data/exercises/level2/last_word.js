@@ -82,6 +82,22 @@ Si no hay palabras (todo espacios o string vacío), imprime solo '\\n'.`,
 
   herramientas: ['strings'],
 
+  campayoMetodo: {
+    feynman: `El programa recibe un string e imprime la última palabra.
+Primero busca el final del string.
+Luego retrocede saltando los espacios del final.
+Luego sigue retrocediendo hasta encontrar otro espacio (o el inicio): eso marca el inicio de la última palabra.
+Luego imprime desde ese inicio hasta donde encontró el espacio final.`,
+    datosPuros: [
+      { elemento: 'tres fases: ir al final, saltar espacios finales, retroceder hasta espacio', nota: 'el orden de las fases es crítico' },
+      { elemento: "while (i > 0 && str[i] == ' ')", nota: 'retroceder saltando espacios finales' },
+      { elemento: "while (i > 0 && str[i - 1] != ' ')", nota: 'retroceder hasta encontrar el inicio de la última palabra' },
+    ],
+    asociaciones: [
+      { dato: '3 fases hacia atrás', imagen: 'El Detective Moonwalk busca la última palabra andando hacia atrás en 3 pasos: 1) Va al final del string. 2) Salta las baldosas blancas (espacios finales). 3) Camina hasta la primera baldosa blanca (inicio de la última palabra). ¡Luego imprime lo que tiene entre las manos!' },
+    ],
+  },
+
   formulaClave: {
     descripcion: 'Desde el final: saltar espacios, luego buscar el inicio de la última palabra',
     formula: 'end=len-1; while(str[end]==" ")end--; start=end; while(start>0&&str[start-1]!=" ")start--; write(str+start, end-start+1)',

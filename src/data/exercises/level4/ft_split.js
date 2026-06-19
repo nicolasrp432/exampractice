@@ -69,6 +69,23 @@ La Sierra ignora los separadores múltiples — sin strings vacíos.`,
 
   herramientas: ['strings'],
 
+  campayoMetodo: {
+    feynman: `La función divide un string en palabras usando un carácter separador.
+Primero cuenta cuántas palabras hay (para saber cuántos strings malloc necesita).
+Luego crea un array de strings con malloc (de words + 1 elementos, el último NULL).
+Para cada palabra, calcula su longitud, hace malloc, y la copia.
+Devuelve el array de strings (array terminado en NULL).`,
+    datosPuros: [
+      { elemento: 'char **ft_split(char const *s, char c)', nota: 'devuelve char** (array de strings), terminado en NULL' },
+      { elemento: 'resultado[word_count] = NULL', nota: 'el último elemento del array debe ser NULL' },
+      { elemento: 'malloc para el array y malloc para cada palabra', nota: 'dos niveles de malloc — free del caller es su responsabilidad' },
+    ],
+    asociaciones: [
+      { dato: 'char** terminado en NULL', imagen: 'ft_split entrega un edificio de apartamentos (char**). El último apartamento está vacío y tiene el cartel "NULL — fin del edificio". Sin ese cartel, quien recorra el edificio no sabe cuándo parar.' },
+      { dato: 'dos niveles de malloc', imagen: 'Para construir el edificio necesitas dos tipos de cemento: uno para las paredes del edificio (malloc del char**) y otro para el interior de cada apartamento (malloc de cada char*). Si fallas en uno, el edificio se derrumba.' },
+    ],
+  },
+
   formulaClave: {
     descripcion: 'Dos pasadas: contar palabras → malloc array → extraer cada palabra',
     formula: 'words=count(str,c); res=malloc((words+1)*ptr_size); for each word: skip_sep; get_len; malloc+copy; res[i]=word;',

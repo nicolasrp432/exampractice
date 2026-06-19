@@ -55,6 +55,23 @@ Si s1 termina antes que s2, el \\0 de s1 "pesa" menos que el char de s2.`,
 
   herramientas: ['strings', 'ascii'],
 
+  campayoMetodo: {
+    feynman: `La función compara dos strings carácter a carácter.
+Avanza mientras los caracteres sean iguales y ninguno sea el final.
+Cuando encuentra una diferencia (o el final de uno), para.
+Devuelve la diferencia entre los valores ASCII de los dos caracteres en esa posición.
+Si ambos son iguales hasta el final, devuelve 0.`,
+    datosPuros: [
+      { elemento: 'return (unsigned char)s1[i] - (unsigned char)s2[i]', nota: 'la diferencia entre valores ASCII — no un booleano' },
+      { elemento: 'while (s1[i] && s2[i] && s1[i] == s2[i])', nota: 'avanzar mientras ambos son iguales y no son \\0' },
+      { elemento: 'int ft_strcmp(char *s1, char *s2)', nota: 'devuelve int (la diferencia), no un bool' },
+    ],
+    asociaciones: [
+      { dato: 'devuelve diferencia (no bool)', imagen: 'ft_strcmp no es un árbitro que dice "¡igual!" o "¡diferente!". Es un tasador que dice "el primero vale 5 más que el segundo". Negativo: s1 < s2. Cero: iguales. Positivo: s1 > s2.' },
+      { dato: 'unsigned char para la resta', imagen: 'Los caracteres con tilde o especiales pueden ser "negativos" como char. Ponerlos en unsigned char es como ponerles un chaleco salvavidas: siempre flotan entre 0-255 y la resta es predecible.' },
+    ],
+  },
+
   formulaClave: {
     descripcion: 'Diferencia del primer byte distinto (o 0 si son iguales hasta el final)',
     formula: 'while (s1[i] == s2[i] && s1[i]) i++; return ((unsigned char)s1[i] - (unsigned char)s2[i]);',

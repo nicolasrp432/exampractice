@@ -75,6 +75,23 @@ Cada nodo eliminado debe liberarse con free.`,
 
   herramientas: ['listas', 'free'],
 
+  campayoMetodo: {
+    feynman: `La función elimina de una lista enlazada todos los nodos cuyo dato coincida con una referencia.
+Recorre la lista usando un doble puntero (puntero al puntero actual) para poder editar la lista.
+Si el dato del nodo actual coincide (según la función cmp), libera ese nodo y salta al siguiente.
+Si no coincide, avanza al siguiente.
+El doble puntero permite eliminar el primer nodo sin caso especial.`,
+    datosPuros: [
+      { elemento: 't_list **begin_list (doble puntero)', nota: 'necesario para poder modificar el primer nodo de la lista' },
+      { elemento: '*begin_list = node->next antes del free', nota: 'enlazar antes de liberar para no perder la referencia' },
+      { elemento: 'cmp(node->data, ref) == 0 → eliminar', nota: 'usar la función de comparación, no == directamente' },
+    ],
+    asociaciones: [
+      { dato: 'doble puntero **begin_list', imagen: 'El doble puntero es el mando a distancia del primer nodo. Sin él, para borrar el primero necesitarías un caso especial. Con él, el primer nodo se borra exactamente igual que cualquier otro: el mando apunta al nodo, lo borras y lo apuntas al siguiente.' },
+      { dato: 'enlazar ANTES de free', imagen: 'Antes de cortar el eslabón de la cadena, agarras los dos extremos para unirlos. Si haces free primero, pierdes la referencia al siguiente nodo y la cadena se rompe.' },
+    ],
+  },
+
   formulaClave: {
     descripcion: 'Borrar nodos coincidentes preservando el resto de la lista',
     formula: 'if cmp(node->data, ref)==0: unlink+free; else avanzar',

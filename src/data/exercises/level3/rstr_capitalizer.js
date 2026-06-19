@@ -81,6 +81,20 @@ Es el "reverso" de str_capitalizer.`,
 
   herramientas: ['strings', 'ascii'],
 
+  campayoMetodo: {
+    feynman: `El programa recibe un string y pone en mayúscula la ÚLTIMA letra de cada palabra.
+El resto de las letras de cada palabra las pone en minúscula.
+Para saber si una letra es la última de una palabra, mira si el siguiente carácter es un separador o el final del string.
+Es el inverso de str_capitalizer.`,
+    datosPuros: [
+      { elemento: 'mirar el siguiente carácter: str[i+1]', nota: 'la última letra de palabra la detectas mirando hacia adelante (str[i+1] es separador o \\0)' },
+      { elemento: 'si !str[i+1] o str[i+1] es separador → mayúscula', nota: 'caso borde: el \\0 también marca fin de palabra' },
+    ],
+    asociaciones: [
+      { dato: 'mirar str[i+1] para detectar última letra', imagen: 'rstr_capitalizer es un revisor de billetes que solo corona a los que van al final del vagón. Mira al pasajero de delante (str[i+1]): si el de delante es un espacio o el fantasma \\0, el actual es el último del vagón y recibe la corona.' },
+    ],
+  },
+
   formulaClave: {
     descripcion: 'Lookahead: si el siguiente char es espacio o fin → mayúscula',
     formula: 'if(!c[j+1]||c[j+1]==" ") upper; else lower; (salvo el propio espacio)',

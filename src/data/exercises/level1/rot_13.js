@@ -82,6 +82,23 @@ Aplicar ROT13 dos veces descifra: es su propio inverso.`,
 
   herramientas: ['strings', 'ascii'],
 
+  campayoMetodo: {
+    feynman: `El programa recibe un string y desplaza cada letra 13 posiciones en el abecedario.
+La 'a' se convierte en 'n', la 'b' en 'o', y así hasta la 'z' que se convierte en 'm'.
+Las 26 letras se dividen en dos mitades: la primera mitad avanza 13, la segunda también avanza 13 (y da la vuelta al inicio).
+ROT13 es su propio inverso: aplicarlo dos veces devuelve el original.
+Los símbolos y números no cambian.`,
+    datosPuros: [
+      { elemento: "(c - 'a') % 26 + 'a'  con c + 13", nota: 'fórmula con módulo para wrap automático' },
+      { elemento: "if (c >= 'a' && c <= 'm') → c + 13", nota: 'primera mitad: simplemente suma 13' },
+      { elemento: "if (c >= 'n' && c <= 'z') → c - 13", nota: 'segunda mitad: resta 13 (equivale a wrap)' },
+    ],
+    asociaciones: [
+      { dato: 'ROT13 — 2 mitades', imagen: 'El abecedario es una pizza de 26 trozos. ROT13 parte la pizza por la mitad y da la vuelta a cada mitad. Los de la primera mitad (a-m) saltan a la segunda, y viceversa.' },
+      { dato: "c + 13 o c - 13 (no módulo)", imagen: 'El truco del panadero: si estás en la primera mitad (a-m), sumas 13 hacia adelante. Si estás en la segunda (n-z), restas 13 hacia atrás. Nunca te pasas del abecedario.' },
+    ],
+  },
+
   formulaClave: {
     descripcion: 'Desplazamiento modular de 13 en el alfabeto',
     formula: "c = 'a' + (c - 'a' + 13) % 26",

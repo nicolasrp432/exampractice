@@ -64,6 +64,22 @@ La fórmula es: return (n > 0 && (n & (n - 1)) == 0).`,
 
   herramientas: ['bits'],
 
+  campayoMetodo: {
+    feynman: `La función dice si un número es potencia de 2.
+Los números potencia de 2 tienen solo UN bit a 1 en su representación binaria: 1, 10, 100, 1000...
+El truco mágico: n & (n-1) siempre da 0 si n es potencia de 2.
+¿Por qué? Porque n-1 "apaga" el único bit a 1 y "enciende" todos los de abajo.
+Además, el 0 no es potencia de 2.`,
+    datosPuros: [
+      { elemento: 'n && !(n & (n - 1))', nota: 'la fórmula completa — el n && descarta el 0' },
+      { elemento: 'int is_power_of_2(unsigned int n)', nota: 'devuelve int (1 o 0), recibe unsigned int' },
+    ],
+    asociaciones: [
+      { dato: 'n & (n-1) == 0', imagen: 'Una potencia de 2 es como una vela solitaria. n-1 apaga esa vela y enciende todas las de abajo. El AND de una vela encendida y todas las de abajo = ninguna coincide = 0. Si hay más de una vela, el AND no es 0.' },
+      { dato: 'n && ... (descartar 0)', imagen: 'El cero es un tramposo: 0 & (0-1) = 0, lo que daría true. Pero el 0 no es potencia de 2. El n&& del principio lo pilla antes de que haga trampas.' },
+    ],
+  },
+
   formulaClave: {
     descripcion: 'Una potencia de 2 tiene exactamente 1 bit encendido. n & (n-1) lo apaga.',
     formula: 'return (n > 0 && (n & (n - 1)) == 0);',

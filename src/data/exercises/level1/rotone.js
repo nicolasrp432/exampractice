@@ -82,6 +82,23 @@ Fórmula mental: letra + 1, pero z → a (el abecedario es circular).`,
 
   herramientas: ['strings', 'ascii', 'argc'],
 
+  campayoMetodo: {
+    feynman: `El programa recibe un string y lo imprime con cada letra avanzada una posición en el abecedario.
+La 'a' se convierte en 'b', la 'b' en 'c', etc.
+La 'z' da la vuelta y se convierte en 'a' (y la 'Z' en 'A').
+Las letras mayúsculas siguen siendo mayúsculas.
+Los símbolos, espacios y números no cambian.`,
+    datosPuros: [
+      { elemento: "c == 'z' ? 'a' : c + 1", nota: 'wrap para z minúscula' },
+      { elemento: "c == 'Z' ? 'A' : c + 1", nota: 'wrap para Z mayúscula' },
+      { elemento: 'else: no modificar', nota: 'símbolos y números pasan sin cambio' },
+    ],
+    asociaciones: [
+      { dato: 'z → a (wrap circular)', imagen: 'El alfabeto es una rueda de hamster. La z llega al final y la rueda da la vuelta: cae de nuevo en la a. La Z hace lo mismo en la rueda de los grandes.' },
+      { dato: 'símbolos sin cambio', imagen: 'Los números y símbolos tienen una armadura protectora. El rotone los toca pero rebotan — él solo cambia las letras desnudas (sin armadura).' },
+    ],
+  },
+
   formulaClave: {
     descripcion: 'Desplazamiento +1 con wrap en z/Z',
     formula: "if (c == 'z') 'a'; else if (c == 'Z') 'A'; else c + 1;",

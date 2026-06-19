@@ -81,6 +81,20 @@ Si no hay argumento, solo escribe "\\n".`,
 
   herramientas: ['strings', 'punteros'],
 
+  campayoMetodo: {
+    feynman: `El programa recibe un string y rota sus palabras: la primera pasa al final.
+Las palabras del string se imprimen en orden, pero la primera palabra va al final.
+Ejemplo: "hello world foo" → "world foo hello".
+Los espacios entre palabras se reducen a exactamente uno.`,
+    datosPuros: [
+      { elemento: 'saltar espacios → imprimir palabras 2..N → espacio → imprimir palabra 1', nota: 'orden de impresión: todas menos la primera, luego la primera' },
+      { elemento: 'guardar inicio y longitud de la primera palabra', nota: 'necesitas recordar dónde empezó y cuánto ocupa' },
+    ],
+    asociaciones: [
+      { dato: 'primera palabra al final', imagen: 'rostring es una ruleta de personas: todos avanzan un paso y el que estaba primero en la fila va al final. El truco: memorizas quién era el primero (inicio y longitud), dejas pasar a los demás, y al último lo llamas.' },
+    ],
+  },
+
   formulaClave: {
     descripcion: 'Saltar la primera palabra y luego imprimirla al final',
     formula: 'find first word; print rest normalized; print first word last',

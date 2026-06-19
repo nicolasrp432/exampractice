@@ -78,6 +78,21 @@ El ritmo es simple: visitar, aplicar la función, avanzar al siguiente.`,
 
   herramientas: ['listas', 'punteros a función'],
 
+  campayoMetodo: {
+    feynman: `La función recorre una lista enlazada y aplica una función a los datos de cada nodo.
+Empieza en el primer nodo.
+Para cada nodo, llama a la función con los datos de ese nodo.
+Luego avanza al siguiente nodo.
+Para cuando llega al final (next == NULL).`,
+    datosPuros: [
+      { elemento: 'void ft_list_foreach(t_list *begin, void (*f)(void *))', nota: 'el segundo argumento es un puntero a función que recibe void*' },
+      { elemento: 'f(node->data)', nota: 'llamar a la función con los datos del nodo — la función la proporciona el caller' },
+    ],
+    asociaciones: [
+      { dato: 'void (*f)(void *) — puntero a función', imagen: 'ft_list_foreach es un autobús que lleva un mecánico de alquiler (f). En cada parada (nodo), el mecánico baja y arregla lo que hay (f(data)). Tú contratas al mecánico (pasas f) y el autobús hace el recorrido.' },
+    ],
+  },
+
   formulaClave: {
     descripcion: 'Iterar lista y llamar al callback para cada elemento',
     formula: 'for node in list: f(node->data)',

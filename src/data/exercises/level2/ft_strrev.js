@@ -57,6 +57,24 @@ SIEMPRE devuelve el mismo puntero (str) — modifica in-place, sin malloc.`,
 
   herramientas: ['strings'],
 
+  campayoMetodo: {
+    feynman: `La función invierte un string IN PLACE — modifica el string original, no crea uno nuevo.
+Pone un puntero al principio y otro al final del string.
+Intercambia las letras de los extremos (como ft_swap pero para chars).
+Mueve los punteros hacia el centro y repite.
+Para cuando los punteros se cruzan o se tocan.
+Devuelve el mismo puntero al string ya invertido.`,
+    datosPuros: [
+      { elemento: 'char *ft_strrev(char *str)', nota: 'devuelve char* (el mismo str), modifica in place' },
+      { elemento: 'i = 0; j = len - 1; while (i < j)', nota: 'dos punteros desde los extremos hacia el centro' },
+      { elemento: 'swap: tmp = str[i]; str[i] = str[j]; str[j] = tmp', nota: 'swap clásico con variable temporal' },
+    ],
+    asociaciones: [
+      { dato: 'in place (mismo puntero)', imagen: 'ft_strrev no hace una fotocopia al revés — da la vuelta al papel original. Cuando termina, el papel ya está al revés y te devuelve el MISMO papel (el mismo puntero), no uno nuevo.' },
+      { dato: 'dos punteros hacia el centro', imagen: 'Dos hormigas empiezan en los extremos del string y caminan hacia el centro intercambiando lo que llevan. Cuando se cruzan, el trabajo está hecho.' },
+    ],
+  },
+
   formulaClave: {
     descripcion: 'Intercambio de chars desde extremos hacia el centro',
     formula: 'while (i < len/2) { tmp=str[i]; str[i]=str[len-1-i]; str[len-1-i]=tmp; i++; } return str;',

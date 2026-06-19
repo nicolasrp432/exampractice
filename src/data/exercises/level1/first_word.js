@@ -84,6 +84,25 @@ Fases: 1) Salta separadores. 2) Escribe letras. 3) Para en separador o \\0.`,
 
   herramientas: ['strings', 'argc'],
 
+  campayoMetodo: {
+    feynman: `El programa recibe una frase como argumento.
+Primero salta todos los espacios y tabulaciones del principio.
+Cuando encuentra una letra de verdad, empieza a escribirla en pantalla.
+Sigue escribiendo hasta que llega a un espacio, una tabulación o el final.
+Al terminar escribe un salto de línea.
+Si no hay exactamente 1 argumento o no hay ninguna letra, solo pone un salto de línea.`,
+    datosPuros: [
+      { elemento: "av[1][i] == ' ' || av[1][i] == '\\t'", nota: 'los separadores son espacio Y tabulación — no olvidar el tab' },
+      { elemento: 'argc != 2', nota: 'exactamente 2 argumentos (programa + 1 string)' },
+      { elemento: 'write(1, &av[1][i], 1)', nota: 'índice doble: av[1] es el string, av[1][i] es el carácter' },
+    ],
+    asociaciones: [
+      { dato: 'saltar espacio Y tab', imagen: 'El Cuchillo de la encimera tiene dos hojas: una para cortar espacios blancos, otra para cortar tablas (\\t). Si olvidas la segunda hoja, el cuchillo se queda atascado en los tabs.' },
+      { dato: 'argc != 2', imagen: 'Un portero de discoteca que solo deja entrar a exactamente 2 personas. Ni una más ni una menos. Si no sois 2, solo pone el newline de "largo de aquí".' },
+      { dato: 'av[1][i] (índice doble)', imagen: 'av es un armario (array de strings), av[1] es el cajón número 1 (el argumento), av[1][i] es el calcetín número i dentro del cajón.' },
+    ],
+  },
+
   formulaClave: {
     descripcion: 'Dos fases: saltar separadores, luego imprimir hasta separador',
     formula: 'while(sep) i++; while(no sep && str[i]) write & i++;',

@@ -91,6 +91,23 @@ La fórmula mágica del loro: posición = letra - 'a' + 1. ¡El +1 es OBLIGATORI
 
   herramientas: ['strings', 'ascii', 'argc'],
 
+  campayoMetodo: {
+    feynman: `El programa recibe un string.
+Para cada letra calcula su posición en el alfabeto: 'a' = 1, 'b' = 2, ..., 'z' = 26.
+Luego repite esa letra exactamente esa cantidad de veces.
+Los símbolos y números se imprimen una sola vez (sin repetición).
+Al final escribe un salto de línea.`,
+    datosPuros: [
+      { elemento: "repeticiones = c - 'a' + 1", nota: 'el +1 es obligatorio: sin él a=0 (y no se imprimiría)' },
+      { elemento: "mayúsculas: c - 'A' + 1", nota: 'misma posición que la minúscula equivalente' },
+      { elemento: 'símbolos: repeat = 1 (no 0)', nota: 'se imprimen una vez — no se omiten' },
+    ],
+    asociaciones: [
+      { dato: "c - 'a' + 1 (+1 obligatorio)", imagen: "El Loro Alfa tiene hambre proporcional a su posición: el 'a' (1º en el abc) come 1 plato. Sin el +1 el 'a' comería 0 platos y desaparecería. ¡El loro siempre come al menos 1!" },
+      { dato: 'símbolo → 1 vez', imagen: "Los símbolos llevan chaleco antibalas. El loro los toca pero no puede repetirlos más de una vez — los escupe una sola vez y los manda a casa." },
+    ],
+  },
+
   formulaClave: {
     descripcion: 'Número de repeticiones según posición en el alfabeto',
     formula: "repeat = c - 'a' + 1",

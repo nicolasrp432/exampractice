@@ -73,6 +73,21 @@ Si no recibe exactamente un argumento, solo escribe "\\n".`,
 
   herramientas: ['strings', 'punteros'],
 
+  campayoMetodo: {
+    feynman: `El programa recibe un string e imprime sus palabras en orden inverso.
+Primero localiza todas las palabras del string.
+Luego las imprime comenzando por la última hasta la primera.
+Las palabras se separan por espacios en la salida, sin espacio al final.
+Si no hay argumentos o la string está vacía, imprime solo un newline.`,
+    datosPuros: [
+      { elemento: 'estrategia: ir al final, retroceder por palabras', nota: 'encontrar el fin de cada palabra con dos índices' },
+      { elemento: 'espacio ENTRE palabras (no antes de la primera ni después de la última)', nota: 'flag o condición para el primer espacio' },
+    ],
+    asociaciones: [
+      { dato: 'imprimir de derecha a izquierda', imagen: 'rev_wstr es un lector de libros que empieza por el último capítulo. Va al final del libro (string), lee la última palabra (desde atrás), la imprime, y retrocede página por página hasta el principio.' },
+    ],
+  },
+
   formulaClave: {
     descripcion: 'Recorrer de derecha a izquierda detectando límites de palabra',
     formula: 'scan end → find start of last word → print it → repeat with one space',

@@ -68,6 +68,22 @@ Combina ambas partes con OR y listo: los nibbles están intercambiados.`,
 
   herramientas: ['bits'],
 
+  campayoMetodo: {
+    feynman: `La función recibe un byte y devuelve ese mismo byte con los 4 bits altos y los 4 bits bajos intercambiados.
+El nibble alto (bits 7-4) pasa a la posición baja (bits 3-0) y viceversa.
+La fórmula es: resultado = (byte >> 4) | (byte << 4).
+Los 4 bits de arriba se desplazan 4 posiciones a la derecha.
+Los 4 bits de abajo se desplazan 4 posiciones a la izquierda.
+El OR los combina.`,
+    datosPuros: [
+      { elemento: '(byte >> 4) | (byte << 4)', nota: 'la fórmula completa — shift derecho e izquierdo con OR' },
+      { elemento: 'unsigned char swap_bits(unsigned char octet)', nota: 'devuelve y recibe unsigned char' },
+    ],
+    asociaciones: [
+      { dato: '>> 4 | << 4', imagen: 'El byte es un sándwich de 2 capas de 4 bits. Para intercambiarlas: bajas la capa de arriba 4 pisos (>> 4) y subes la de abajo 4 pisos (<< 4). El OR (|) une las dos capas ya intercambiadas en el nuevo sándwich.' },
+    ],
+  },
+
   formulaClave: {
     descripcion: 'Mover nibble bajo a posición alta y nibble alto a posición baja, combinar con OR',
     formula: 'return ((octet << 4) | (octet >> 4));',

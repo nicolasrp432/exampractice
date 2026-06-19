@@ -77,6 +77,23 @@ Si sale por el \\0 → no encontrado. Si sale por coincidencia → encontrado.`,
 
   herramientas: ['strings', 'ascii'],
 
+  campayoMetodo: {
+    feynman: `El programa recibe dos strings e imprime solo los caracteres que aparecen en AMBOS.
+Para cada carácter del primer string, mira si también está en el segundo.
+Si está en los dos y no lo ha imprimido antes, lo imprime.
+Los caracteres repetidos solo se imprimen una vez.
+El orden de salida sigue el orden del primer string.`,
+    datosPuros: [
+      { elemento: 'array seen[256] = {0}', nota: 'tabla de caracteres ya vistos para evitar duplicados' },
+      { elemento: 'buscar s1[i] en s2 con un while', nota: 'doble bucle: i sobre s1, j sobre s2' },
+      { elemento: 'imprimir solo si !seen[s1[i]]', nota: 'la comprobación de duplicados es obligatoria' },
+    ],
+    asociaciones: [
+      { dato: 'array seen[256]', imagen: 'Inter lleva una lista de invitados de 256 casillas (una por carácter ASCII). Cuando imprime un carácter, tapa su casilla. La segunda vez que llega, la casilla está tapada y se va sin imprimir.' },
+      { dato: 'orden del primer string', imagen: 'Es como un filtro de café: el primer string es el café y el segundo string es el filtro. Solo pasa lo que el filtro deja pasar (lo que está en ambos), en el orden en que cae (orden de s1).' },
+    ],
+  },
+
   formulaClave: {
     descripcion: 'Para cada char de s1: si está en s2 y no ha salido antes, escribirlo',
     formula: 'for s1[i]: if iter(s2,s1[i]) && !seen[s1[i]]: write(s1[i]); seen[s1[i]]=1',

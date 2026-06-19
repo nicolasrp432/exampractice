@@ -83,6 +83,25 @@ El truco: comprobar el 15 PRIMERO (else if), sino Fizz y Buzz compiten.`,
 
   herramientas: ['strings', 'ascii'],
 
+  campayoMetodo: {
+    feynman: `El programa tiene un contador que va del 1 al 100.
+En cada número pregunta: "¿Es múltiplo de 15?" Si sí, grita "FizzBuzz" y pasa al siguiente.
+Si no, pregunta: "¿Es múltiplo de 3?" Si sí, grita "Fizz".
+Si tampoco, pregunta: "¿Es múltiplo de 5?" Si sí, grita "Buzz".
+Si no es ninguno, dice el número normal.
+El truco: siempre pregunta el 15 PRIMERO, porque si no, el 15 diría "Fizz" y se perdería "FizzBuzz".`,
+    datosPuros: [
+      { elemento: 'i % 15 == 0', nota: 'el 15 SIEMPRE va antes que 3 y 5' },
+      { elemento: 'ft_putnbr(i)', nota: 'función auxiliar que hay que escribir para imprimir el número' },
+      { elemento: 'Mayúsculas: Fizz Buzz FizzBuzz', nota: 'el examen distingue mayúsculas/minúsculas' },
+    ],
+    asociaciones: [
+      { dato: 'i % 15 == 0 primero', imagen: 'Un árbitro de fútbol con el número 15 en la camiseta que silba ANTES de que hablen los de 3 y 5 — si no silba él primero, se arma la pelea entre Fizz y Buzz.' },
+      { dato: 'ft_putnbr auxiliar', imagen: 'Un loro que solo sabe contar en binario: necesitas traducirle los números con una "máquina de traducir" (ft_putnbr) antes de que los grite.' },
+      { dato: 'Mayúsculas exactas', imagen: 'Un juez muy estricto con lupa que golpea la mesa si ves "fizz" en minúscula: "¡Es FIZZ con F mayúscula, caso desestimado!"' },
+    ],
+  },
+
   formulaClave: {
     descripcion: 'Triple condicional con módulo — orden de comprobación importa',
     formula: 'if (i%15==0) FizzBuzz; else if (i%3==0) Fizz; else if (i%5==0) Buzz; else número;',

@@ -70,6 +70,22 @@ CLAVE: inicializar bit=0 (no 1, no octet).`,
 
   herramientas: ['bits'],
 
+  campayoMetodo: {
+    feynman: `La función recibe un byte y devuelve el mismo byte con los bits en orden inverso.
+El bit 7 (el mayor) se convierte en el bit 0 (el menor), y así sucesivamente.
+Para cada bit del byte original, comprueba si es 1 con una máscara.
+Si es 1, lo pone en la posición correspondiente del resultado (invertida).
+Al terminar los 8 bits, devuelve el resultado.`,
+    datosPuros: [
+      { elemento: 'result |= (1 << (7 - i))', nota: 'poner el bit extraído en la posición invertida del resultado' },
+      { elemento: 'if (byte & (1 << i))', nota: 'comprobar el bit i-ésimo (de derecha a izquierda)' },
+      { elemento: 'unsigned char reverse_bits(unsigned char octet)', nota: 'devuelve unsigned char, recibe unsigned char' },
+    ],
+    asociaciones: [
+      { dato: 'bit i → posición (7-i) en result', imagen: 'Es como dar la vuelta a una fila de 8 soldados. El soldado de la derecha pasa a la izquierda y viceversa. El soldado en posición i del original acaba en posición (7-i) del resultado.' },
+    ],
+  },
+
   formulaClave: {
     descripcion: 'Extrae LSB de octet, acumúlalo en bit desplazando left. Repetir 8 veces.',
     formula: 'bit=0; for(i=0;i<8;i++){ bit=bit*2+octet%2; octet/=2; } return bit;',

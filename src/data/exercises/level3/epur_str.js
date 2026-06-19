@@ -86,6 +86,21 @@ Usa el flag k: k=1 "hay un espacio pendiente". Cuando llega el siguiente char no
 
   herramientas: ['strings'],
 
+  campayoMetodo: {
+    feynman: `El programa recibe un string y lo imprime con múltiples espacios reducidos a uno solo, y sin espacios al principio ni al final.
+Recorre el string saltando espacios extras.
+Cuando encuentra una palabra, la imprime.
+Si hay una palabra anterior, añade un espacio antes.
+Resultado: palabras separadas por exactamente un espacio, sin espacios al inicio o al final.`,
+    datosPuros: [
+      { elemento: 'bandera (flag) para el primer espacio', nota: 'necesitas saber si es la primera palabra para no poner espacio antes' },
+      { elemento: 'saltar espacios → imprimir palabra → saltar espacios', nota: 'patrón de dos fases dentro del bucle' },
+    ],
+    asociaciones: [
+      { dato: 'flag primer espacio', imagen: 'epur_str usa una bandera de portero: "¿Ha entrado ya alguien?" La primera palabra entra sin pagar. Las siguientes pagan con un espacio delante. Sin la bandera, la primera palabra tendría un espacio falso.' },
+    ],
+  },
+
   formulaClave: {
     descripcion: 'Flag k para espacio pendiente: escribirlo solo cuando llega el siguiente char real',
     formula: 'for c: if c!=" " { if k: write(" "),k=0; write(c) } else if out>0: k=1',

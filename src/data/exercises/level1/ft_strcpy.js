@@ -53,6 +53,23 @@ Al final devuelve dest — el papel ya relleno.
 
   herramientas: ['strings'],
 
+  campayoMetodo: {
+    feynman: `La función recibe dos strings: el destino vacío y el original.
+Va copiando letra a letra del original al destino: destino[i] = origen[i].
+Cuando llega al Cero Fantasma, lo copia también (¡es obligatorio!).
+Al terminar devuelve el destino — el papel ya relleno.
+El destino debe tener espacio suficiente para caber todo el original.`,
+    datosPuros: [
+      { elemento: 'char *ft_strcpy(char *dest, char *src)', nota: 'devuelve char* (el mismo dest), no void' },
+      { elemento: 'while ((dest[i] = src[i]))', nota: 'asignación dentro del while — copia y comprueba a la vez' },
+      { elemento: 'return (dest)', nota: 'devuelve el puntero al destino, no al origen' },
+    ],
+    asociaciones: [
+      { dato: 'devuelve char* dest', imagen: 'La Fotocopiadora de recetas de la alacena no solo te da la copia — te devuelve el papel de la copia en la mano. No el original, sino el papel que rellenó.' },
+      { dato: 'while ((dest[i] = src[i]))', imagen: 'La fotocopiadora tiene un bucle mágico: copia Y mira al mismo tiempo. Cuando copia el Fantasma Cero (valor 0 = falso), el while para solo.' },
+    ],
+  },
+
   formulaClave: {
     descripcion: 'Copia cada byte de src a dest incluyendo el \\0',
     formula: 'while ((dest[i] = src[i])) i++;',

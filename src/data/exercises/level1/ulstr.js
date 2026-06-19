@@ -72,6 +72,22 @@ Fórmula: si mayúscula → toLowerCase(); si minúscula → toUpperCase().`,
 
   herramientas: ['strings', 'ascii'],
 
+  campayoMetodo: {
+    feynman: `El programa recibe un string y le da la vuelta al case de cada letra.
+Las mayúsculas se convierten en minúsculas y las minúsculas en mayúsculas.
+Los números, símbolos y espacios los deja exactamente igual.
+Al final escribe un salto de línea.`,
+    datosPuros: [
+      { elemento: "c >= 'A' && c <= 'Z' → c + 32", nota: 'mayúscula → minúscula: suma 32 al valor ASCII' },
+      { elemento: "c >= 'a' && c <= 'z' → c - 32", nota: 'minúscula → mayúscula: resta 32 al valor ASCII' },
+      { elemento: '+32 y -32', nota: 'diferencia exacta en ASCII entre mayúscula y minúscula equivalente' },
+    ],
+    asociaciones: [
+      { dato: '+32 para bajar (mayús→minús)', imagen: 'Ultrón igualador de la batidora tiene una palanca de +32. Empuja las mayúsculas hacia abajo (suman 32 en ASCII = se hacen minúsculas). Quitar 32 las sube de nuevo.' },
+      { dato: "rango 'A'-'Z' / 'a'-'z'", imagen: "Los que viven fuera del barrio de las letras (números, símbolos) tienen pasaporte especial: Ultrón no los toca aunque quiera. Solo los ciudadanos del barrio A-Z y a-z sufren el cambio." },
+    ],
+  },
+
   formulaClave: {
     descripcion: 'La diferencia ASCII entre mayúscula y minúscula es siempre 32',
     formula: "mayúscula: c + 32; minúscula: c - 32;",

@@ -45,6 +45,22 @@ Si no pesca nada, devuelve NULL. ¡NUNCA devuelve el char, sino el puntero!`,
 
   herramientas: ['strings'],
 
+  campayoMetodo: {
+    feynman: `La función busca la primera letra del string que aparezca en un conjunto de caracteres.
+Avanza por el string principal letra a letra.
+Para cada letra, la compara con todas las letras del conjunto.
+Si la encuentra, devuelve un puntero a esa posición en el string original.
+Si recorre todo el string sin encontrar ninguno del conjunto, devuelve NULL.`,
+    datosPuros: [
+      { elemento: 'char *ft_strpbrk(const char *s1, const char *s2)', nota: 'devuelve char* (puntero dentro de s1), no un índice' },
+      { elemento: 'return ((char *)&s1[i])', nota: 'devuelve PUNTERO al carácter encontrado, no su posición numérica' },
+      { elemento: 'return (NULL)', nota: 'si no encuentra ningún carácter del conjunto' },
+    ],
+    asociaciones: [
+      { dato: 'devuelve puntero (no índice)', imagen: 'strpbrk es un sabueso que olfatea el string. Cuando encuentra el olor buscado, no te dice "está en la posición 5" sino que te LLEVA hasta allí y te señala con la pata (devuelve el puntero). strspn (su primo) solo dice el número.' },
+    ],
+  },
+
   formulaClave: {
     descripcion: 'Recorre s1; para cada char, busca si está en s2; devuelve &s1[i] si sí',
     formula: 'for (i=0; s1[i]; i++) if (ft_isin(s1[i], s2)) return &s1[i]; return NULL;',

@@ -98,6 +98,20 @@ Usa put_nbr para imprimir los números sin printf.`,
 
   herramientas: ['strings', 'ascii'],
 
+  campayoMetodo: {
+    feynman: `El programa recibe un número n e imprime su tabla de multiplicar del 1 al 9.
+Para cada número del 1 al 9, multiplica n × i y escribe el resultado.
+El formato exacto es: "n * i = resultado\\n".
+Necesita funciones auxiliares para convertir enteros a strings (ft_putnbr o similar).`,
+    datosPuros: [
+      { elemento: '"n * i = resultado\\n"', nota: 'formato exacto con espacios alrededor de * y = — byte a byte' },
+      { elemento: 'i de 1 a 9 inclusive', nota: 'el bucle va from i=1 to i<=9' },
+    ],
+    asociaciones: [
+      { dato: 'formato "n * i = resultado"', imagen: 'El robot tab_mult tiene un sello con el patrón "X * Y = Z". Cada vez que multiplica, estampa el sello con los números rellenados. Si cambias los espacios del sello, el examen falla — el sello es exacto.' },
+    ],
+  },
+
   formulaClave: {
     descripcion: 'Bucle de 1 a 9 imprimiendo "i x n = i*n"',
     formula: 'for i=1 to 9: put_nbr(i); write(" x "); put_nbr(n); write(" = "); put_nbr(i*n); write("\\n");',

@@ -72,6 +72,22 @@ Si min >= max: no hay donde subir → NULL.`,
 
   herramientas: ['strings'],
 
+  campayoMetodo: {
+    feynman: `La función crea un array de enteros con todos los números desde min hasta max (excluido).
+Primero calcula cuántos números hay (max - min).
+Pide memoria para ese número de enteros con malloc.
+Luego los rellena: arr[0] = min, arr[1] = min+1, ..., hasta max-1.
+Devuelve el puntero al array, o NULL si min >= max o malloc falla.`,
+    datosPuros: [
+      { elemento: 'int *ft_range(int min, int max)', nota: 'devuelve int* (array dinámico), recibe dos int' },
+      { elemento: 'malloc((max - min) * sizeof(int))', nota: 'tamaño = diferencia * bytes por int' },
+      { elemento: 'if (min >= max) return (NULL)', nota: 'caso borde: rango vacío' },
+    ],
+    asociaciones: [
+      { dato: 'malloc((max - min) * sizeof(int))', imagen: 'ft_range es un fabricante de reglas. Calcula la longitud de la regla (max - min), pide esa cantidad de madera (malloc), y graba los números de min a max-1. Si la regla tiene tamaño 0 o negativo, devuelve una regla nula.' },
+    ],
+  },
+
   formulaClave: {
     descripcion: 'malloc(max-min)*sizeof(int) + rellenar de min a max-1',
     formula: 'arr=malloc((max-min)*sizeof(int)); for i=0;i<max-min: arr[i]=min+i; return arr;',

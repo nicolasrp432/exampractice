@@ -73,6 +73,22 @@ La struct t_list tiene: next (puntero al siguiente) y data (el contenido).`,
 
   herramientas: ['strings'],
 
+  campayoMetodo: {
+    feynman: `La función cuenta cuántos nodos tiene una lista enlazada.
+Empieza en el primer nodo y va saltando de nodo en nodo usando el puntero next.
+Cuenta 1 por cada nodo que visita.
+Para cuando llega al final de la lista (next == NULL).
+Devuelve el número de nodos contados.`,
+    datosPuros: [
+      { elemento: 'int ft_list_size(t_list *begin_list)', nota: 'recibe el primer nodo, devuelve int' },
+      { elemento: 'while (node) { count++; node = node->next; }', nota: 'avanzar con ->next hasta NULL' },
+      { elemento: 't_list *', nota: 'estructura con al menos void *data y t_list *next' },
+    ],
+    asociaciones: [
+      { dato: 'node = node->next', imagen: 'El contador de nodos es un saltador de trampolines. Salta de trampolín en trampolín (->next). Cuando llega a un sitio sin trampolín (NULL), cuenta cuántos saltos dio.' },
+    ],
+  },
+
   formulaClave: {
     descripcion: 'Recorrer la lista con while(node): count++; node=node->next',
     formula: 'count=0; while(begin_list){ count++; begin_list=begin_list->next; } return count;',

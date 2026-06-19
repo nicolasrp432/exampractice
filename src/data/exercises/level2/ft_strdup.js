@@ -55,6 +55,24 @@ Le das el original (s) y ella:
 
   herramientas: ['strings'],
 
+  campayoMetodo: {
+    feynman: `La función crea una copia exacta de un string en una nueva zona de memoria.
+Primero cuenta cuántas letras tiene el string original (con strlen).
+Luego pide esa cantidad de memoria + 1 byte extra al sistema operativo (con malloc).
+Si el sistema no puede darlo, devuelve NULL.
+Luego copia letra a letra el original en la nueva memoria (con strcpy o un bucle).
+Devuelve el puntero a la copia nueva.`,
+    datosPuros: [
+      { elemento: 'malloc(ft_strlen(src) + 1)', nota: '+1 para el carácter \\0 final — sin él hay buffer overflow' },
+      { elemento: 'if (!dup) return (NULL)', nota: 'siempre verificar que malloc no devolvió NULL' },
+      { elemento: 'char *ft_strdup(const char *src)', nota: 'devuelve char* (nueva memoria), recibe const char*' },
+    ],
+    asociaciones: [
+      { dato: 'malloc + 1 para \\0', imagen: 'La fotocopiadora de ft_strdup pide papel al almacén (malloc). Siempre pide UN folio más de los que necesita para el texto — ese folio extra es para el sello de "FIN" (\\0). Sin ese folio extra, el texto se derrama.' },
+      { dato: 'verificar NULL de malloc', imagen: 'Antes de copiar, la fotocopiadora mira si el almacén le mandó papel. Si viene vacío (NULL), apaga la máquina y dice "sin papel" en lugar de intentar copiar en el aire.' },
+    ],
+  },
+
   formulaClave: {
     descripcion: 'malloc(strlen+1) + strcpy + return puntero',
     formula: 'len = ft_strlen(s); dest = malloc(len + 1); ft_strcpy(dest, s); return dest;',
