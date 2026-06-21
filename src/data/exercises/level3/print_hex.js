@@ -82,7 +82,7 @@ Si el número es 0, imprime "0".`,
       { elemento: 'recursión o array+índice inverso', nota: 'dos estrategias comunes para imprimir en base no-decimal' },
     ],
     asociaciones: [
-      { dato: 'base hex "0123456789abcdef"', imagen: 'El hexadecimal es el abecedario de 16 caracteres. Para obtener el dígito correcto, el número entra en la cadena como índice: hex_digits[n % 16]. La letra 'a' (10), 'b' (11), ..., 'f' (15) son los ciudadanos "extra" del sistema.' },
+      { dato: 'base hex "0123456789abcdef"', imagen: 'El hexadecimal es el abecedario de 16 caracteres. Para obtener el dígito correcto, el número entra en la cadena como índice: hex_digits[n % 16]. Las letras a (10), b (11), ..., f (15) son los ciudadanos "extra" del sistema.' },
       { dato: 'imprimir al revés (resta últimos primero)', imagen: 'print_hex es un pintor que pinta de derecha a izquierda. Con cada división por 16 saca el dígito más a la derecha. La recursión los voltea automáticamente: imprime el de antes de volver.' },
     ],
   },
