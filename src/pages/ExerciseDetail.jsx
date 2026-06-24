@@ -3,7 +3,7 @@ import { useParams, useNavigate, Link } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
   ChevronLeft, ChevronRight, Play, ClipboardList, BookOpen,
-  Hash, Gamepad2, Microscope, Shuffle, Cpu, Trophy, Trash2, Copy, Check,
+  Hash, Gamepad2, Microscope, Shuffle, Cpu, Trophy, Trash2, Copy, Check, Brain,
 } from 'lucide-react'
 import clsx from 'clsx'
 import { getExercise, getPrevExercise, getNextExercise } from '@/data/index'
@@ -17,19 +17,21 @@ import FormulaVisualizer from '@/components/exercise/FormulaVisualizer'
 import CodeViewer       from '@/components/exercise/CodeViewer'
 import TrapsList        from '@/components/exercise/TrapsList'
 import ImageGenerator   from '@/components/exercise/ImageGenerator'
+import CampayoMethodCard from '@/components/exercise/CampayoMethodCard'
 import InputPlayground  from '@/components/simulator/InputPlayground'
 import GdbStepper       from '@/components/gdb/GdbStepper'
 
 // ─── Tabs config ──────────────────────────────────────────────────────────────
 const TABS = [
-  { id: 'subject',   icon: ClipboardList, label: 'Subject'    },
-  { id: 'historia',  icon: BookOpen,      label: 'Historia'   },
-  { id: 'formula',   icon: Hash,          label: 'Fórmula'    },
-  { id: 'simulador', icon: Gamepad2,      label: 'Simulador'  },
-  { id: 'gdb',       icon: Microscope,    label: 'GDB'        },
-  { id: 'variantes', icon: Shuffle,       label: 'Variantes'  },
-  { id: 'debajo',    icon: Cpu,           label: 'Por debajo' },
-  { id: 'pruebate',  icon: Trophy,        label: 'Pruébate'   },
+  { id: 'subject',   icon: ClipboardList, label: 'Subject'         },
+  { id: 'historia',  icon: BookOpen,      label: 'Historia'        },
+  { id: 'campayo',   icon: Brain,         label: 'Método Campayo'  },
+  { id: 'formula',   icon: Hash,          label: 'Fórmula'         },
+  { id: 'simulador', icon: Gamepad2,      label: 'Simulador'       },
+  { id: 'gdb',       icon: Microscope,    label: 'GDB'             },
+  { id: 'variantes', icon: Shuffle,       label: 'Variantes'       },
+  { id: 'debajo',    icon: Cpu,           label: 'Por debajo'      },
+  { id: 'pruebate',  icon: Trophy,        label: 'Pruébate'        },
 ]
 
 const STATUS_CONFIG = {
@@ -417,6 +419,7 @@ export default function ExerciseDetail() {
   const tabContent = {
     subject:   <TabSubject exercise={exercise} />,
     historia:  <TabHistoria exercise={exercise} />,
+    campayo:   <CampayoMethodCard exercise={exercise} />,
     formula:   <TabFormula exercise={exercise} />,
     simulador: <TabSimulador exercise={exercise} />,
     gdb:       <TabGDB exercise={exercise} />,

@@ -76,6 +76,21 @@ El 1 no es primo. El 2 sí es primo (el único par primo). Resultado: put_nbr(su
 
   herramientas: ['strings'],
 
+  campayoMetodo: {
+    feynman: `El programa recibe un número n e imprime la suma de todos los números primos hasta n (incluyendo n si es primo).
+Para cada número del 2 al n, comprueba si es primo.
+Un número es primo si solo es divisible entre 1 y él mismo.
+Para comprobarlo, intenta dividirlo entre todos los números del 2 hasta su raíz cuadrada.
+Si ninguno lo divide exactamente, es primo y lo suma al total.`,
+    datosPuros: [
+      { elemento: 'i * i <= n (en vez de i <= sqrt(n))', nota: 'evitar usar sqrt() — comparar i*i es equivalente y más seguro' },
+      { elemento: 'si argc != 2 o n <= 0 → solo \\n', nota: 'validación de argumentos' },
+    ],
+    asociaciones: [
+      { dato: 'i * i <= n (no sqrt)', imagen: 'El detective de primos usa una regla: "Si no has encontrado divisor antes de que tu cuadrado supere al sospechoso, es primo." Es más rápido que sacar la raíz cuadrada y evita errores de coma flotante.' },
+    ],
+  },
+
   formulaClave: {
     descripcion: 'is_prime hasta sqrt + suma acumulativa',
     formula: 'is_prime(x): i=2; while i*i<=x: if x%i==0 return 0; i++ return 1',

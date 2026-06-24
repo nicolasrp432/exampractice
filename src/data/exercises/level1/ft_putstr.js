@@ -55,6 +55,23 @@ Fórmula: while(str[i]) { write(1, &str[i], 1); i++; }`,
 
   herramientas: ['strings'],
 
+  campayoMetodo: {
+    feynman: `La función recibe un string.
+Mientras haya letras (no sea el Cero Fantasma), escribe UN solo carácter en la pantalla.
+Luego avanza al siguiente.
+Para cuando llega al final (\\0).
+No añade nada más — ni salto de línea, ni espacio.`,
+    datosPuros: [
+      { elemento: 'write(1, &str[i], 1)', nota: 'fd=1 (stdout), dirección del carácter, tamaño 1 byte' },
+      { elemento: 'void ft_putstr(char *str)', nota: 'devuelve void — no hay return con valor' },
+      { elemento: 'SIN \\n al final', nota: 'ft_putstr no añade newline — eso lo decide quien la llama' },
+    ],
+    asociaciones: [
+      { dato: 'write(1, &str[i], 1)', imagen: 'La Tele de la ventana tiene una boca gigante. Le das un solo carácter (con un puntero &) y ella lo GRITA (write) al mundo (fd=1). Solo uno por vez.' },
+      { dato: 'SIN \\n al final', imagen: 'La Tele tiene la boca cosida para no añadir nada extra al final. Si quieres el salto de línea tienes que pedírselo tú por separado.' },
+    ],
+  },
+
   formulaClave: {
     descripcion: 'Escribe cada byte del string con write()',
     formula: 'write(1, &str[i], 1)',

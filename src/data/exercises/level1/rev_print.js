@@ -68,6 +68,23 @@ Luego retrocede desde i = len-1 hasta i = 0.
 
   herramientas: ['strings', 'argc'],
 
+  campayoMetodo: {
+    feynman: `El programa recibe un string como argumento.
+Primero busca el final del string contando sus letras (o usando ft_strlen).
+Luego empieza desde la ÚLTIMA letra y va hacia atrás, escribiéndola en pantalla.
+Hace esto hasta que llega a la primera letra (posición 0).
+Al terminar escribe un salto de línea.`,
+    datosPuros: [
+      { elemento: 'i = len - 1', nota: 'el último carácter está en posición len-1, no len' },
+      { elemento: 'while (i >= 0)', nota: 'i >= 0 (no i > 0) para incluir el primer carácter' },
+      { elemento: 'i--', nota: 'decrementa i en lugar de incrementar' },
+    ],
+    asociaciones: [
+      { dato: 'i = len - 1 (no len)', imagen: 'El Reverendo Moonwalk del espejo empieza su moonwalk UNA casilla antes del final. Si empieza en len, pisa el Fantasma Cero y resbala — off-by-one.' },
+      { dato: 'while (i >= 0)', imagen: 'El reverendo baila hasta la casilla CERO inclusive. Si dijera i > 0 se quedaría sin bailar la primera letra — dejaría la "h" de "hello" sin imprimir.' },
+    ],
+  },
+
   formulaClave: {
     descripcion: 'Busca el final, itera hacia atrás',
     formula: 'i = len - 1; while (i >= 0) { write(str[i]); i--; }',

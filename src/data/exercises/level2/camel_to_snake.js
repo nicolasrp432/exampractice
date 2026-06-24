@@ -78,6 +78,20 @@ Fórmula: mayúscula → '_' + (c + 32).
 
   herramientas: ['strings', 'ascii'],
 
+  campayoMetodo: {
+    feynman: `El programa recibe un string en camelCase y lo convierte a snake_case.
+Cada vez que encuentra una mayúscula, la convierte a minúscula y le pone un guión bajo delante.
+Las letras minúsculas y los otros caracteres los deja tal cual.
+Ejemplo: helloWorld → hello_world`,
+    datosPuros: [
+      { elemento: "if (c >= 'A' && c <= 'Z')", nota: 'detectar mayúscula' },
+      { elemento: "write '_' luego c + 32", nota: 'escribir guión bajo y luego la minúscula' },
+    ],
+    asociaciones: [
+      { dato: 'mayúscula → _ + minúscula', imagen: "La serpiente del camelCase tiene alergia a las jorobas (mayúsculas). Cada vez que ve una joroba, le planta un guión bajo delante y la aplana (c + 32 = minúscula). Sin guión primero = error." },
+    ],
+  },
+
   formulaClave: {
     descripcion: 'Mayúscula → "_" + minúscula equivalente (+32)',
     formula: "if (uppercase) { write('_'); write(c + 32); } else write(c);",

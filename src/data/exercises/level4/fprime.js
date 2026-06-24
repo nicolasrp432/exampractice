@@ -97,6 +97,23 @@ Caso especial: n=1 → imprimir "1".`,
 
   herramientas: ['bits', 'ascii'],
 
+  campayoMetodo: {
+    feynman: `El programa recibe un número y muestra su descomposición en factores primos.
+Empieza con el divisor d = 2.
+Mientras d × d sea menor o igual al número, intenta dividir el número entre d.
+Si el número es divisible entre d, imprime d y divide el número entre d (sin incrementar d).
+Si no es divisible, pasa al siguiente d.
+Al final, si el número que queda es mayor que 1, es un factor primo y lo imprime.`,
+    datosPuros: [
+      { elemento: 'while (d * d <= n) antes del if (n % d)', nota: 'el bucle externo controla hasta cuándo probar divisores' },
+      { elemento: 'imprimir "*" solo entre factores (no al final)', nota: 'formato exacto: "2*3*5" no "2*3*5*"' },
+    ],
+    asociaciones: [
+      { dato: 'n / d en bucle (sin d++) hasta no divisible', imagen: 'fprime es un exprimidor de naranjas. Exprime el 2 tantas veces como pueda. Cuando ya no sale zumo de 2, prueba el 3, etc. Al final, si queda pulpa (n > 1), esa pulpa es el último factor primo.' },
+      { dato: 'formato sin * al final', imagen: 'Los factores son escalones unidos por un * que actúa de pegamento. El pegamento va ENTRE escalones, no al final del último. Un * final sería como pegar pegamento en la pared después del último escalón.' },
+    ],
+  },
+
   formulaClave: {
     descripcion: 'Divide por d mientras d*d<=n; resto n>1 es primo',
     formula: 'while d*d<=n: if n%d==0: print d; n/=d; else d++; if n>1: print n',

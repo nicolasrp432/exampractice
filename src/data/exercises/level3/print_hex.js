@@ -71,6 +71,22 @@ La tabla "0123456789abcdef" es la clave: hex[n%16] da el dígito correcto.`,
 
   herramientas: ['bits', 'ascii'],
 
+  campayoMetodo: {
+    feynman: `El programa recibe un número y lo imprime en hexadecimal (base 16).
+Los dígitos hexadecimales van del 0 al 9 y luego de la 'a' a la 'f'.
+Para convertir, divide el número entre 16 repetidamente y guarda los restos.
+Los restos se imprimen al revés (de último a primero).
+Si el número es 0, imprime "0".`,
+    datosPuros: [
+      { elemento: '"0123456789abcdef"', nota: 'la cadena de dígitos hex — minúsculas, no mayúsculas' },
+      { elemento: 'recursión o array+índice inverso', nota: 'dos estrategias comunes para imprimir en base no-decimal' },
+    ],
+    asociaciones: [
+      { dato: 'base hex "0123456789abcdef"', imagen: 'El hexadecimal es el abecedario de 16 caracteres. Para obtener el dígito correcto, el número entra en la cadena como índice: hex_digits[n % 16]. Las letras a (10), b (11), ..., f (15) son los ciudadanos "extra" del sistema.' },
+      { dato: 'imprimir al revés (resta últimos primero)', imagen: 'print_hex es un pintor que pinta de derecha a izquierda. Con cada división por 16 saca el dígito más a la derecha. La recursión los voltea automáticamente: imprime el de antes de volver.' },
+    ],
+  },
+
   formulaClave: {
     descripcion: 'Recursión base 16: dividir por 16, resto mapea a dígito hex',
     formula: 'print_hex(n): if n>=16: print_hex(n/16); write(hex[n%16]);',

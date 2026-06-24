@@ -117,6 +117,23 @@ Si algo está mal (mal argc, operador desconocido, /0), grita "Error".
 
   herramientas: ['strings', 'argc', 'ascii'],
 
+  campayoMetodo: {
+    feynman: `El programa recibe 3 argumentos: un número, un operador y otro número.
+Convierte los dos strings de números en enteros (usando ft_atoi o similar).
+Aplica la operación indicada por el operador (+, -, *, /, %).
+Imprime el resultado.
+Si el operador no es válido, o si se divide entre 0, imprime "Error".`,
+    datosPuros: [
+      { elemento: 'argc == 4', nota: '4 argumentos: programa + num1 + operador + num2' },
+      { elemento: 'av[2][0]', nota: 'el operador es av[2], pero solo el primer carácter cuenta' },
+      { elemento: '"Error\\n"', nota: 'con mayúscula y newline — exactamente así' },
+    ],
+    asociaciones: [
+      { dato: 'argc == 4', imagen: 'La calculadora del do_op necesita 4 ingredientes: ella misma + primer número + símbolo de operación + segundo número. Ni uno más ni uno menos.' },
+      { dato: '"Error\\n" con mayúscula', imagen: 'El robot calculador tiene un cartel de ERROR en mayúscula gigante que muestra cuando alguien le pide dividir por cero o le da un operador raro. El cartel siempre lleva su salto de línea.' },
+    ],
+  },
+
   formulaClave: {
     descripcion: 'Leer dos enteros y un operador, aplicar y escribir resultado',
     formula: 'a = ft_atoi(argv[1]); b = ft_atoi(argv[3]); op = argv[2][0];',

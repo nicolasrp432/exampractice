@@ -54,6 +54,24 @@ Ritual: 1) Vierte A en tmp. 2) Vierte B en A. 3) Vierte tmp en B.
 
   herramientas: ['strings'],
 
+  campayoMetodo: {
+    feynman: `La función recibe las direcciones de dos enteros (no los valores, sino dónde están guardados).
+Para intercambiarlos necesita un tercer vaso vacío: int tmp.
+Primero vierte el contenido de A en el vaso vacío.
+Luego pone lo de B donde estaba A.
+Luego pone lo del vaso en B.
+Sin el vaso vacío perdería uno de los valores para siempre.`,
+    datosPuros: [
+      { elemento: 'void ft_swap(int *a, int *b)', nota: 'recibe punteros int*, devuelve void' },
+      { elemento: 'int tmp = *a', nota: 'tmp es int (no int*) — guarda el valor, no la dirección' },
+      { elemento: '*a = *b; *b = tmp', nota: 'desreferenciar con * para leer/escribir el valor' },
+    ],
+    asociaciones: [
+      { dato: 'int tmp (no int*)', imagen: 'El Sapo Mago del fregadero coge un vaso de agua (int tmp). No coge el grifo (int*), sino EL AGUA MISMA. Si confundes vaso con grifo el hechizo explota.' },
+      { dato: '*a = *b (*desreferencia)', imagen: 'El asterisco es como meter la mano en el buzón (*) para sacar o meter cartas. Sin el asterisco solo tocas el buzón (la dirección) sin abrir.' },
+    ],
+  },
+
   formulaClave: {
     descripcion: 'Swap clásico con variable temporal',
     formula: 'tmp = *a; *a = *b; *b = tmp;',

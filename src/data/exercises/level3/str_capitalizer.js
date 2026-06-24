@@ -82,6 +82,20 @@ Si no es espacio y !capitalize: MINÚSCULA.`,
 
   herramientas: ['strings', 'ascii'],
 
+  campayoMetodo: {
+    feynman: `El programa recibe un string y pone en mayúscula la primera letra de cada palabra.
+El resto de las letras de cada palabra las pone en minúscula.
+Los caracteres no-alfabéticos actúan como separadores de palabras.
+El primer carácter de una nueva palabra va en mayúscula; los demás en minúscula.`,
+    datosPuros: [
+      { elemento: 'bandera "inicio de palabra"', nota: 'necesitas saber si el próximo carácter es inicio de palabra' },
+      { elemento: 'letra + separador → siguiente letra en mayúscula', nota: 'el separador activa la bandera; la siguiente letra la usa' },
+    ],
+    asociaciones: [
+      { dato: 'bandera de inicio de palabra', imagen: 'str_capitalizer lleva una linterna. Cuando el portero (un espacio o símbolo) pasa, la linterna se enciende. La primera letra que llega con la linterna encendida recibe la corona (mayúscula) y la linterna se apaga.' },
+    ],
+  },
+
   formulaClave: {
     descripcion: 'Flag capitalize: true al inicio y tras cada espacio',
     formula: 'if(space) cap=1; else if(cap){upper;cap=0;} else lower;',

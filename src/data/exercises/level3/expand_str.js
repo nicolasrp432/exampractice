@@ -88,6 +88,20 @@ El algoritmo es idéntico a epur_str pero escribe "   " en vez de " ".`,
 
   herramientas: ['strings'],
 
+  campayoMetodo: {
+    feynman: `El programa recibe un string y añade espacios alrededor de cada carácter no-alfanumérico.
+Los caracteres alfanuméricos (letras y dígitos) se imprimen tal cual.
+Los demás caracteres (símbolos, espacios, puntuación) se imprimen con un espacio antes y uno después.
+Los espacios extras se normalizan para evitar dobles espacios.`,
+    datosPuros: [
+      { elemento: "isalnum(c) para detectar alfanumérico", nota: 'alternativa: c >= a-z || c >= A-Z || c >= 0-9' },
+      { elemento: 'espacio antes y después del símbolo', nota: 'dos write: primero " ", luego el símbolo, luego " "' },
+    ],
+    asociaciones: [
+      { dato: 'espacio antes y después de símbolo', imagen: 'expand_str es un repartidor que respeta el espacio personal de los símbolos. Cada vez que ve un símbolo, le abre paso con "espacios guardaespaldas" a ambos lados. Las letras y números van sin guardaespaldas.' },
+    ],
+  },
+
   formulaClave: {
     descripcion: 'Flag k: cada grupo de espacios → exactamente 3 espacios antes del siguiente char',
     formula: 'for c: if c!=" " { if k: write("   "),k=0; write(c) } else: k=1',

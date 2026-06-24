@@ -70,6 +70,22 @@ Con tres argumentos: argc=4, imprime 3.`,
 
   herramientas: ['strings'],
 
+  campayoMetodo: {
+    feynman: `El programa recibe varios números como argumentos y muestra su suma.
+Recorre todos los argumentos desde av[1] hasta av[argc-1].
+Para cada uno, lo convierte a entero (con ft_atoi o similar).
+Los suma todos.
+Imprime el resultado seguido de newline.
+Si no hay argumentos, imprime "0".`,
+    datosPuros: [
+      { elemento: 'i = 1; i < argc; i++', nota: 'empezar en av[1], no av[0] (av[0] es el nombre del programa)' },
+      { elemento: 'si argc == 1 → imprimir "0\\n"', nota: 'sin argumentos = suma vacía = 0' },
+    ],
+    asociaciones: [
+      { dato: 'av[1] no av[0]', imagen: 'La caja registradora de paramsum ignora el primer artículo (av[0] = el nombre del programa). Solo cuenta lo que el cliente pone en la cinta (av[1], av[2], ...). Si el cliente no trae nada, el total es 0.' },
+    ],
+  },
+
   formulaClave: {
     descripcion: 'argc - 1 es el número de parámetros del programa',
     formula: 'put_nbr(argc - 1); write(1, "\\n", 1);',

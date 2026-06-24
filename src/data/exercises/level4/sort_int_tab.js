@@ -61,6 +61,21 @@ Los duplicados se quedan exactamente donde toca en el orden final.`,
 
   herramientas: ['arrays', 'swap'],
 
+  campayoMetodo: {
+    feynman: `La función ordena un array de enteros de menor a mayor.
+Usa bubble sort: recorre el array comparando pares de elementos adyacentes.
+Si el de la izquierda es mayor que el de la derecha, los intercambia.
+Repite el proceso hasta que en toda una pasada no hace ningún intercambio.
+Al terminar, el array está ordenado.`,
+    datosPuros: [
+      { elemento: 'void sort_int_tab(int *tab, int size)', nota: 'ordena in place — void, no devuelve nada' },
+      { elemento: 'flag swapped para detectar si terminó antes', nota: 'optimización: si no hubo swap en una pasada, ya está ordenado' },
+    ],
+    asociaciones: [
+      { dato: 'bubble sort — el mayor burbujea al final', imagen: 'En cada pasada, el número más grande "burbujea" hacia el final del array como una burbuja de champán. Tras N pasadas, los N números más grandes están en su sitio. Con el flag de swap, para antes si ya está todo ordenado.' },
+    ],
+  },
+
   formulaClave: {
     descripcion: 'Bubble sort simple o inserción en sitio',
     formula: 'while swaps: for i=0..size-2 if tab[i] > tab[i+1] swap',

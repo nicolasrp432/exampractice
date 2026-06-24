@@ -52,6 +52,24 @@ Ancla mental: el alien NUNCA cuenta al fantasma, solo se detiene ante él.`,
 
   herramientas: ['strings'],
 
+  campayoMetodo: {
+    feynman: `La función recibe un string (una fila de letras).
+Empieza a contar desde la posición 0.
+Avanza letra a letra mientras haya una letra de verdad.
+Cuando encuentra el Cero Fantasma (\\0) que marca el final, para de contar.
+Devuelve el número que tenía: eso es la longitud del string.
+Nunca cuenta al Fantasma Cero en la longitud.`,
+    datosPuros: [
+      { elemento: 'int ft_strlen(char *str)', nota: 'devuelve int, recibe char*' },
+      { elemento: 'while (str[i])', nota: 'para en \\0 porque \\0 es falso (valor 0)' },
+      { elemento: 'return (i)', nota: 'i ya contiene el número correcto, no i-1' },
+    ],
+    asociaciones: [
+      { dato: 'while (str[i])', imagen: 'El Alien Elástico de la nevera se estira casilla a casilla. Cuando toca al Fantasma Cero se congela al instante. El número de casillas tocadas = la longitud.' },
+      { dato: 'return (i)', imagen: 'El alien lleva un contador en la mano. Cuando se congela, te enseña el número que tiene: ese es el resultado. No resta nada porque al fantasma nunca lo contó.' },
+    ],
+  },
+
   formulaClave: {
     descripcion: 'Cuenta caracteres hasta el terminador nulo',
     formula: 'i = 0; while (str[i]) i++; return (i);',

@@ -56,6 +56,24 @@ Si vale 0, debe devolver "0".`,
 
   herramientas: ['strings', 'malloc'],
 
+  campayoMetodo: {
+    feynman: `La función convierte un entero en un string.
+Primero calcula cuántos dígitos tiene el número (y si es negativo, añade 1 para el '-').
+Luego pide esa cantidad de memoria + 1 (para el \\0).
+Rellena el string de derecha a izquierda con los dígitos (módulo 10 para el último dígito).
+Si es negativo, añade el '-' al principio.
+Devuelve el string resultante.`,
+    datosPuros: [
+      { elemento: 'manejar INT_MIN (-2147483648) por separado', nota: '-INT_MIN = overflow en int — caso especial obligatorio' },
+      { elemento: 'str[len] = \'\\0\' antes de rellenar', nota: 'poner el terminador al final antes de rellenar hacia atrás' },
+      { elemento: 'char *ft_itoa(int n)', nota: 'devuelve char* asignado con malloc — el caller debe hacer free' },
+    ],
+    asociaciones: [
+      { dato: 'INT_MIN caso especial', imagen: 'INT_MIN es el pasajero problemático: si intentas hacerlo positivo con -n, el int se desborda (no cabe). Lo mejor es tratarlo aparte al principio: hardcodear "-2147483648" o usar long para la conversión.' },
+      { dato: 'rellenar de derecha a izquierda', imagen: 'ft_itoa llena el string como un espejo de la calculadora: el último dígito se calcula primero (n%10) y va al final del array. Luego se divide por 10 y se va hacia la izquierda hasta terminar.' },
+    ],
+  },
+
   formulaClave: {
     descripcion: 'Calcular longitud, reservar, y escribir desde el final',
     formula: 'len = digits(n) + sign; result = malloc(len + 1); result[len] = "\\0"; fill from back',

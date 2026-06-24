@@ -62,6 +62,22 @@ Si la montaña está vacía, el Guardián devuelve 0 y no mira nada más.`,
 
   herramientas: ['arrays', 'comparación'],
 
+  campayoMetodo: {
+    feynman: `La función recibe un array de enteros y su tamaño, y devuelve el más grande.
+Guarda el primer número como candidato a "máximo".
+Recorre el resto del array comparando cada número con el máximo actual.
+Si encuentra uno mayor, lo convierte en el nuevo máximo.
+Al terminar, devuelve el máximo encontrado.`,
+    datosPuros: [
+      { elemento: 'int max(int *tab, int len)', nota: 'recibe puntero a array y su longitud' },
+      { elemento: 'int max = tab[0]', nota: 'inicializar con el primer elemento, no con 0 (puede haber negativos)' },
+      { elemento: 'if (tab[i] > max) max = tab[i]', nota: 'actualizar si el nuevo es mayor' },
+    ],
+    asociaciones: [
+      { dato: 'inicializar con tab[0] (no 0)', imagen: 'El cazador de máximos necesita un punto de partida. Si empieza con 0 y todos los números son negativos, devolverá 0 — pero 0 ni siquiera está en el array. Siempre empieza por la primera presa real (tab[0]).' },
+    ],
+  },
+
   formulaClave: {
     descripcion: 'Guardar el mayor encontrado mientras se recorre el array',
     formula: 'if (len == 0) return 0; res = tab[0]; for i=1..len-1 if tab[i] > res res = tab[i]; return res;',

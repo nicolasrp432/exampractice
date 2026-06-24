@@ -66,6 +66,21 @@ Si no hay argumento, solo escribe un salto de línea.`,
 
   herramientas: ['strings', 'ascii'],
 
+  campayoMetodo: {
+    feynman: `El programa recibe un string en snake_case y lo convierte a camelCase.
+Recorre el string carácter a carácter.
+Cuando encuentra un guión bajo, lo OMITE y convierte la siguiente letra a mayúscula.
+Las demás letras las escribe tal cual.
+Ejemplo: hello_world → helloWorld`,
+    datosPuros: [
+      { elemento: "if (str[i] == '_')", nota: 'detectar el guión bajo — no escribirlo' },
+      { elemento: 'i++; y luego c - 32', nota: 'avanzar un carácter más Y convertir a mayúscula' },
+    ],
+    asociaciones: [
+      { dato: '_ → omitir y subir la siguiente', imagen: 'La serpiente snake_case tiene jorobas (_). El constructor camelCase agarra cada joroba, la borra, y empuja la letra siguiente hacia ARRIBA (c - 32 = mayúscula). Sin el avance extra (i++), convertiría el guión bajo también.' },
+    ],
+  },
+
   formulaClave: {
     descripcion: 'Recorrer la cadena y saltar/capitalizar al cruzar "_"',
     formula: 'for each char: if "_" skip and uppercase next; else write char',

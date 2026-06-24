@@ -58,6 +58,22 @@ Si ningún char de s1 está en s2, devuelve la longitud total de s1.`,
 
   herramientas: ['strings'],
 
+  campayoMetodo: {
+    feynman: `La función busca en un string la primera letra que aparezca en un segundo string de "caracteres prohibidos".
+Avanza por el primer string letra a letra.
+Para cada letra, mira si está en el segundo string.
+Si la encuentra entre los prohibidos, para y devuelve la posición donde estaba.
+Si llega al final sin encontrar ningún prohibido, devuelve la longitud del string.`,
+    datosPuros: [
+      { elemento: 'size_t ft_strcspn(const char *s, const char *reject)', nota: 'devuelve size_t (posición), recibe dos const char*' },
+      { elemento: 'doble bucle: i sobre s, j sobre reject', nota: 'para cada char de s, comparar con todos los de reject' },
+      { elemento: 'return (i) cuando s[i] == reject[j]', nota: 'devuelve el índice en s, no en reject' },
+    ],
+    asociaciones: [
+      { dato: 'busca primer char de reject en s', imagen: 'Un detector de metales (strcspn) recorre la playa (s). Cuando pita por primera vez (encuentra un carácter de reject), para y anuncia a qué distancia de la orilla está (la posición i).' },
+    ],
+  },
+
   formulaClave: {
     descripcion: 'Cuenta bytes de s1 hasta encontrar uno que esté en s2',
     formula: 'while (s1[i] && !ft_strchr(s2, s1[i])) i++; return i;',

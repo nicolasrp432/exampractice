@@ -83,6 +83,22 @@ Al final, la maceta tiene todos los chars únicos en orden de primera aparición
 
   herramientas: ['strings', 'ascii'],
 
+  campayoMetodo: {
+    feynman: `El programa recibe dos strings e imprime todos los caracteres que aparecen en cualquiera de los dos, sin repetir.
+Primero recorre el primer string e imprime cada carácter que no haya imprimido antes.
+Luego hace lo mismo con el segundo string.
+Los caracteres duplicados (tanto dentro de un string como entre los dos) solo se imprimen una vez.
+El orden de salida sigue el orden del primer string, luego el del segundo.`,
+    datosPuros: [
+      { elemento: 'int seen[256] = {0}', nota: 'array de 256 para marcar qué caracteres ya fueron impresos' },
+      { elemento: 'if (!seen[(unsigned char)c])', nota: 'imprimir solo si no se ha visto antes' },
+      { elemento: 'seen[(unsigned char)c] = 1', nota: 'marcar como visto después de imprimir' },
+    ],
+    asociaciones: [
+      { dato: 'seen[256] como filtro', imagen: 'Un club con 256 puertas (una por carácter ASCII). La primera vez que un personaje entra, le estampan el sello (seen = 1) y pasa. La segunda vez que llega, el portero ve el sello y no le deja entrar. Así no hay duplicados en la fiesta (el output).' },
+    ],
+  },
+
   formulaClave: {
     descripcion: 'Recorrer s1 luego s2: para cada char, si no está en visto, escribirlo y marcarlo',
     formula: 'for c in s1+s2: if !visto[(uchar)c]: write(c); visto[(uchar)c]=1',

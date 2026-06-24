@@ -60,6 +60,22 @@ SIEMPRE 8 bits, siempre con ceros a la izquierda. SIN newline al final.`,
 
   herramientas: ['bits', 'ascii'],
 
+  campayoMetodo: {
+    feynman: `La función recibe un byte (unsigned char) e imprime sus 8 bits como "0" y "1".
+Empieza desde el bit más significativo (el bit 7, el de más a la izquierda).
+Para cada bit, usa una máscara con desplazamiento para ver si ese bit es 1 o 0.
+Si el bit es 1, escribe "1". Si es 0, escribe "0".
+Hace esto 8 veces, del bit 7 al bit 0.`,
+    datosPuros: [
+      { elemento: '1 << (7 - i)', nota: 'máscara que selecciona el bit i-ésimo desde la izquierda' },
+      { elemento: 'if (byte & mask)', nota: 'AND con máscara para ver si el bit está a 1' },
+      { elemento: 'i = 0; i < 8; i++', nota: 'iterar 8 veces (un byte = 8 bits)' },
+    ],
+    asociaciones: [
+      { dato: '1 << (7 - i)', imagen: 'La linterna de 8 posiciones: empieza apuntando al bit más grande (1 corrida 7 puestos a la izquierda). Con cada paso, la linterna se mueve un poco a la derecha (i crece, el desplazamiento baja). Donde brilla la linterna y el byte tiene 1, escribes "1".' },
+    ],
+  },
+
   formulaClave: {
     descripcion: 'MSB primero: extraer bit i con (octet>>i)&1, escribir "0" o "1"',
     formula: 'i=7; while(i>=0){ c="0"+((octet>>i)&1); write(1,&c,1); i--; }',

@@ -77,6 +77,21 @@ Luego divide a entre el GCD antes de multiplicar para evitar overflow.`,
 
   herramientas: ['strings'],
 
+  campayoMetodo: {
+    feynman: `El programa recibe dos números y calcula su Mínimo Común Múltiplo.
+El MCM es el número más pequeño que es múltiplo de ambos.
+La fórmula es: MCM = (a × b) / MCD(a, b).
+El MCD (Máximo Común Divisor) se calcula con el algoritmo de Euclides.
+Algoritmo de Euclides: mientras b != 0, hacemos a = b, b = a % b. El MCD es el a final.`,
+    datosPuros: [
+      { elemento: 'lcm = (a / pgcd(a, b)) * b', nota: 'dividir primero para evitar overflow de a*b' },
+      { elemento: 'pgcd: while (b) { tmp = b; b = a % b; a = tmp; }', nota: 'algoritmo de Euclides estándar' },
+    ],
+    asociaciones: [
+      { dato: 'lcm = (a / gcd) * b (no a*b/gcd)', imagen: 'El truco del orden: si multiplicas a*b primero el número puede ser gigantesco y hacer overflow. Dividir primero (a/gcd) mantiene los números manejables. El resultado es el mismo pero sin accidente de desbordamiento.' },
+    ],
+  },
+
   formulaClave: {
     descripcion: 'lcm(a,b) = a / gcd(a,b) * b — divide primero para evitar overflow',
     formula: 'gcd(x,y): while(y){tmp=y;y=x%y;x=tmp;} return x; lcm: return a/gcd(a,b)*b;',

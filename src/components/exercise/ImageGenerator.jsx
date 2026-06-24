@@ -1,9 +1,17 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Image as ImageIcon, Sparkles, RefreshCw, Save, Edit3, Check, HelpCircle, Key, Eye, EyeOff, Settings } from 'lucide-react'
+import { Image as ImageIcon, Sparkles, RefreshCw, Save, Edit3, Check, HelpCircle, Key, Eye, EyeOff, Settings, Upload, Link as LinkIcon, Trash2 } from 'lucide-react'
 import clsx from 'clsx'
 
+// 'ai' | 'upload' | 'url'
+const INPUT_MODES = [
+  { id: 'upload', icon: Upload,    label: 'Subir archivo' },
+  { id: 'url',    icon: LinkIcon,  label: 'URL externa'   },
+  { id: 'ai',     icon: Sparkles,  label: 'Generar con IA' },
+]
+
 export default function ImageGenerator({ exercise, onSaveImage, savedImageUrl = null }) {
+  const [inputMode, setInputMode] = useState('upload')
   const [provider, setProvider] = useState(() => {
     return localStorage.getItem('42prep-img-provider') || 'gemini'
   })
@@ -26,6 +34,9 @@ export default function ImageGenerator({ exercise, onSaveImage, savedImageUrl = 
   const [isSaved, setIsSaved] = useState(!!savedImageUrl)
   const [hasError, setHasError] = useState(false)
   const [errorMsg, setErrorMsg] = useState('')
+  const [urlInput, setUrlInput] = useState('')
+  const [urlError, setUrlError] = useState('')
+  const fileInputRef = useRef(null)
 
   // Generate default prompt based on exercise mnemotecnia
   useEffect(() => {
@@ -166,7 +177,6 @@ export default function ImageGenerator({ exercise, onSaveImage, savedImageUrl = 
   const handleSave = () => {
     if (!imageUrl) return
     setIsSaved(true)
-    // Persist URL and prompt to database if function is provided
     if (onSaveImage) {
       onSaveImage(imageUrl, customPrompt || prompt)
     } else {
@@ -175,31 +185,143 @@ export default function ImageGenerator({ exercise, onSaveImage, savedImageUrl = 
     }
   }
 
+  const handleFileUpload = (e) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    if (!file.type.startsWith('image/')) {
+      setHasError(true)
+      setErrorMsg('El archivo seleccionado no es una imagen válida.')
+      return
+    }
+    const reader = new FileReader()
+    reader.onload = (ev) => {
+      const dataUrl = ev.target.result
+      setImageUrl(dataUrl)
+      setIsSaved(false)
+      setHasError(false)
+      setErrorMsg('')
+      localStorage.setItem(`42prep-img-${exercise.id}`, dataUrl)
+    }
+    reader.readAsDataURL(file)
+  }
+
+  const handleUrlSave = () => {
+    const trimmed = urlInput.trim()
+    if (!trimmed.startsWith('http')) {
+      setUrlError('La URL debe empezar por http:// o https://')
+      return
+    }
+    setUrlError('')
+    setImageUrl(trimmed)
+    setIsSaved(false)
+    setHasError(false)
+    setErrorMsg('')
+    localStorage.setItem(`42prep-img-${exercise.id}`, trimmed)
+  }
+
+  const handleClearImage = () => {
+    setImageUrl(null)
+    setIsSaved(false)
+    setHasError(false)
+    setErrorMsg('')
+    localStorage.removeItem(`42prep-img-${exercise.id}`)
+    localStorage.removeItem(`42prep-img-saved-${exercise.id}`)
+    if (fileInputRef.current) fileInputRef.current.value = ''
+    setUrlInput('')
+  }
+
   return (
     <div className="rounded-3xl border border-zinc-200 bg-white p-5 shadow-sm space-y-4">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <ImageIcon size={18} className="text-purple-500" />
-          <h3 className="font-bold text-zinc-900 text-sm">Asociación Visual (IA Generativa)</h3>
+          <h3 className="font-bold text-zinc-900 text-sm">Asociación Visual</h3>
         </div>
         <div className="flex items-center gap-1.5">
-          <button
-            onClick={() => setShowKeyInput(o => !o)}
-            className="text-[10px] text-zinc-500 hover:text-zinc-800 underline font-semibold flex items-center gap-0.5"
-          >
-            <Settings size={10} />
-            Configuración
-          </button>
           {imageUrl && (
-            <span className="text-xs bg-purple-50 text-purple-600 px-2 py-0.5 rounded-full font-semibold flex items-center gap-1">
-              <Sparkles size={10} /> {provider === 'gemini' ? 'Gemini Imagen' : 'Pollinations'}
-            </span>
+            <button
+              onClick={handleClearImage}
+              title="Eliminar imagen"
+              className="text-[10px] text-red-400 hover:text-red-600 flex items-center gap-0.5 font-semibold"
+            >
+              <Trash2 size={10} /> Borrar
+            </button>
+          )}
+          {inputMode === 'ai' && (
+            <button
+              onClick={() => setShowKeyInput(o => !o)}
+              className="text-[10px] text-zinc-500 hover:text-zinc-800 underline font-semibold flex items-center gap-0.5"
+            >
+              <Settings size={10} />
+              Config IA
+            </button>
           )}
         </div>
       </div>
 
+      {/* Mode selector */}
+      <div className="flex gap-1 p-1 bg-zinc-100 rounded-xl">
+        {INPUT_MODES.map(({ id: modeId, icon: Icon, label }) => (
+          <button
+            key={modeId}
+            onClick={() => { setInputMode(modeId); setHasError(false); setErrorMsg('') }}
+            className={clsx(
+              'flex-1 flex items-center justify-center gap-1.5 py-1.5 rounded-lg text-[11px] font-semibold transition-all',
+              inputMode === modeId
+                ? 'bg-white text-purple-700 shadow-sm'
+                : 'text-zinc-500 hover:text-zinc-700'
+            )}
+          >
+            <Icon size={12} />
+            <span className="hidden sm:inline">{label}</span>
+          </button>
+        ))}
+      </div>
+
+      {/* Upload mode panel */}
+      {inputMode === 'upload' && (
+        <div className="rounded-2xl border border-purple-100 bg-purple-50/40 p-4 space-y-3">
+          <p className="text-xs text-purple-700 font-semibold">Sube una imagen desde tu dispositivo</p>
+          <label className="flex flex-col items-center justify-center gap-2 p-4 border-2 border-dashed border-purple-200 rounded-xl cursor-pointer hover:border-purple-400 hover:bg-purple-50 transition-all">
+            <Upload size={20} className="text-purple-400" />
+            <span className="text-xs text-zinc-500">Haz clic o arrastra una imagen aquí</span>
+            <span className="text-[10px] text-zinc-400">JPG, PNG, GIF, WebP…</span>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={handleFileUpload}
+            />
+          </label>
+        </div>
+      )}
+
+      {/* URL mode panel */}
+      {inputMode === 'url' && (
+        <div className="rounded-2xl border border-blue-100 bg-blue-50/40 p-4 space-y-3">
+          <p className="text-xs text-blue-700 font-semibold">Pega la URL de una imagen externa</p>
+          <div className="flex gap-2">
+            <input
+              type="url"
+              placeholder="https://ejemplo.com/imagen.jpg"
+              value={urlInput}
+              onChange={(e) => { setUrlInput(e.target.value); setUrlError('') }}
+              className="flex-1 px-3 py-2 border border-blue-200 rounded-xl text-xs bg-white focus:outline-none focus:ring-1 focus:ring-blue-400"
+            />
+            <button
+              onClick={handleUrlSave}
+              className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold transition-all shadow-sm"
+            >
+              Usar
+            </button>
+          </div>
+          {urlError && <p className="text-[11px] text-red-600">{urlError}</p>}
+        </div>
+      )}
+
       {/* API Key Configuration Panel */}
-      {showKeyInput && (
+      {inputMode === 'ai' && showKeyInput && (
         <div className="rounded-2xl border border-amber-200 bg-amber-50/50 p-4 space-y-3 text-xs">
           <div className="flex items-center justify-between">
             <p className="font-bold text-amber-800 flex items-center gap-1.5">
@@ -363,7 +485,8 @@ export default function ImageGenerator({ exercise, onSaveImage, savedImageUrl = 
           ) : null}
       </div>
 
-      {/* Control Actions */}
+      {/* AI Controls — only shown in AI mode */}
+      {inputMode === 'ai' && (
       <div className="space-y-3">
         {/* Prompt editor */}
         <div className="rounded-xl border border-zinc-100 bg-zinc-50/50 p-3 space-y-2">
@@ -423,6 +546,23 @@ export default function ImageGenerator({ exercise, onSaveImage, savedImageUrl = 
           )}
         </div>
       </div>
+      )} {/* end AI controls */}
+
+      {/* Save button for upload/URL modes */}
+      {inputMode !== 'ai' && imageUrl && (
+        <button
+          onClick={handleSave}
+          className={clsx(
+            'w-full flex items-center justify-center gap-1.5 py-2.5 rounded-xl text-xs font-semibold border transition-all',
+            isSaved
+              ? 'bg-green-50 border-green-200 text-green-700'
+              : 'bg-white border-zinc-200 text-zinc-700 hover:bg-zinc-50'
+          )}
+        >
+          {isSaved ? <Check size={14} /> : <Save size={14} />}
+          {isSaved ? 'Imagen guardada' : 'Confirmar imagen'}
+        </button>
+      )}
     </div>
   )
 }

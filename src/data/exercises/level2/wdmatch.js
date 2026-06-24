@@ -80,6 +80,22 @@ No importa si hay chars de más entre ellos en s1 — solo importa el ORDEN.`,
 
   herramientas: ['strings'],
 
+  campayoMetodo: {
+    feynman: `El programa comprueba si el primer string es una subsecuencia del segundo.
+Recorre el segundo string carácter a carácter.
+Cada vez que encuentra el siguiente carácter que busca del primer string, avanza en el primero.
+Si al terminar el segundo string ya encontró todos los caracteres del primero (en orden), imprime el primero.
+Si no los encontró todos, imprime solo un salto de línea.`,
+    datosPuros: [
+      { elemento: 'if (s1[j] == s2[i]) j++', nota: 'avanzar en s1 solo cuando hay coincidencia en s2' },
+      { elemento: 'if (!s1[j]) → imprimir s1', nota: 'j llegó al \\0 de s1 → todos los chars encontrados' },
+    ],
+    asociaciones: [
+      { dato: 'subsecuencia (orden importa)', imagen: 'wdmatch es como buscar las letras de una palabra en una sopa de letras leyendo solo de izquierda a derecha. Puedes saltarte letras, pero el orden debe mantenerse. Si encuentras todas en orden, ¡ganaste!' },
+      { dato: '!s1[j] → éxito', imagen: 'El índice j es un rastreador de pistas. Cuando j llega al Fantasma Cero de s1 (s1[j] = \\0), significa que encontró todas las pistas en orden. Si j se queda atascado, la búsqueda fracasó.' },
+    ],
+  },
+
   formulaClave: {
     descripcion: 'Dos índices: i recorre s1, j avanza en s2 solo cuando hay match',
     formula: 'while(s1[i]&&s2[j]){ if(s1[i]==s2[j])j++; i++; } if(!s2[j]) write(s2);',

@@ -113,6 +113,23 @@ Si no lo encuentra, deja el ingrediente sin tocar.
 
   herramientas: ['strings', 'argc'],
 
+  campayoMetodo: {
+    feynman: `El programa recibe 3 argumentos: un string, una letra a buscar y una letra de reemplazo.
+Recorre el string letra a letra.
+Cuando encuentra la letra que hay que buscar (av[2][0]), la escribe reemplazada por la letra nueva (av[3][0]).
+Si la letra no es la buscada, la escribe tal cual.
+Si no hay exactamente 3 argumentos o el segundo argumento no está en el string, solo imprime el string + newline.`,
+    datosPuros: [
+      { elemento: 'argc != 4', nota: '4 argumentos en total: programa + string + búsqueda + reemplazo' },
+      { elemento: 'av[2][0]', nota: 'primer carácter del 2º argumento — solo se usa el primer char' },
+      { elemento: 'av[3][0]', nota: 'primer carácter del 3º argumento — solo se usa el primer char' },
+    ],
+    asociaciones: [
+      { dato: 'argc != 4 (4 total)', imagen: 'La fotocopiadora de recetas necesita 4 ingredientes: ella misma + el papel original + el sabor a buscar + el sabor nuevo. Si faltan ingredientes, solo imprime y se va.' },
+      { dato: 'av[2][0] (primer char del arg)', imagen: 'El argumento av[2] es una palabra entera, pero la "lupa" solo mira la primera letra ([0]). El resto del argumento lo ignora: solo importa el primer carácter.' },
+    ],
+  },
+
   formulaClave: {
     descripcion: 'Por cada carácter: si es el buscado, escribe el reemplazo; si no, escribe el original',
     formula: "if (str[i] == search) write(replace); else write(str[i]);",

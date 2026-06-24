@@ -140,6 +140,23 @@ No pinta diagonales.`,
 
   herramientas: ['recursión', 'matrices'],
 
+  campayoMetodo: {
+    feynman: `La función rellena una zona conectada en una matriz de caracteres, como el bote de pintura de MS Paint.
+Empieza en una posición (x, y) y cambia el carácter de esa posición por uno nuevo.
+Luego se llama a sí misma (recursión) en las 4 posiciones vecinas (arriba, abajo, izquierda, derecha).
+Solo avanza si la posición vecina tiene el mismo carácter original — así no se sale de la zona.
+Para cuando no queda ninguna casilla vecina con el carácter original.`,
+    datosPuros: [
+      { elemento: 'if (tab[y][x] != to_fill) return', nota: 'condición de parada: el char ya cambió o era distinto' },
+      { elemento: 'tab[y][x] = new_c antes de las llamadas recursivas', nota: 'cambiar primero para evitar bucle infinito' },
+      { elemento: 'llamar a las 4 direcciones: (x+1,y), (x-1,y), (x,y+1), (x,y-1)', nota: 'con comprobación de límites' },
+    ],
+    asociaciones: [
+      { dato: 'cambiar ANTES de llamar recursivamente', imagen: 'El bote de pintura se aplica ANTES de llamar a los vecinos. Si lo dejas para después, el vecino vuelve a ti (ves que aún tienes el color original) y te vuelves a llamar infinitamente — bucle de pintura infinita.' },
+      { dato: '4 direcciones (no diagonales)', imagen: 'El relleno de flood_fill solo se extiende como una cruz (arriba, abajo, izquierda, derecha). No va en diagonal. Es como un virus que solo infecta a quienes están en contacto directo, no a los vecinos diagonales.' },
+    ],
+  },
+
   formulaClave: {
     descripcion: 'Guardar el carácter original y expandirse en cruz',
     formula: 'to_fill = tab[begin.y][begin.x]; recurse N/S/E/W if in bounds and same char',

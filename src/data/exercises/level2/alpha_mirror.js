@@ -83,6 +83,22 @@ El espejo maneja mayúsculas y minúsculas por separado (A↔Z, a↔z).`,
 
   herramientas: ['strings', 'ascii'],
 
+  campayoMetodo: {
+    feynman: `El programa recibe un string y espeja cada letra del alfabeto.
+La 'a' se convierte en 'z', la 'b' en 'y', la 'c' en 'x', y así al revés.
+Es como si el abecedario tuviera un espejo en el centro (entre la m y la n).
+Las mayúsculas hacen lo mismo entre sí.
+Los símbolos y números no cambian.`,
+    datosPuros: [
+      { elemento: "'z' - (c - 'a')", nota: 'fórmula espejo para minúsculas' },
+      { elemento: "'Z' - (c - 'A')", nota: 'fórmula espejo para mayúsculas' },
+    ],
+    asociaciones: [
+      { dato: "'z' - (c - 'a')", imagen: "El alfabeto es un pasillo con espejo al fondo. Caminas desde la 'a' un número de pasos (c - 'a') y el espejo te devuelve a esa misma distancia desde la 'z'. Siempre llegas al espejo opuesto." },
+      { dato: 'símbolos sin cambio', imagen: "Los símbolos llevan gafas de sol reflectantes — el espejo los ve pero no puede transformarlos. Los deja pasar tal cual." },
+    ],
+  },
+
   formulaClave: {
     descripcion: 'Posición especular: 25 - posición_original',
     formula: "c = 'z' - (c - 'a')  ó equivalente  c = 'a' + 'z' - c",

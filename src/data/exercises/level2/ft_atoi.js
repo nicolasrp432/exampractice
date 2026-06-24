@@ -62,6 +62,23 @@ Cuando llega a un carácter no-dígito, para y devuelve el número.`,
 
   herramientas: ['strings', 'ascii'],
 
+  campayoMetodo: {
+    feynman: `La función convierte un string de números en un entero.
+Primero salta los espacios y tabulaciones del principio.
+Luego mira si hay un signo + o - (si no hay, es positivo).
+Luego va dígito a dígito y construye el número: resultado = resultado * 10 + (c - '0').
+Para cuando deja de haber dígitos.`,
+    datosPuros: [
+      { elemento: "result = result * 10 + (c - '0')", nota: "fórmula para construir el número: cada dígito desplaza los anteriores una posición decimal" },
+      { elemento: 'c - 0x30  o  c - 48  o  c - \'0\'', nota: "las tres formas son equivalentes — '0' en ASCII es 48" },
+      { elemento: 'sign = -1 si hay -', nota: 'multiplicar por sign al final para el resultado negativo' },
+    ],
+    asociaciones: [
+      { dato: "result * 10 + (c - '0')", imagen: "El constructor de números es como un teleférico: con cada dígito nuevo, todos los anteriores suben un piso (×10) y el nuevo se sienta en planta baja. Al final, el número completo está construido piso a piso." },
+      { dato: "c - '0' (quitar ASCII 48)", imagen: "El dígito '5' lleva puesto el disfraz de ASCII (valor 53). Para quitarle el disfraz le restas '0' (48) y te queda el número real 5. Sin quitarle el disfraz, el número sale disparatado." },
+    ],
+  },
+
   formulaClave: {
     descripcion: 'Acumulación de dígitos en base 10',
     formula: 'result = result * 10 + (str[i] - "0");',

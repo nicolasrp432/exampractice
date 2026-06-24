@@ -77,6 +77,20 @@ Es el fundamento de lcm y muchos algoritmos de criptografía.`,
 
   herramientas: ['strings'],
 
+  campayoMetodo: {
+    feynman: `El programa recibe dos números y calcula su Máximo Común Divisor.
+Usa el algoritmo de Euclides: mientras el segundo número no sea cero, reemplaza el primero por el segundo y el segundo por el resto de la división del primero entre el segundo.
+Cuando el segundo número llega a cero, el primero es el MCD.
+Imprime el resultado.`,
+    datosPuros: [
+      { elemento: 'while (b) { tmp = b; b = a % b; a = tmp; }', nota: 'algoritmo de Euclides — el orden importa: guardar b antes de pisarlo' },
+      { elemento: 'return (a)', nota: 'al salir del while, a contiene el MCD' },
+    ],
+    asociaciones: [
+      { dato: 'a = b; b = a % b (con tmp)', imagen: 'Euclides es como el juego de las sillas musicales: b se sienta en la silla de a, y el resto (a % b) pasa a ser el nuevo b. Sin la silla temporal (tmp), b sobrescribiría a antes de que pudieras calcular a % b.' },
+    ],
+  },
+
   formulaClave: {
     descripcion: 'Algoritmo de Euclides: reemplazar (a,b) por (b, a%b) hasta b=0',
     formula: 'while(b){ tmp=b; b=a%b; a=tmp; } return a;',

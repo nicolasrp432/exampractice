@@ -78,6 +78,23 @@ Si el char no está en base: PARA. El índice en base ES el dígito.`,
 
   herramientas: ['strings', 'ascii'],
 
+  campayoMetodo: {
+    feynman: `La función convierte un string a entero usando una base arbitraria (no solo base 10).
+Recibe el string del número y la base como string de caracteres válidos.
+Para cada carácter del número, busca su posición en la base — esa posición es su valor.
+Construye el resultado: resultado = resultado * longitud_de_base + valor_del_carácter.
+Si la base es inválida (menos de 2 chars o con duplicados), devuelve 0.`,
+    datosPuros: [
+      { elemento: 'result = result * base_len + char_value', nota: 'fórmula: igual que ft_atoi pero multiplicando por la longitud de la base' },
+      { elemento: 'validar base: len >= 2, sin duplicados', nota: 'base inválida → return 0' },
+      { elemento: 'buscar char en base con while anidado', nota: 'para cada dígito del string, encontrar su índice en la cadena base' },
+    ],
+    asociaciones: [
+      { dato: 'result * base_len + posición', imagen: 'Es ft_atoi con un abecedario personalizado. En base 16 tienes 16 caracteres; en base 2 tienes 2. El truco del teleférico (×base_len en vez de ×10) sigue siendo el mismo: cada dígito nuevo empuja a los anteriores una posición.' },
+      { dato: 'validar base (sin duplicados)', imagen: 'La base es la regla del juego. Si hay duplicados en la base, el juego no tiene sentido (¿qué vale "A" si hay dos "A"?). La función echa al tramposo con return 0.' },
+    ],
+  },
+
   formulaClave: {
     descripcion: 'Como ft_atoi pero cada dígito es el índice del char en la cadena base',
     formula: 'digit=base.indexOf(str[i]); result=result*base_len+digit; (parar si -1)',

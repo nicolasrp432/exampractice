@@ -95,6 +95,21 @@ Clave: solo se intercambia data, los punteros next permanecen igual.`,
 
   herramientas: ['strings'],
 
+  campayoMetodo: {
+    feynman: `La función ordena una lista enlazada usando un comparador.
+La estrategia más común es insertion sort o bubble sort adaptado a listas enlazadas.
+Recorre la lista y si dos nodos adyacentes están en orden incorrecto, intercambia sus datos (no los punteros).
+Repite hasta que la lista esté ordenada.
+La función de comparación (cmp) dice si el primer elemento debe ir antes que el segundo.`,
+    datosPuros: [
+      { elemento: 'void sort_list(t_list **begin_list, int (*cmp)(void*, void*))', nota: 'doble puntero para poder modificar la cabeza; puntero a función para comparar' },
+      { elemento: 'intercambiar data (void*), no los punteros next', nota: 'es más sencillo swapear los contenidos que reorganizar los punteros' },
+    ],
+    asociaciones: [
+      { dato: 'swap de data (no de punteros)', imagen: 'Para ordenar la cola de personas, no muevas a la gente (punteros) — solo intercambia sus maletines (data). Es mucho más fácil. El orden de la cola (los punteros) queda igual; lo que cambia es lo que llevan dentro.' },
+    ],
+  },
+
   formulaClave: {
     descripcion: 'Bubble sort en lista: swap DATA de nodos adyacentes si están desordenados',
     formula: 'while(swapped){swapped=0;ptr=lst; while(ptr->next){if(cmp(ptr->data,ptr->next->data)>0){swap(ptr->data,ptr->next->data);swapped=1;}ptr=ptr->next;}}',

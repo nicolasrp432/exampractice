@@ -82,6 +82,21 @@ Si alguno falta o está fuera de orden → imprime '0'.
 
   herramientas: ['strings'],
 
+  campayoMetodo: {
+    feynman: `El programa comprueba si el primer número (como string) es una subsecuencia del segundo número (también como string).
+Recorre el segundo string dígito a dígito.
+Cada vez que encuentra el siguiente dígito que busca del primero, avanza en el primero.
+Si al terminar el segundo ya encontró todos los dígitos del primero (en orden), imprime "1\\n".
+Si no, imprime "0\\n".`,
+    datosPuros: [
+      { elemento: 'imprimir "1\\n" o "0\\n"', nota: 'comillas y newline exactos' },
+      { elemento: 'misma lógica que wdmatch pero para dígitos', nota: 'if (!s1[j]) → "1", else → "0"' },
+    ],
+    asociaciones: [
+      { dato: '"1\\n" o "0\\n" (no int)', imagen: 'hidenp es wdmatch disfrazado de números. El resultado no es el número 1 o 0 — son los CARACTERES "1" y "0" escritos con write, seguidos de newline. Si escribes el entero 1 con write, sale un carácter de control, no el texto "1".' },
+    ],
+  },
+
   formulaClave: {
     descripcion: 'Dos índices: i en s1 (siempre avanza), j en s2 (solo en match)',
     formula: 'while(s1[i]&&s2[j]){ if(s1[i]==s2[j])j++; i++; } write(s2[j]?"0":"1");',
