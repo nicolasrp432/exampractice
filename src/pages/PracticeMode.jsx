@@ -22,6 +22,8 @@ import ImageGenerator from '@/components/exercise/ImageGenerator'
 import GdbStepper from '@/components/gdb/GdbStepper'
 import RunPanel from '@/components/practice/RunPanel'
 import PracticeDiagnostics from '@/components/practice/PracticeDiagnostics'
+import CampayoMethodCard from '@/components/exercise/CampayoMethodCard'
+import AiTutorPanel from '@/components/practice/AiTutorPanel'
 
 // ─── Default placeholder code ────────────────────────────────────────────────
 function getPlaceholder(exercise) {
@@ -677,7 +679,7 @@ export default function PracticeMode() {
 
   // Mobile layout state
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768)
-  const [activeMobileTab, setActiveMobileTab] = useState(null) // null | 'enunciado' | 'moulinette' | 'run' | 'mnemotecnia'
+  const [activeMobileTab, setActiveMobileTab] = useState(null) // null | 'enunciado' | 'moulinette' | 'run' | 'mnemotecnia' | 'tutor'
 
   useEffect(() => {
     const handleResize = () => {
@@ -758,7 +760,7 @@ export default function PracticeMode() {
   // Live trace hook (Python-Tutor-style stepper)
   const liveTrace = useLiveTrace()
 
-  const [activeTab, setActiveTab] = useState('enunciado') // 'enunciado' | 'moulinette' | 'mnemotecnia'
+  const [activeTab, setActiveTab] = useState('enunciado') // 'enunciado' | 'moulinette' | 'mnemotecnia' | 'run' | 'tutor'
   const [compileMode, setCompileMode] = useState(null)
 
   // Track whether all passed using a ref to avoid stale closure in async handleCompile
@@ -993,9 +995,42 @@ export default function PracticeMode() {
             </div>
             <SubjectViewer
               subject={exercise.subject}
+              subjectEs={exercise.subjectEs}
               funcionesPermitidas={exercise.funcionesPermitidas}
               archivosEsperados={exercise.archivosEsperados}
             />
+
+            {/* Lógica y Razonamiento Conceptual */}
+            {exercise.razonamiento && (
+              <div className="card p-4 space-y-3 bg-white border border-zinc-200 rounded-2xl shadow-sm">
+                <div className="flex items-center gap-2 text-zinc-800">
+                  <span className="text-base">💡</span>
+                  <h3 className="font-bold text-xs uppercase tracking-wider text-zinc-700">Lógica y Razonamiento</h3>
+                </div>
+                <p className="text-xs text-zinc-600 leading-relaxed whitespace-pre-line">
+                  {exercise.razonamiento.porQue}
+                </p>
+
+                {exercise.razonamiento.qa && exercise.razonamiento.qa.length > 0 && (
+                  <div className="mt-4 pt-3 border-t border-zinc-100 space-y-2">
+                    <h4 className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider">Preguntas y Respuestas Clave</h4>
+                    <div className="space-y-2">
+                      {exercise.razonamiento.qa.map((qaItem, idx) => (
+                        <details key={idx} className="group border border-zinc-100 rounded-xl bg-zinc-50/50 p-2.5 overflow-hidden transition-all duration-200">
+                          <summary className="font-semibold text-xs text-zinc-700 cursor-pointer list-none flex items-center justify-between outline-none">
+                            <span>{qaItem.pregunta}</span>
+                            <span className="transition-transform group-open:rotate-180 text-zinc-400 font-mono text-[10px]">&gt;</span>
+                          </summary>
+                          <div className="mt-2 text-xs text-zinc-500 leading-relaxed border-t border-zinc-100/80 pt-2">
+                            {qaItem.respuesta}
+                          </div>
+                        </details>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         )
       case 'moulinette':
@@ -1110,28 +1145,9 @@ export default function PracticeMode() {
       case 'mnemotecnia':
         return (
           <div className="space-y-4">
-            {/* Story card */}
-            <div className="border-l-4 border-purple-500 bg-purple-50 rounded-r-2xl px-4 py-3.5 text-xs leading-relaxed text-purple-950">
-              <div className="font-bold mb-1.5 flex items-center gap-1.5 text-purple-900">
-                <span className="text-base">{exercise.palacio?.emoji}</span>
-                <span>{exercise.palacio?.personaje}</span>
-              </div>
-              <p>{exercise.palacio?.historia}</p>
-            </div>
+            <CampayoMethodCard exercise={exercise} />
             
-            {/* Anchors chips */}
-            <div className="space-y-2">
-              <h4 className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider">Anclas de Memoria</h4>
-              <div className="flex flex-wrap gap-1.5">
-                {exercise.palacio?.anclas?.map((anchor, i) => (
-                  <span key={i} className="px-2.5 py-1 bg-purple-100 text-purple-700 rounded-lg text-xs font-mono">
-                    {anchor}
-                  </span>
-                ))}
-              </div>
-            </div>
-
-            {/* AI image generator card */}
+            <div className="h-px bg-zinc-100 my-4" />
             <ImageGenerator exercise={exercise} />
 
             <div className="h-px bg-zinc-100 my-4" />
@@ -1146,6 +1162,14 @@ export default function PracticeMode() {
               </motion.div>
             )}
           </div>
+        )
+      case 'tutor':
+        return (
+          <AiTutorPanel
+            exercise={exercise}
+            getCurrentCode={() => editorRef.current?.getValue() || ''}
+            tests={tests}
+          />
         )
       default:
         return null
@@ -1432,7 +1456,19 @@ export default function PracticeMode() {
                 )}
               >
                 <BookOpen size={14} />
-                Mnemotecnia
+                Campayo
+              </button>
+              <button
+                onClick={() => setActiveTab('tutor')}
+                className={clsx(
+                  'flex-1 py-3 text-xs font-semibold flex items-center justify-center gap-1.5 border-b-2 transition-all duration-200 focus:outline-none',
+                  activeTab === 'tutor'
+                    ? 'border-zinc-900 text-zinc-900 bg-white font-bold'
+                    : 'border-transparent text-zinc-500 hover:text-zinc-800 hover:bg-zinc-100/50'
+                )}
+              >
+                <Sparkles size={14} className="text-purple-500" />
+                Tutor AI
               </button>
             </div>
 
@@ -1486,7 +1522,8 @@ export default function PracticeMode() {
                     {activeMobileTab === 'enunciado' && 'Enunciado'}
                     {activeMobileTab === 'moulinette' && `Moulinette (${passedCount}/${tests.length})`}
                     {activeMobileTab === 'run' && 'Parámetros'}
-                    {activeMobileTab === 'mnemotecnia' && 'Mnemotecnia'}
+                    {activeMobileTab === 'mnemotecnia' && 'Campayo'}
+                    {activeMobileTab === 'tutor' && 'Tutor AI'}
                   </div>
                   <button
                     onClick={() => setActiveMobileTab(null)}
@@ -1547,7 +1584,17 @@ export default function PracticeMode() {
             )}
           >
             <BookOpen size={18} />
-            <span>Memoria</span>
+            <span>Campayo</span>
+          </button>
+          <button
+            onClick={() => setActiveMobileTab('tutor')}
+            className={clsx(
+              "flex flex-col items-center gap-1 py-1 px-3 text-[10px] font-semibold transition-all rounded-lg",
+              activeMobileTab === 'tutor' ? "text-purple-600 bg-purple-50 font-bold" : "text-zinc-500 hover:text-zinc-800"
+            )}
+          >
+            <Sparkles size={18} className={activeMobileTab === 'tutor' ? "text-purple-600" : "text-zinc-500"} />
+            <span>Tutor AI</span>
           </button>
         </div>
       )}

@@ -29,10 +29,10 @@ test('decodeSubject maps a subject to the expected tools', () => {
 })
 
 test('decodeSubject produces a short skeleton for the detected tools', () => {
-  const result = decodeSubject('Convert uppercase and lowercase using ASCII math')
+  const result = decodeSubject('void ft_putchar(char c); expected files: ft_putchar.c')
 
-  assert.ok(result.skeleton.includes('while (str[i])'))
-  assert.ok(result.skeleton.includes('c - \'a\' + 1'))
+  assert.ok(result.skeleton.includes('void ft_putchar(char c)'))
+  assert.ok(result.skeleton.includes('{'))
 })
 
 test('buildQuizQuestions returns ten multiple choice questions', () => {

@@ -11,12 +11,14 @@ export const useSettingsStore = create(
       mostrarPistas: true,
       autoReveal: false,
       strictMoulinette: true,
+      geminiApiKey: '',
 
       setTimerExamen: (mins) => set({ timerExamen: mins }),
       setNivelesExamen: (niveles) => set({ nivelesExamen: niveles }),
       togglePistas: () => set(s => ({ mostrarPistas: !s.mostrarPistas })),
       setAutoReveal: (v) => set({ autoReveal: v }),
       toggleStrictMoulinette: () => set(s => ({ strictMoulinette: !s.strictMoulinette })),
+      setGeminiApiKey: (key) => set({ geminiApiKey: key }),
       toggleNivel: (nivel) =>
         set(s => ({
           nivelesExamen: s.nivelesExamen.includes(nivel)

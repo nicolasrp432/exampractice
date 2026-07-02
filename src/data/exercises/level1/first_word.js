@@ -61,7 +61,51 @@ $> ./first_word "  lorem,ipsum  " | cat -e
 lorem,ipsum$
 $>`,
 
+  subjectEs: `Nombre del ejercicio: first_word
+Archivos esperados : first_word.c
+Funciones autorizadas: write
+--------------------------------------------------------------------------------
+
+Escribe un programa que tome un string y muestre su primera palabra, seguida
+de un salto de línea.
+
+Una palabra es una secuencia de caracteres imprimibles, sin incluir espacios
+o tabulaciones ('\\t').
+
+Si el número de parámetros no es 1, o si no hay palabras en el string,
+muestra únicamente un salto de línea.
+
+Ejemplos:
+$> ./first_word "FOR PONY"
+FOR
+$> ./first_word "   lorem   ipsum   dolor   "
+lorem
+$> ./first_word ""
+
+$> ./first_word "  "
+
+$>`,
+
   descripcion: 'Programa que imprime la primera palabra del string (separadores: espacio y tab). Si no hay exactamente 1 argumento o no hay palabras, imprime solo \\n.',
+
+  razonamiento: {
+    porQue: "Este ejercicio enseña a procesar argumentos de terminal y a recorrer cadenas de caracteres en C controlando los espacios en blanco. La clave lógica reside en ignorar los espacios y tabuladores iniciales (fase 1) y luego imprimir los caracteres correspondientes a la primera palabra hasta toparse con otro espacio o el final de la cadena (fase 2). Se utiliza 'write' carácter por carácter para tener control total de la salida y evitar el uso de funciones de biblioteca.",
+    qa: [
+      {
+        pregunta: "¿Por qué es importante comprobar tanto espacios ' ' como tabuladores '\\t'?",
+        respuesta: "Porque el enunciado (subject) especifica que una palabra está delimitada por caracteres imprimibles que excluyen ' ' y '\\t'. Si solo compruebas espacios tradicionales, tu programa fallará cuando Moulinette le pase un argumento con tabuladores al inicio o entre palabras."
+      },
+      {
+        pregunta: "¿Qué pasa si hay múltiples argumentos?",
+        respuesta: "El enunciado dice: 'Si el número de parámetros no es 1...'. En C, argc cuenta el nombre del programa como el primer argumento. Por tanto, para tener exactamente un argumento del usuario, debemos verificar que argc sea igual a 2. Si no es así, imprimimos un salto de línea y terminamos."
+      },
+      {
+        pregunta: "¿Por qué no debemos usar variables o arreglos temporales para guardar la palabra?",
+        respuesta: "Porque no es necesario y consume memoria de forma ineficiente. Al imprimir carácter a carácter directamente con `write(1, &av[1][i], 1)` mientras recorremos la cadena original, resolvemos el problema en O(1) de memoria extra, que es la forma más limpia y profesional en C."
+      }
+    ],
+    animacionFlujo: "string"
+  },
 
   palacio: {
     habitacion: 'cocina',

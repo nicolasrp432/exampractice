@@ -2,15 +2,17 @@ import { useEffect, useMemo, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import Editor from '@monaco-editor/react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { ChevronDown, ChevronUp, Cpu, Sparkles, Trophy, CheckCircle2, XCircle, RotateCcw, Wand2, Flame, Copy, Check } from 'lucide-react'
+import { ChevronDown, ChevronUp, Cpu, Sparkles, Trophy, CheckCircle2, XCircle, RotateCcw, Wand2, Flame, Copy, Check, Dumbbell } from 'lucide-react'
 import clsx from 'clsx'
 import { buildQuizQuestions, decodeSubject, getToolById, getToolTrainingExercises, getUniversalTools } from '@/utils/tools'
 import { useProgressStore } from '@/store/progressStore'
+import LogicGym from '@/components/tools/LogicGym'
 
 const TABS = [
   { id: 'tools', label: 'Las 7 Herramientas', icon: Cpu },
   { id: 'decoder', label: 'Decodificador de Subjects', icon: Wand2 },
   { id: 'quiz', label: 'Quiz Relámpago', icon: Flame },
+  { id: 'gimnasio', label: 'Gimnasio de Lógica', icon: Dumbbell },
 ]
 
 function SectionTitle({ title, subtitle }) {
@@ -373,6 +375,13 @@ export default function Tools() {
                 <div>
                   <SectionTitle title="Quiz relámpago" subtitle="Lee el subject, identifica la herramienta y responde sin pensar de más. Ritmo corto, repetición alta." />
                   <QuizPanel />
+                </div>
+              )}
+
+              {activeTab === 'gimnasio' && (
+                <div>
+                  <SectionTitle title="Gimnasio de Lógica" subtitle="Entrena tus bases de punteros, aritmética ASCII y seguimiento de banderas de forma visual y didáctica." />
+                  <LogicGym />
                 </div>
               )}
             </motion.section>

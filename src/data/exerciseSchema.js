@@ -121,6 +121,35 @@ const VALID_GDB_FUENTES      = ['didactica', 'real']
 export function validateOptionalRank02(data) {
   const errors = []
 
+  if (data.subjectEs !== undefined && typeof data.subjectEs !== 'string')
+    errors.push('subjectEs debe ser string')
+
+  if (data.razonamiento !== undefined) {
+    if (typeof data.razonamiento !== 'object' || data.razonamiento === null) {
+      errors.push('razonamiento debe ser un objeto')
+    } else {
+      const raz = data.razonamiento
+      if (raz.porQue !== undefined && typeof raz.porQue !== 'string')
+        errors.push('razonamiento.porQue debe ser string')
+      if (raz.animacionFlujo !== undefined && !['string', 'flag', 'bits', 'pointer'].includes(raz.animacionFlujo))
+        errors.push('razonamiento.animacionFlujo debe ser: string, flag, bits o pointer')
+      if (raz.qa !== undefined) {
+        if (!Array.isArray(raz.qa)) {
+          errors.push('razonamiento.qa debe ser un array')
+        } else {
+          raz.qa.forEach((qItem, idx) => {
+            if (!qItem || typeof qItem !== 'object') {
+              errors.push(`razonamiento.qa[${idx}] debe ser un objeto`)
+            } else {
+              if (typeof qItem.pregunta !== 'string') errors.push(`razonamiento.qa[${idx}].pregunta debe ser string`)
+              if (typeof qItem.respuesta !== 'string') errors.push(`razonamiento.qa[${idx}].respuesta debe ser string`)
+            }
+          })
+        }
+      }
+    }
+  }
+
   if (data.subjectReal !== undefined && typeof data.subjectReal !== 'string')
     errors.push('subjectReal debe ser string')
   if (data.subjectAlternativo !== undefined && typeof data.subjectAlternativo !== 'string')

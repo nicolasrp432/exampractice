@@ -19,6 +19,7 @@ import TrapsList        from '@/components/exercise/TrapsList'
 import ImageGenerator   from '@/components/exercise/ImageGenerator'
 import CampayoMethodCard from '@/components/exercise/CampayoMethodCard'
 import InputPlayground  from '@/components/simulator/InputPlayground'
+import LogicAnimator    from '@/components/simulator/LogicAnimator'
 import GdbStepper       from '@/components/gdb/GdbStepper'
 
 // ─── Tabs config ──────────────────────────────────────────────────────────────
@@ -101,6 +102,7 @@ function TabSubject({ exercise }) {
       )}
       <SubjectViewer
         subject={subjectToShow}
+        subjectEs={exercise.subjectEs}
         funcionesPermitidas={exercise.funcionesPermitidas}
         archivosEsperados={exercise.archivosEsperados}
       />
@@ -138,7 +140,27 @@ function TabFormula({ exercise }) {
 }
 
 function TabSimulador({ exercise }) {
-  return <InputPlayground exerciseId={exercise.id} tests={exercise.tests} />
+  return (
+    <div className="space-y-6">
+      <div className="space-y-2">
+        <div className="flex items-center gap-2">
+          <span className="text-base">🎬</span>
+          <h3 className="font-bold text-sm text-zinc-800">Animación Interactiva de la Lógica</h3>
+        </div>
+        <LogicAnimator exerciseId={exercise.id} />
+      </div>
+
+      <div className="h-px bg-zinc-200" />
+
+      <div className="space-y-2">
+        <div className="flex items-center gap-2">
+          <span className="text-base">🎮</span>
+          <h3 className="font-bold text-sm text-zinc-800">Simulador de Entradas Moulinette</h3>
+        </div>
+        <InputPlayground exerciseId={exercise.id} tests={exercise.tests} />
+      </div>
+    </div>
+  )
 }
 
 function TabGDB({ exercise }) {
